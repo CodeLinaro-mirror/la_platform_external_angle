@@ -667,6 +667,22 @@ bool ValidCap(const Context *context, GLenum cap, bool queryOnly)
 
         case GL_TEXTURE_RECTANGLE_ANGLE:
             return context->getExtensions().webglCompatibility;
+
+        // GL_APPLE_clip_distance/GL_EXT_clip_cull_distance
+        case GL_CLIP_DISTANCE0_EXT:
+        case GL_CLIP_DISTANCE1_EXT:
+        case GL_CLIP_DISTANCE2_EXT:
+        case GL_CLIP_DISTANCE3_EXT:
+        case GL_CLIP_DISTANCE4_EXT:
+        case GL_CLIP_DISTANCE5_EXT:
+        case GL_CLIP_DISTANCE6_EXT:
+        case GL_CLIP_DISTANCE7_EXT:
+            if (context->getClientVersion() >= Version(2, 0) &&
+                context->getExtensions().clipDistanceAPPLE)
+            {
+                return true;
+            }
+            break;
     }
 
     // GLES1 emulation: GLES1-specific caps after this point
@@ -5041,6 +5057,14 @@ bool ValidateHint(const Context *context, GLenum target, GLenum mode)
     switch (target)
     {
         case GL_GENERATE_MIPMAP_HINT:
+            break;
+
+        case GL_TEXTURE_FILTERING_HINT_CHROMIUM:
+            if (!context->getExtensions().textureFilteringCHROMIUM)
+            {
+                context->validationError(GL_INVALID_ENUM, kEnumNotSupported);
+                return false;
+            }
             break;
 
         case GL_FRAGMENT_SHADER_DERIVATIVE_HINT:

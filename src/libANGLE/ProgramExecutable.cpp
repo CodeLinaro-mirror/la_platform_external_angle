@@ -24,10 +24,46 @@ ProgramExecutable::ProgramExecutable()
       mAttributesMask(0),
       mActiveSamplersMask(0),
       mActiveSamplerRefCounts{},
-      mActiveImagesMask(0)
+      mActiveImagesMask(0),
+      mCanDrawWith(false),
+      mTransformFeedbackBufferMode(GL_INTERLEAVED_ATTRIBS),
+      mSamplerUniformRange(0, 0),
+      mImageUniformRange(0, 0)
 {
-    mActiveSamplerTypes.fill(TextureType::InvalidEnum);
-    mActiveSamplerFormats.fill(SamplerFormat::InvalidEnum);
+    reset();
+}
+
+ProgramExecutable::ProgramExecutable(const ProgramExecutable &other)
+    : mProgramState(other.mProgramState),
+      mProgramPipelineState(other.mProgramPipelineState),
+      mLinkedGraphicsShaderStages(other.mLinkedGraphicsShaderStages),
+      mLinkedComputeShaderStages(other.mLinkedComputeShaderStages),
+      mActiveAttribLocationsMask(other.mActiveAttribLocationsMask),
+      mMaxActiveAttribLocation(other.mMaxActiveAttribLocation),
+      mAttributesTypeMask(other.mAttributesTypeMask),
+      mAttributesMask(other.mAttributesMask),
+      mActiveSamplersMask(other.mActiveSamplersMask),
+      mActiveSamplerRefCounts(other.mActiveSamplerRefCounts),
+      mActiveSamplerTypes(other.mActiveSamplerTypes),
+      mActiveSamplerFormats(other.mActiveSamplerFormats),
+      mActiveSamplerShaderBits(other.mActiveSamplerShaderBits),
+      mActiveImagesMask(other.mActiveImagesMask),
+      mActiveImageShaderBits(other.mActiveImageShaderBits),
+      mCanDrawWith(other.mCanDrawWith),
+      mOutputVariables(other.mOutputVariables),
+      mOutputLocations(other.mOutputLocations),
+      mProgramInputs(other.mProgramInputs),
+      mLinkedTransformFeedbackVaryings(other.mLinkedTransformFeedbackVaryings),
+      mTransformFeedbackStrides(other.mTransformFeedbackStrides),
+      mTransformFeedbackBufferMode(other.mTransformFeedbackBufferMode),
+      mUniforms(other.mUniforms),
+      mSamplerUniformRange(other.mSamplerUniformRange),
+      mUniformBlocks(other.mUniformBlocks),
+      mAtomicCounterBuffers(other.mAtomicCounterBuffers),
+      mImageUniformRange(other.mImageUniformRange),
+      mShaderStorageBlocks(other.mShaderStorageBlocks)
+{
+    reset();
 }
 
 ProgramExecutable::~ProgramExecutable() = default;
@@ -46,6 +82,42 @@ void ProgramExecutable::reset()
     mActiveSamplerFormats.fill(SamplerFormat::InvalidEnum);
 
     mActiveImagesMask.reset();
+
+    mProgramInputs.clear();
+    mLinkedTransformFeedbackVaryings.clear();
+    mUniforms.clear();
+    mUniformBlocks.clear();
+    mShaderStorageBlocks.clear();
+    mAtomicCounterBuffers.clear();
+    mOutputVariables.clear();
+    mOutputLocations.clear();
+}
+
+void ProgramExecutable::load(gl::BinaryInputStream *stream)
+{
+    static_assert(MAX_VERTEX_ATTRIBS * 2 <= sizeof(uint32_t) * 8,
+                  "Too many vertex attribs for mask: All bits of mAttributesTypeMask types and "
+                  "mask fit into 32 bits each");
+    mAttributesTypeMask        = gl::ComponentTypeMask(stream->readInt<uint32_t>());
+    mAttributesMask            = stream->readInt<gl::AttributesMask>();
+    mActiveAttribLocationsMask = stream->readInt<gl::AttributesMask>();
+    mMaxActiveAttribLocation   = stream->readInt<unsigned int>();
+
+    mLinkedGraphicsShaderStages = ShaderBitSet(stream->readInt<uint8_t>());
+    mLinkedComputeShaderStages  = ShaderBitSet(stream->readInt<uint8_t>());
+}
+
+void ProgramExecutable::save(gl::BinaryOutputStream *stream) const
+{
+    static_assert(MAX_VERTEX_ATTRIBS * 2 <= sizeof(uint32_t) * 8,
+                  "All bits of mAttributesTypeMask types and mask fit into 32 bits each");
+    stream->writeInt(static_cast<int>(mAttributesTypeMask.to_ulong()));
+    stream->writeInt(static_cast<int>(mAttributesMask.to_ulong()));
+    stream->writeInt(mActiveAttribLocationsMask.to_ulong());
+    stream->writeInt(mMaxActiveAttribLocation);
+
+    stream->writeInt(mLinkedGraphicsShaderStages.bits());
+    stream->writeInt(mLinkedComputeShaderStages.bits());
 }
 
 const ProgramState *ProgramExecutable::getProgramState(ShaderType shaderType) const
@@ -62,6 +134,30 @@ const ProgramState *ProgramExecutable::getProgramState(ShaderType shaderType) co
     }
 
     return nullptr;
+}
+
+bool ProgramExecutable::isCompute() const
+{
+    ASSERT(mProgramState || mProgramPipelineState);
+
+    if (mProgramState)
+    {
+        return mProgramState->isCompute();
+    }
+
+    return mProgramPipelineState->isCompute();
+}
+
+void ProgramExecutable::setIsCompute(bool isComputeIn)
+{
+    // A Program can only either be graphics or compute, but never both, so it can answer
+    // isCompute() based on which shaders it has. However, a PPO can have both graphics and compute
+    // programs attached, so we don't know if the PPO is a 'graphics' or 'compute' PPO until the
+    // actual draw/dispatch call, which is why only PPOs need to record the type of call here.
+    if (mProgramPipelineState)
+    {
+        mProgramPipelineState->setIsCompute(isComputeIn);
+    }
 }
 
 int ProgramExecutable::getInfoLogLength() const
@@ -82,7 +178,7 @@ std::string ProgramExecutable::getInfoLogString() const
 bool ProgramExecutable::isAttribLocationActive(size_t attribLocation) const
 {
     // TODO(timvp): http://anglebug.com/3570: Enable this assert here somehow.
-    //    ASSERT(mLinkResolved);
+    //    ASSERT(!mLinkingState);
     ASSERT(attribLocation < mActiveAttribLocationsMask.size());
     return mActiveAttribLocationsMask[attribLocation];
 }
@@ -90,7 +186,7 @@ bool ProgramExecutable::isAttribLocationActive(size_t attribLocation) const
 AttributesMask ProgramExecutable::getAttributesMask() const
 {
     // TODO(timvp): http://anglebug.com/3570: Enable this assert here somehow.
-    //    ASSERT(mLinkResolved);
+    //    ASSERT(!mLinkingState);
     return mAttributesMask;
 }
 
@@ -405,6 +501,27 @@ bool ProgramExecutable::linkValidateGlobalNames(InfoLog &infoLog) const
     }
 
     return true;
+}
+
+void ProgramExecutable::updateCanDrawWith()
+{
+    mCanDrawWith =
+        (hasLinkedShaderStage(ShaderType::Vertex) && hasLinkedShaderStage(ShaderType::Fragment));
+}
+
+void ProgramExecutable::saveLinkedStateInfo()
+{
+    // Only a Program's linked data needs to be saved, not a ProgramPipeline's
+    ASSERT(mProgramState);
+
+    for (ShaderType shaderType : getLinkedShaderStages())
+    {
+        Shader *shader = mProgramState->getAttachedShader(shaderType);
+        ASSERT(shader);
+        mLinkedOutputVaryings[shaderType] = shader->getOutputVaryings();
+        mLinkedInputVaryings[shaderType]  = shader->getInputVaryings();
+        mLinkedShaderVersions[shaderType] = shader->getShaderVersion();
+    }
 }
 
 }  // namespace gl
