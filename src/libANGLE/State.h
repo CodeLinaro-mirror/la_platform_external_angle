@@ -125,8 +125,8 @@ class State : angle::NonCopyable
     bool allActiveDrawBufferChannelsMasked() const;
     bool anyActiveDrawBufferChannelMasked() const;
     const RasterizerState &getRasterizerState() const;
-    const BlendState &getBlendState() const { return mBlendStateArray[0]; }
-    const BlendStateArray &getBlendStateArray() const { return mBlendStateArray; }
+    const BlendState &getBlendState() const { return mBlendState; }
+    const BlendStateExt &getBlendStateExt() const { return mBlendStateExt; }
     const DepthStencilState &getDepthStencilState() const;
 
     // Clear behavior setters & state parameter block generation function
@@ -166,13 +166,13 @@ class State : angle::NonCopyable
     float getFarPlane() const { return mFarZ; }
 
     // Blend state manipulation
-    bool isBlendEnabled() const { return mBlendStateArray[0].blend; }
+    bool isBlendEnabled() const { return mBlendStateExt.mEnabledMask.test(0); }
     bool isBlendEnabledIndexed(GLuint index) const
     {
-        ASSERT(index < mBlendStateArray.size());
-        return mBlendStateArray[index].blend;
+        ASSERT(static_cast<size_t>(index) < mBlendStateExt.mMaxDrawBuffers);
+        return mBlendStateExt.mEnabledMask.test(index);
     }
-    DrawBufferMask getBlendEnabledDrawBufferMask() const { return mBlendEnabledDrawBuffers; }
+    DrawBufferMask getBlendEnabledDrawBufferMask() const { return mBlendStateExt.mEnabledMask; }
     void setBlend(bool enabled);
     void setBlendIndexed(bool enabled, GLuint index);
     void setBlendFactors(GLenum sourceRGB, GLenum destRGB, GLenum sourceAlpha, GLenum destAlpha);
@@ -255,6 +255,8 @@ class State : angle::NonCopyable
 
     // Hint setters
     void setGenerateMipmapHint(GLenum hint);
+    void setTextureFilteringHint(GLenum hint);
+    GLenum getTextureFilteringHint() const;
     void setFragmentShaderDerivativeHint(GLenum hint);
 
     // GL_CHROMIUM_bind_generates_resource
@@ -597,8 +599,6 @@ class State : angle::NonCopyable
         DIRTY_BIT_PACK_STATE,
         DIRTY_BIT_PACK_BUFFER_BINDING,
         DIRTY_BIT_DITHER_ENABLED,
-        DIRTY_BIT_GENERATE_MIPMAP_HINT,
-        DIRTY_BIT_SHADER_DERIVATIVE_HINT,
         DIRTY_BIT_RENDERBUFFER_BINDING,
         DIRTY_BIT_VERTEX_ARRAY_BINDING,
         DIRTY_BIT_DRAW_INDIRECT_BUFFER_BINDING,
@@ -620,6 +620,7 @@ class State : angle::NonCopyable
         DIRTY_BIT_FRAMEBUFFER_SRGB,     // GL_EXT_sRGB_write_control
         DIRTY_BIT_CURRENT_VALUES,
         DIRTY_BIT_PROVOKING_VERTEX,
+        DIRTY_BIT_EXTENDED,  // clip distances, mipmap generation hint, derivative hint.
         DIRTY_BIT_INVALID,
         DIRTY_BIT_MAX = DIRTY_BIT_INVALID,
     };
@@ -724,7 +725,8 @@ class State : angle::NonCopyable
 
     ANGLE_INLINE bool validateSamplerFormats() const
     {
-        return (mTexturesIncompatibleWithSamplers & mExecutable->getActiveSamplersMask()).none();
+        return (!mExecutable ||
+                (mTexturesIncompatibleWithSamplers & mExecutable->getActiveSamplersMask()).none());
     }
 
     ProvokingVertexConvention getProvokingVertex() const { return mProvokingVertex; }
@@ -733,6 +735,10 @@ class State : angle::NonCopyable
         mDirtyBits.set(State::DIRTY_BIT_PROVOKING_VERTEX);
         mProvokingVertex = val;
     }
+
+    using ClipDistanceEnableBits = angle::BitSet32<IMPLEMENTATION_MAX_CLIP_DISTANCES>;
+    const ClipDistanceEnableBits &getEnabledClipDistances() const { return mClipDistancesEnabled; }
+    void setClipDistanceEnable(int idx, bool enable);
 
     const OverlayType *getOverlay() const { return mOverlay; }
 
@@ -761,12 +767,12 @@ class State : angle::NonCopyable
 
     bool hasConstantAlphaBlendFunc() const
     {
-        return (mBlendFuncConstantAlphaDrawBuffers & mBlendEnabledDrawBuffers).any();
+        return (mBlendFuncConstantAlphaDrawBuffers & mBlendStateExt.mEnabledMask).any();
     }
 
     bool hasSimultaneousConstantColorAndAlphaBlendFunc() const
     {
-        return (mBlendFuncConstantColorDrawBuffers & mBlendEnabledDrawBuffers).any() &&
+        return (mBlendFuncConstantColorDrawBuffers & mBlendStateExt.mEnabledMask).any() &&
                hasConstantAlphaBlendFunc();
     }
 
@@ -871,7 +877,8 @@ class State : angle::NonCopyable
     bool mScissorTest;
     Rectangle mScissor;
 
-    BlendStateArray mBlendStateArray;
+    BlendState mBlendState;  // Buffer zero blend state legacy struct
+    BlendStateExt mBlendStateExt;
     ColorF mBlendColor;
     bool mSampleAlphaToCoverage;
     bool mSampleCoverage;
@@ -888,6 +895,7 @@ class State : angle::NonCopyable
     GLfloat mLineWidth;
 
     GLenum mGenerateMipmapHint;
+    GLenum mTextureFilteringHint;
     GLenum mFragmentShaderDerivativeHint;
 
     const bool mBindGeneratesResource;
@@ -982,6 +990,9 @@ class State : angle::NonCopyable
     // GL_KHR_parallel_shader_compile
     GLuint mMaxShaderCompilerThreads;
 
+    // GL_APPLE_clip_distance/GL_EXT_clip_cull_distance
+    ClipDistanceEnableBits mClipDistancesEnabled;
+
     // GLES1 emulation: state specific to GLES1
     GLES1State mGLES1State;
 
@@ -996,7 +1007,6 @@ class State : angle::NonCopyable
     const OverlayType *mOverlay;
 
     // OES_draw_buffers_indexed
-    DrawBufferMask mBlendEnabledDrawBuffers;
     DrawBufferMask mBlendFuncConstantAlphaDrawBuffers;
     DrawBufferMask mBlendFuncConstantColorDrawBuffers;
     bool mNoSimultaneousConstantColorAndAlphaBlendFunc;

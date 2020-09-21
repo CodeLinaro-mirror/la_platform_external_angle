@@ -378,6 +378,13 @@ void Context::initialize()
         }
     }
 
+    if (getClientVersion() >= Version(3, 2) || mSupportedExtensions.textureCubeMapArrayAny())
+    {
+        Texture *zeroTextureCubeMapArray =
+            new Texture(mImplementation.get(), {0}, TextureType::CubeMapArray);
+        mZeroTextures[TextureType::CubeMapArray].set(this, zeroTextureCubeMapArray);
+    }
+
     if (mSupportedExtensions.textureRectangle)
     {
         Texture *zeroTextureRectangle =
@@ -404,6 +411,8 @@ void Context::initialize()
     }
 
     mState.initializeZeroTextures(this, mZeroTextures);
+
+    ANGLE_CONTEXT_TRY(mImplementation->initialize());
 
     bindVertexArray({0});
 
@@ -496,8 +505,6 @@ void Context::initialize()
 
     mCopyImageDirtyBits.set(State::DIRTY_BIT_READ_FRAMEBUFFER_BINDING);
     mCopyImageDirtyObjects.set(State::DIRTY_OBJECT_READ_FRAMEBUFFER);
-
-    ANGLE_CONTEXT_TRY(mImplementation->initialize());
 
     // Initialize overlay after implementation is initialized.
     ANGLE_CONTEXT_TRY(mOverlay.init(this));
@@ -1124,6 +1131,7 @@ void Context::bindProgramPipeline(ProgramPipelineID pipelineHandle)
     ProgramPipeline *pipeline = mState.mProgramPipelineManager->checkProgramPipelineAllocation(
         mImplementation.get(), pipelineHandle);
     ANGLE_CONTEXT_TRY(mState.setProgramPipelineBinding(this, pipeline));
+    mStateCache.onProgramExecutableChange(this);
 }
 
 void Context::beginQuery(QueryType target, QueryID query)
@@ -1750,8 +1758,18 @@ void Context::getIntegervImpl(GLenum pname, GLint *params) const
         case GL_MAX_LIGHTS:
             *params = mState.mCaps.maxLights;
             break;
+
+        // case GL_MAX_CLIP_DISTANCES_EXT:  Conflict enum value
         case GL_MAX_CLIP_PLANES:
-            *params = mState.mCaps.maxClipPlanes;
+            if (getClientVersion().major >= 2)
+            {
+                // GL_APPLE_clip_distance/GL_EXT_clip_cull_distance
+                *params = mState.mCaps.maxClipDistances;
+            }
+            else
+            {
+                *params = mState.mCaps.maxClipPlanes;
+            }
             break;
         // GLES1 emulation: Vertex attribute queries
         case GL_VERTEX_ARRAY_BUFFER_BINDING:
@@ -3088,6 +3106,7 @@ Extensions Context::generateSupportedExtensions() const
         supportedExtensions.textureMultisample       = false;
         supportedExtensions.drawBuffersIndexedEXT    = false;
         supportedExtensions.drawBuffersIndexedOES    = false;
+        supportedExtensions.eglImageArray            = false;
 
         // Requires glCompressedTexImage3D
         supportedExtensions.textureCompressionASTCOES = false;
@@ -3569,6 +3588,10 @@ ANGLE_INLINE angle::Result Context::prepareForCopyImage()
 
 ANGLE_INLINE angle::Result Context::prepareForDispatch()
 {
+    // We always assume PPOs are used for draws, until they aren't. If we are executing a dispatch
+    // with a PPO, we need to convert it from a "draw"-type to "dispatch"-type.
+    convertPpoToComputeOrDraw(true);
+
     ANGLE_TRY(syncDirtyObjects(mComputeDirtyObjects));
     return syncDirtyBits(mComputeDirtyBits);
 }
@@ -4766,6 +4789,9 @@ void Context::hint(GLenum target, GLenum mode)
         case GL_FOG_HINT:
             mState.gles1().setHint(target, mode);
             break;
+        case GL_TEXTURE_FILTERING_HINT_CHROMIUM:
+            mState.setTextureFilteringHint(mode);
+            break;
         default:
             UNREACHABLE();
             return;
@@ -5506,9 +5532,33 @@ void Context::dispatchCompute(GLuint numGroupsX, GLuint numGroupsY, GLuint numGr
     }
 
     ANGLE_CONTEXT_TRY(prepareForDispatch());
-    ANGLE_CONTEXT_TRY(mImplementation->dispatchCompute(this, numGroupsX, numGroupsY, numGroupsZ));
+
+    angle::Result result =
+        mImplementation->dispatchCompute(this, numGroupsX, numGroupsY, numGroupsZ);
+
+    // We always assume PPOs are used for draws, until they aren't. If we just executed a dispatch
+    // with a PPO, we need to convert it back to a "draw"-type.
+    convertPpoToComputeOrDraw(false);
+
+    if (ANGLE_UNLIKELY(IsError(result)))
+    {
+        return;
+    }
 
     MarkShaderStorageBufferUsage(this);
+}
+
+void Context::convertPpoToComputeOrDraw(bool isCompute)
+{
+    Program *program          = mState.getProgram();
+    ProgramPipeline *pipeline = mState.getProgramPipeline();
+    if (!program && pipeline)
+    {
+        pipeline->getExecutable().setIsCompute(isCompute);
+        pipeline->setDirtyBit(ProgramPipeline::DirtyBitType::DIRTY_BIT_DRAW_DISPATCH_CHANGE);
+        mState.mDirtyObjects.set(State::DIRTY_OBJECT_PROGRAM_PIPELINE);
+        mState.mDirtyBits.set(State::DirtyBitType::DIRTY_BIT_PROGRAM_EXECUTABLE);
+    }
 }
 
 void Context::dispatchComputeIndirect(GLintptr indirect)
@@ -5754,13 +5804,13 @@ void Context::drawArraysInstancedBaseInstance(PrimitiveMode mode,
                                               GLsizei instanceCount,
                                               GLuint baseInstance)
 {
-    ANGLE_CONTEXT_TRY(prepareForDraw(mode));
-    Program *programObject = mState.getLinkedProgram(this);
-
     if (noopDraw(mode, count))
     {
         return;
     }
+
+    ANGLE_CONTEXT_TRY(prepareForDraw(mode));
+    Program *programObject = mState.getLinkedProgram(this);
 
     const bool hasBaseInstance = programObject && programObject->hasBaseInstanceUniform();
     if (hasBaseInstance)
@@ -5771,7 +5821,7 @@ void Context::drawArraysInstancedBaseInstance(PrimitiveMode mode,
     ResetBaseVertexBaseInstance resetUniforms(programObject, false, hasBaseInstance);
 
     // The input gl_InstanceID does not follow the baseinstance. gl_InstanceID always falls on
-    // the half-open range [0, instancecount​). No need to set other stuff. Except for Vulkan.
+    // the half-open range [0, instancecount). No need to set other stuff. Except for Vulkan.
 
     ANGLE_CONTEXT_TRY(mImplementation->drawArraysInstancedBaseInstance(
         this, mode, first, count, instanceCount, baseInstance));
@@ -5786,13 +5836,13 @@ void Context::drawElementsInstancedBaseVertexBaseInstance(PrimitiveMode mode,
                                                           GLint baseVertex,
                                                           GLuint baseInstance)
 {
-    ANGLE_CONTEXT_TRY(prepareForDraw(mode));
-    Program *programObject = mState.getLinkedProgram(this);
-
     if (noopDraw(mode, count))
     {
         return;
     }
+
+    ANGLE_CONTEXT_TRY(prepareForDraw(mode));
+    Program *programObject = mState.getLinkedProgram(this);
 
     const bool hasBaseVertex = programObject && programObject->hasBaseVertexUniform();
     if (hasBaseVertex)
@@ -8453,7 +8503,8 @@ StateCache::StateCache()
       mCachedInstancedVertexElementLimit(0),
       mCachedBasicDrawStatesError(kInvalidPointer),
       mCachedBasicDrawElementsError(kInvalidPointer),
-      mCachedTransformFeedbackActiveUnpaused(false)
+      mCachedTransformFeedbackActiveUnpaused(false),
+      mCachedCanDraw(false)
 {}
 
 StateCache::~StateCache() = default;
@@ -8474,6 +8525,7 @@ void StateCache::initialize(Context *context)
     updateBasicDrawStatesError();
     updateBasicDrawElementsError();
     updateVertexAttribTypesValidation(context);
+    updateCanDraw(context);
 }
 
 void StateCache::updateActiveAttribsMask(Context *context)
@@ -8585,6 +8637,7 @@ void StateCache::onProgramExecutableChange(Context *context)
     updateBasicDrawStatesError();
     updateValidDrawModes(context);
     updateActiveShaderStorageBufferIndices(context);
+    updateCanDraw(context);
 }
 
 void StateCache::onVertexArrayFormatChange(Context *context)
@@ -8760,6 +8813,7 @@ void StateCache::updateValidBindTextureTypes(Context *context)
         {TextureType::External, exts.eglImageExternalOES || exts.eglStreamConsumerExternalNV},
         {TextureType::Rectangle, exts.textureRectangle},
         {TextureType::CubeMap, true},
+        {TextureType::CubeMapArray, exts.textureCubeMapArrayAny()},
         {TextureType::VideoImage, exts.webglVideoTexture},
     }};
 }
@@ -8845,5 +8899,12 @@ void StateCache::updateActiveShaderStorageBufferIndices(Context *context)
             mCachedActiveShaderStorageBufferIndices.set(block.binding);
         }
     }
+}
+
+void StateCache::updateCanDraw(Context *context)
+{
+    mCachedCanDraw = (context->isGLES1() ||
+                      (context->getState().getProgramExecutable() &&
+                       context->getState().getProgramExecutable()->hasVertexAndFragmentShader()));
 }
 }  // namespace gl

@@ -99,8 +99,7 @@ std::string GlslangGetMappedSamplerName(const std::string &originalName);
 std::string GetXfbBufferName(const uint32_t bufferIndex);
 
 void GlslangAssignLocations(GlslangSourceOptions &options,
-                            const gl::ProgramState &programState,
-                            const gl::ProgramLinkedResources &resources,
+                            const gl::ProgramExecutable &programExecutable,
                             const gl::ShaderType shaderType,
                             GlslangProgramInterfaceInfo *programInterfaceInfo,
                             gl::ShaderMap<ShaderInterfaceVariableInfoMap> *variableInfoMapOut);
@@ -124,6 +123,7 @@ angle::Result GlslangTransformSpirvCode(const GlslangErrorCallback &callback,
                                         SpirvBlob *spirvBlobOut);
 
 angle::Result GlslangGetShaderSpirvCode(const GlslangErrorCallback &callback,
+                                        const gl::ShaderBitSet &linkedShaderStages,
                                         const gl::Caps &glCaps,
                                         const gl::ShaderMap<std::string> &shaderSources,
                                         const ShaderMapInterfaceVariableInfoMap &variableInfoMap,
