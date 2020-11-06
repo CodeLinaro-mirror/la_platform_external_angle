@@ -132,6 +132,11 @@ const gl::InternalFormat &Format::intendedInternalFormat() const
     return gl::GetSizedInternalFormatInfo(intendedAngleFormat().glInternalFormat);
 }
 
+const gl::InternalFormat &Format::actualInternalFormat() const
+{
+    return gl::GetSizedInternalFormatInfo(actualAngleFormat().glInternalFormat);
+}
+
 bool Format::needConversion(angle::FormatID srcFormatId) const
 {
     if ((srcFormatId == angle::FormatID::BC1_RGB_UNORM_BLOCK &&
@@ -263,35 +268,6 @@ void FormatTable::setCompressedFormatCaps(MTLPixelFormat formatId, bool filterab
 void FormatTable::initNativeFormatCaps(const DisplayMtl *display)
 {
     initNativeFormatCapsAutogen(display);
-
-#if TARGET_OS_OSX || TARGET_OS_MACCATALYST
-    setCompressedFormatCaps(MTLPixelFormatBC1_RGBA, true);
-    setCompressedFormatCaps(MTLPixelFormatBC1_RGBA_sRGB, true);
-    setCompressedFormatCaps(MTLPixelFormatBC2_RGBA, true);
-    setCompressedFormatCaps(MTLPixelFormatBC2_RGBA_sRGB, true);
-    setCompressedFormatCaps(MTLPixelFormatBC3_RGBA, true);
-    setCompressedFormatCaps(MTLPixelFormatBC3_RGBA_sRGB, true);
-#else
-    setCompressedFormatCaps(MTLPixelFormatPVRTC_RGB_2BPP, true);
-    setCompressedFormatCaps(MTLPixelFormatPVRTC_RGB_2BPP_sRGB, true);
-    setCompressedFormatCaps(MTLPixelFormatPVRTC_RGB_4BPP, true);
-    setCompressedFormatCaps(MTLPixelFormatPVRTC_RGB_4BPP_sRGB, true);
-    setCompressedFormatCaps(MTLPixelFormatPVRTC_RGBA_2BPP, true);
-    setCompressedFormatCaps(MTLPixelFormatPVRTC_RGBA_2BPP_sRGB, true);
-    setCompressedFormatCaps(MTLPixelFormatPVRTC_RGBA_4BPP, true);
-    setCompressedFormatCaps(MTLPixelFormatPVRTC_RGBA_4BPP_sRGB, true);
-    setCompressedFormatCaps(MTLPixelFormatEAC_R11Unorm, true);
-    setCompressedFormatCaps(MTLPixelFormatEAC_R11Snorm, true);
-    setCompressedFormatCaps(MTLPixelFormatEAC_RG11Unorm, true);
-    setCompressedFormatCaps(MTLPixelFormatEAC_RG11Snorm, true);
-    setCompressedFormatCaps(MTLPixelFormatEAC_RGBA8, true);
-    setCompressedFormatCaps(MTLPixelFormatEAC_RGBA8_sRGB, true);
-    setCompressedFormatCaps(MTLPixelFormatETC2_RGB8, true);
-    setCompressedFormatCaps(MTLPixelFormatETC2_RGB8_sRGB, true);
-    setCompressedFormatCaps(MTLPixelFormatETC2_RGB8A1, true);
-    setCompressedFormatCaps(MTLPixelFormatETC2_RGB8A1_sRGB, true);
-#endif
-    // clang-format on
 }
 
 }  // namespace mtl

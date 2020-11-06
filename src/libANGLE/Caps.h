@@ -644,6 +644,24 @@ struct Extensions
 
     // GL_EXT_shadow_samplers
     bool shadowSamplersEXT = false;
+
+    // GL_EXT_buffer_storage
+    bool bufferStorageEXT = false;
+
+    // GL_OES_texture_stencil8
+    bool stencilIndex8 = false;
+
+    // GL_OES_sample_shading
+    bool sampleShadingOES = false;
+
+    // OES_shader_multisample_interpolation
+    bool multisampleInterpolationOES = false;
+
+    // GL_NV_robustness_video_memory_purge
+    bool robustnessVideoMemoryPurgeNV = false;
+
+    // GL_ANGLE_get_tex_level_parameter
+    bool getTexLevelParameterANGLE = false;
 };
 
 // Pointer to a boolean memeber of the Extensions struct
@@ -666,6 +684,9 @@ const ExtensionInfoMap &GetExtensionInfoMap();
 struct Limitations
 {
     Limitations();
+    Limitations(const Limitations &other);
+
+    Limitations &operator=(const Limitations &other);
 
     // Renderer doesn't support gl_FrontFacing in fragment shaders
     bool noFrontFacingSupport = false;
@@ -694,6 +715,10 @@ struct Limitations
 
     // D3D does not support vertex attribute aliasing
     bool noVertexAttributeAliasing = false;
+
+    // Renderer doesn't support GL_TEXTURE_COMPARE_MODE=GL_NONE on a shadow sampler.
+    // TODO(http://anglebug.com/5231): add validation code to front-end.
+    bool noShadowSamplerCompareModeNone = false;
 };
 
 struct TypePrecision
@@ -723,6 +748,10 @@ struct Caps
     // If the values could be got by using GetIntegeri_v, they should
     // be GLint instead of GLuint and call LimitToInt() to ensure
     // they will not overflow.
+
+    GLfloat minInterpolationOffset        = 0;
+    GLfloat maxInterpolationOffset        = 0;
+    GLint subPixelInterpolationOffsetBits = 0;
 
     // ES 3.1 (April 29, 2015) 20.39: implementation dependent values
     GLint64 maxElementIndex       = 0;
@@ -889,6 +918,9 @@ struct Caps
 
     // Support for NPOT surfaces
     bool textureNPOT;
+
+    // Support for Stencil8 configs
+    bool stencil8;
 };
 
 struct DisplayExtensions
@@ -1051,6 +1083,9 @@ struct DisplayExtensions
     // EGL_ANDROID_get_native_client_buffer
     bool getNativeClientBufferANDROID = false;
 
+    // EGL_ANDROID_create_native_client_buffer
+    bool createNativeClientBufferANDROID = false;
+
     // EGL_ANDROID_native_fence_sync
     bool nativeFenceSyncANDROID = false;
 
@@ -1101,6 +1136,12 @@ struct DisplayExtensions
 
     // EGL_NOK_texture_from_pixmap
     bool textureFromPixmapNOK = false;
+
+    // EGL_NV_robustness_video_memory_purge
+    bool robustnessVideoMemoryPurgeNV = false;
+
+    // EGL_KHR_reusable_sync
+    bool reusableSyncKHR = false;
 };
 
 struct DeviceExtensions
