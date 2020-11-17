@@ -769,6 +769,16 @@ spv::BuiltIn TGlslangToSpvTraverser::TranslateBuiltInDecoration(glslang::TBuiltI
         builder.addCapability(spv::CapabilityStencilExportEXT);
         return spv::BuiltInFragStencilRefEXT;
 
+    case glslang::EbvShadingRateKHR:
+        builder.addExtension(spv::E_SPV_KHR_fragment_shading_rate);
+        builder.addCapability(spv::CapabilityFragmentShadingRateKHR);
+        return spv::BuiltInShadingRateKHR;
+
+    case glslang::EbvPrimitiveShadingRateKHR:
+        builder.addExtension(spv::E_SPV_KHR_fragment_shading_rate);
+        builder.addCapability(spv::CapabilityFragmentShadingRateKHR);
+        return spv::BuiltInPrimitiveShadingRateKHR;
+
     case glslang::EbvInvocationId:         return spv::BuiltInInvocationId;
     case glslang::EbvTessLevelInner:       return spv::BuiltInTessLevelInner;
     case glslang::EbvTessLevelOuter:       return spv::BuiltInTessLevelOuter;
@@ -1709,6 +1719,12 @@ void TGlslangToSpvTraverser::visitSymbol(glslang::TIntermSymbol* symbol)
 
     if (symbol->getType().getQualifier().isSpecConstant())
         spec_constant_op_mode_setter.turnOnSpecConstantOpMode();
+
+#ifdef ENABLE_HLSL
+    // Skip symbol handling if it is string-typed
+    if (symbol->getBasicType() == glslang::EbtString)
+        return;
+#endif
 
     // getSymbolId() will set up all the IO decorations on the first call.
     // Formal function parameters were mapped during makeFunctions().

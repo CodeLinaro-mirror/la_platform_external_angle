@@ -29,10 +29,16 @@ class VisibilityBufferOffsetsMtl;
 
 namespace mtl
 {
-struct ClearRectParams : public ClearOptions
+
+struct ClearRectParams
 {
+    Optional<ClearColorValue> clearColor;
+    Optional<float> clearDepth;
+    Optional<uint32_t> clearStencil;
+
     MTLColorWriteMask clearColorMask = MTLColorWriteMaskAll;
 
+    const mtl::Format *colorFormat = nullptr;
     gl::Extents dstTextureSize;
 
     // Only clear enabled buffers
@@ -57,8 +63,8 @@ struct BlitParams
     bool dstFlipX = false;
 
     TextureRef src;
-    uint32_t srcLevel = 0;
-    uint32_t srcLayer = 0;
+    MipmapNativeLevel srcLevel = kZeroNativeMipLevel;
+    uint32_t srcLayer          = 0;
 
     // Source rectangle:
     // NOTE: if srcYFlipped=true, this rectangle will be converted internally to flipped rect before
@@ -93,9 +99,9 @@ struct StencilBlitViaBufferParams : public DepthStencilBlitParams
     StencilBlitViaBufferParams(const DepthStencilBlitParams &src);
 
     TextureRef dstStencil;
-    uint32_t dstStencilLevel         = 0;
-    uint32_t dstStencilLayer         = 0;
-    bool dstPackedDepthStencilFormat = false;
+    MipmapNativeLevel dstStencilLevel = kZeroNativeMipLevel;
+    uint32_t dstStencilLayer          = 0;
+    bool dstPackedDepthStencilFormat  = false;
 };
 
 struct TriFanFromArrayParams
@@ -128,11 +134,40 @@ struct IndexGenerationParams
     uint32_t dstOffset;
 };
 
+struct CopyPixelsCommonParams
+{
+    BufferRef buffer;
+    uint32_t bufferStartOffset = 0;
+    uint32_t bufferRowPitch    = 0;
+
+    TextureRef texture;
+};
+
+struct CopyPixelsFromBufferParams : CopyPixelsCommonParams
+{
+    uint32_t bufferDepthPitch = 0;
+
+    // z offset is:
+    //  - slice index if texture is array.
+    //  - depth if texture is 3d.
+    gl::Box textureArea;
+};
+
+struct CopyPixelsToBufferParams : CopyPixelsCommonParams
+{
+    gl::Rectangle textureArea;
+    MipmapNativeLevel textureLevel = kZeroNativeMipLevel;
+    uint32_t textureSliceOrDeph    = 0;
+    bool reverseTextureRowOrder;
+};
+
 // Utils class for clear & blitting
 class ClearUtils final : angle::NonCopyable
 {
   public:
-    ClearUtils();
+    ClearUtils() = delete;
+    ClearUtils(const std::string &fragmentShaderName);
+    ClearUtils(const ClearUtils &src);
 
     void onDestroy();
 
@@ -153,6 +188,8 @@ class ClearUtils final : angle::NonCopyable
                                                            RenderCommandEncoder *cmdEncoder,
                                                            const ClearRectParams &params);
 
+    const std::string mFragmentShaderName;
+
     // Render pipeline cache for clear with draw:
     std::array<RenderPipelineCache, kMaxRenderTargets + 1> mClearRenderPipelineCache;
 };
@@ -160,7 +197,9 @@ class ClearUtils final : angle::NonCopyable
 class ColorBlitUtils final : angle::NonCopyable
 {
   public:
-    ColorBlitUtils();
+    ColorBlitUtils() = delete;
+    ColorBlitUtils(const std::string &fragmentShaderName);
+    ColorBlitUtils(const ColorBlitUtils &src);
 
     void onDestroy();
 
@@ -184,6 +223,8 @@ class ColorBlitUtils final : angle::NonCopyable
                                                                RenderCommandEncoder *cmdEncoder,
                                                                const ColorBlitParams &params);
 
+    const std::string mFragmentShaderName;
+
     // Blit with draw pipeline caches:
     // First array dimension: number of outputs.
     // Second array dimension: source texture type (2d, ms, array, 3d, etc)
@@ -203,6 +244,7 @@ class DepthStencilBlitUtils final : angle::NonCopyable
     angle::Result blitDepthStencilWithDraw(const gl::Context *context,
                                            RenderCommandEncoder *cmdEncoder,
                                            const DepthStencilBlitParams &params);
+
     // Blit stencil data using intermediate buffer. This function is used on devices with no
     // support for direct stencil write in shader. Thus an intermediate buffer storing copied
     // stencil data is needed.
@@ -344,13 +386,47 @@ class MipmapUtils final : angle::NonCopyable
     angle::Result generateMipmapCS(ContextMtl *contextMtl,
                                    const TextureRef &srcTexture,
                                    bool sRGBMipmap,
-                                   gl::TexLevelArray<mtl::TextureRef> *mipmapOutputViews);
+                                   NativeTexLevelArray *mipmapOutputViews);
 
   private:
     void ensure3DMipGeneratorPipelineInitialized(ContextMtl *contextMtl);
 
     // Mipmaps generating compute pipeline:
     AutoObjCPtr<id<MTLComputePipelineState>> m3DMipGeneratorPipeline;
+};
+
+// Util class for handling pixels copy between buffers and textures
+class CopyPixelsUtils
+{
+  public:
+    CopyPixelsUtils() = default;
+    CopyPixelsUtils(const std::string &readShaderName, const std::string &writeShaderName);
+    CopyPixelsUtils(const CopyPixelsUtils &src);
+
+    void onDestroy();
+
+    angle::Result unpackPixelsFromBufferToTexture(ContextMtl *contextMtl,
+                                                  const angle::Format &srcAngleFormat,
+                                                  const CopyPixelsFromBufferParams &params);
+    angle::Result packPixelsFromTextureToBuffer(ContextMtl *contextMtl,
+                                                const angle::Format &dstAngleFormat,
+                                                const CopyPixelsToBufferParams &params);
+
+  private:
+    AutoObjCPtr<id<MTLComputePipelineState>> getPixelsCopyPipeline(ContextMtl *contextMtl,
+                                                                   const angle::Format &angleFormat,
+                                                                   const TextureRef &texture,
+                                                                   bool bufferWrite);
+    // Copy pixels between buffer and texture compute pipelines:
+    // - First dimension: pixel format.
+    // - Second dimension: texture type * (buffer read/write flag)
+    using PixelsCopyPipelineArray = std::array<
+        std::array<AutoObjCPtr<id<MTLComputePipelineState>>, mtl_shader::kTextureTypeCount * 2>,
+        angle::kNumANGLEFormats>;
+    PixelsCopyPipelineArray mPixelsCopyPipelineCaches;
+
+    const std::string mReadShaderName;
+    const std::string mWriteShaderName;
 };
 
 // RenderUtils: container class of various util classes above
@@ -370,12 +446,19 @@ class RenderUtils : public Context, angle::NonCopyable
     // Blit texture data to current framebuffer
     angle::Result blitColorWithDraw(const gl::Context *context,
                                     RenderCommandEncoder *cmdEncoder,
+                                    const angle::Format &srcAngleFormat,
                                     const ColorBlitParams &params);
     // Same as above but blit the whole texture to the whole of current framebuffer.
     // This function assumes the framebuffer and the source texture have same size.
     angle::Result blitColorWithDraw(const gl::Context *context,
                                     RenderCommandEncoder *cmdEncoder,
+                                    const angle::Format &srcAngleFormat,
                                     const TextureRef &srcTexture);
+    angle::Result copyTextureWithDraw(const gl::Context *context,
+                                      RenderCommandEncoder *cmdEncoder,
+                                      const angle::Format &srcAngleFormat,
+                                      const angle::Format &dstAngleFormat,
+                                      const ColorBlitParams &params);
 
     angle::Result blitDepthStencilWithDraw(const gl::Context *context,
                                            RenderCommandEncoder *cmdEncoder,
@@ -409,7 +492,14 @@ class RenderUtils : public Context, angle::NonCopyable
     angle::Result generateMipmapCS(ContextMtl *contextMtl,
                                    const TextureRef &srcTexture,
                                    bool sRGBMipmap,
-                                   gl::TexLevelArray<mtl::TextureRef> *mipmapOutputViews);
+                                   NativeTexLevelArray *mipmapOutputViews);
+
+    angle::Result unpackPixelsFromBufferToTexture(ContextMtl *contextMtl,
+                                                  const angle::Format &srcAngleFormat,
+                                                  const CopyPixelsFromBufferParams &params);
+    angle::Result packPixelsFromTextureToBuffer(ContextMtl *contextMtl,
+                                                const angle::Format &dstAngleFormat,
+                                                const CopyPixelsToBufferParams &params);
 
   private:
     // override ErrorHandler
@@ -422,12 +512,16 @@ class RenderUtils : public Context, angle::NonCopyable
                      const char *function,
                      unsigned int line) override;
 
-    ClearUtils mClearUtils;
-    ColorBlitUtils mColorBlitUtils;
+    std::array<ClearUtils, angle::EnumSize<PixelType>()> mClearUtils;
+
+    std::array<ColorBlitUtils, angle::EnumSize<PixelType>()> mColorBlitUtils;
+    ColorBlitUtils mCopyTextureFloatToUIntUtils;
+
     DepthStencilBlitUtils mDepthStencilBlitUtils;
     IndexGeneratorUtils mIndexUtils;
     VisibilityResultUtils mVisibilityResultUtils;
     MipmapUtils mMipmapUtils;
+    std::array<CopyPixelsUtils, angle::EnumSize<PixelType>()> mCopyPixelsUtils;
 };
 
 }  // namespace mtl
