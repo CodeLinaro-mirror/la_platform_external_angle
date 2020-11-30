@@ -64,24 +64,25 @@ void RenderTargetVk::reset()
     mLayerIndex        = 0;
 }
 
-vk::ImageViewSubresourceSerial RenderTargetVk::getSubresourceSerialImpl(
+vk::ImageOrBufferViewSubresourceSerial RenderTargetVk::getSubresourceSerialImpl(
     vk::ImageViewHelper *imageViews) const
 {
     ASSERT(imageViews);
     ASSERT(mLayerIndex < std::numeric_limits<uint16_t>::max());
     ASSERT(mLevelIndexGL.get() < std::numeric_limits<uint16_t>::max());
 
-    vk::ImageViewSubresourceSerial imageViewSerial =
-        imageViews->getSubresourceSerial(mLevelIndexGL, 1, mLayerIndex, vk::LayerMode::Single);
+    vk::ImageOrBufferViewSubresourceSerial imageViewSerial =
+        imageViews->getSubresourceSerial(mLevelIndexGL, 1, mLayerIndex, vk::LayerMode::Single,
+                                         vk::SrgbDecodeMode::SkipDecode, gl::SrgbOverride::Default);
     return imageViewSerial;
 }
 
-vk::ImageViewSubresourceSerial RenderTargetVk::getDrawSubresourceSerial() const
+vk::ImageOrBufferViewSubresourceSerial RenderTargetVk::getDrawSubresourceSerial() const
 {
     return getSubresourceSerialImpl(mImageViews);
 }
 
-vk::ImageViewSubresourceSerial RenderTargetVk::getResolveSubresourceSerial() const
+vk::ImageOrBufferViewSubresourceSerial RenderTargetVk::getResolveSubresourceSerial() const
 {
     return getSubresourceSerialImpl(mResolveImageViews);
 }
@@ -253,11 +254,12 @@ angle::Result RenderTargetVk::flushStagedUpdates(ContextVk *contextVk,
     // below will either flush all staged updates to the resolve image, or if the only staged update
     // is a clear, it will accumulate it in the |deferredClears| array.  Later, when the render pass
     // is started, the deferred clears are applied to the transient multisampled image.
-    ASSERT(!isResolveImageOwnerOfData() || !mImage->isUpdateStaged(mLevelIndexGL, layerIndex));
+    ASSERT(!isResolveImageOwnerOfData() ||
+           !mImage->hasStagedUpdatesForSubresource(mLevelIndexGL, layerIndex));
     ASSERT(isResolveImageOwnerOfData() || mResolveImage == nullptr ||
-           !mResolveImage->isUpdateStaged(mLevelIndexGL, layerIndex));
+           !mResolveImage->hasStagedUpdatesForSubresource(mLevelIndexGL, layerIndex));
 
-    if (!image->isUpdateStaged(mLevelIndexGL, layerIndex))
+    if (!image->hasStagedUpdatesForSubresource(mLevelIndexGL, layerIndex))
     {
         return angle::Result::Continue;
     }

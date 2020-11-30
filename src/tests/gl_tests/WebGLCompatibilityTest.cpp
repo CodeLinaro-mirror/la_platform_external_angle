@@ -594,6 +594,9 @@ TEST_P(WebGLCompatibilityTest, EnablePixelBufferObjectExtensions)
     // These extensions become core in in ES3/WebGL2.
     ANGLE_SKIP_TEST_IF(getClientMajorVersion() >= 3);
 
+    // http://anglebug.com/5268
+    ANGLE_SKIP_TEST_IF(IsOSX() && IsIntelUHD630Mobile() && IsDesktopOpenGL());
+
     GLBuffer buffer;
     glBindBuffer(GL_PIXEL_PACK_BUFFER, buffer);
     EXPECT_GL_ERROR(GL_INVALID_ENUM);
@@ -2721,7 +2724,7 @@ void main() {
 // Based on the WebGL test conformance/textures/misc/texture-copying-feedback-loops.html
 TEST_P(WebGLCompatibilityTest, TextureCopyingFeedbackLoops)
 {
-    // TODO(crbug.com/1132295): Failing on Apple DTK.
+    // TODO(anglebug.com/5360): Failing on ARM-based Apple DTKs.
     ANGLE_SKIP_TEST_IF(IsOSX() && IsARM64() && IsDesktopOpenGL());
 
     GLTexture texture;
@@ -2792,7 +2795,7 @@ TEST_P(WebGL2CompatibilityTest, CopyMip1ToMip0)
     // http://anglebug.com/4805
     ANGLE_SKIP_TEST_IF(IsOpenGL() && IsIntel() && (IsWindows() || IsOSX()));
 
-    // TODO(crbug.com/1132295): Failing on ARM64-based Apple DTKs.
+    // TODO(anglebug.com/5360): Failing on ARM64-based Apple DTKs.
     ANGLE_SKIP_TEST_IF(IsOSX() && IsARM64() && IsDesktopOpenGL());
 
     GLFramebuffer framebuffer;

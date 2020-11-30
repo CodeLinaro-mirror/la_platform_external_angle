@@ -1933,6 +1933,25 @@ static bool ValidateBindBufferCommon(const Context *context,
             }
             break;
         }
+        case BufferBinding::Texture:
+        {
+            if (!context->getExtensions().textureBufferAny())
+            {
+                context->validationError(GL_INVALID_ENUM, kTextureBufferExtensionNotAvailable);
+                return false;
+            }
+            if (index != 0)
+            {
+                context->validationError(GL_INVALID_VALUE, kIndexExceedsMaxUniformBufferBindings);
+                return false;
+            }
+            if (buffer.value != 0 && (offset % caps.textureBufferOffsetAlignment) != 0)
+            {
+                context->validationError(GL_INVALID_VALUE, kTextureBufferOffsetAlignment);
+                return false;
+            }
+            break;
+        }
         default:
             context->validationError(GL_INVALID_ENUM, kEnumNotSupported);
             return false;
@@ -1995,17 +2014,11 @@ bool ValidateGetProgramBinary(const Context *context,
     return ValidateGetProgramBinaryBase(context, program, bufSize, length, binaryFormat, binary);
 }
 
-bool ValidateProgramParameteri(const Context *context,
-                               ShaderProgramID program,
-                               GLenum pname,
-                               GLint value)
+bool ValidateProgramParameteriBase(const Context *context,
+                                   ShaderProgramID program,
+                                   GLenum pname,
+                                   GLint value)
 {
-    if (context->getClientMajorVersion() < 3)
-    {
-        context->validationError(GL_INVALID_OPERATION, kES3Required);
-        return false;
-    }
-
     if (GetValidProgram(context, program) == nullptr)
     {
         return false;
@@ -2041,6 +2054,20 @@ bool ValidateProgramParameteri(const Context *context,
     }
 
     return true;
+}
+
+bool ValidateProgramParameteri(const Context *context,
+                               ShaderProgramID program,
+                               GLenum pname,
+                               GLint value)
+{
+    if (context->getClientMajorVersion() < 3)
+    {
+        context->validationError(GL_INVALID_OPERATION, kES3Required);
+        return false;
+    }
+
+    return ValidateProgramParameteriBase(context, program, pname, value);
 }
 
 bool ValidateBlitFramebuffer(const Context *context,

@@ -292,6 +292,7 @@
     void getTranslatedShaderSource(ShaderProgramID shaderPacked, GLsizei bufsize, GLsizei *length, \
                                    GLchar *source);                                                \
     /* GL_EXT_EGL_image_array */                                                                   \
+    /* GL_EXT_YUV_target */                                                                        \
     /* GL_EXT_blend_func_extended */                                                               \
     void bindFragDataLocation(ShaderProgramID programPacked, GLuint color, const GLchar *name);    \
     void bindFragDataLocationIndexed(ShaderProgramID programPacked, GLuint colorNumber,            \
@@ -321,6 +322,11 @@
     void multiDrawElementsBaseVertex(PrimitiveMode modePacked, const GLsizei *count,               \
                                      DrawElementsType typePacked, const void *const *indices,      \
                                      GLsizei primcount, const GLint *basevertex);                  \
+    /* GL_EXT_external_buffer */                                                                   \
+    void bufferStorageExternal(BufferBinding targetPacked, GLintptr offset, GLsizeiptr size,       \
+                               GLeglClientBufferEXT clientBuffer, GLbitfield flags);               \
+    void namedBufferStorageExternal(GLuint buffer, GLintptr offset, GLsizeiptr size,               \
+                                    GLeglClientBufferEXT clientBuffer, GLbitfield flags);          \
     /* GL_EXT_geometry_shader */                                                                   \
     /* GL_EXT_instanced_arrays */                                                                  \
     /* GL_EXT_map_buffer_range */                                                                  \
@@ -379,6 +385,8 @@
                        const TextureID *texturesPacked, const GLenum *srcLayouts);                 \
     /* GL_EXT_semaphore_fd */                                                                      \
     void importSemaphoreFd(SemaphoreID semaphorePacked, HandleType handleTypePacked, GLint fd);    \
+    /* GL_EXT_separate_shader_objects */                                                           \
+    /* GL_EXT_tessellation_shader */                                                               \
     /* GL_EXT_texture_buffer */                                                                    \
     /* GL_EXT_texture_compression_bptc */                                                          \
     /* GL_EXT_texture_compression_dxt1 */                                                          \

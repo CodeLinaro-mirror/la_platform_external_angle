@@ -185,7 +185,7 @@ class Resource : angle::NonCopyable
     angle::Result waitForIdle(ContextVk *contextVk, const char *debugMessage);
 
     // Adds the resource to a resource use list.
-    void retain(ResourceUseList *resourceUseList);
+    void retain(ResourceUseList *resourceUseList) const;
 
   protected:
     Resource();
@@ -195,11 +195,12 @@ class Resource : angle::NonCopyable
     SharedResourceUse mUse;
 };
 
-ANGLE_INLINE void Resource::retain(ResourceUseList *resourceUseList)
+ANGLE_INLINE void Resource::retain(ResourceUseList *resourceUseList) const
 {
     // Store reference in resource list.
     resourceUseList->add(mUse);
 }
+
 }  // namespace vk
 }  // namespace rx
 

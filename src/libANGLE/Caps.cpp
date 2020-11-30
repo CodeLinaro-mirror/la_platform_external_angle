@@ -1016,6 +1016,7 @@ const ExtensionInfoMap &GetExtensionInfoMap()
         map["GL_ANGLE_explicit_context_gles1"] = enableableExtension(&Extensions::explicitContextGles1);
         map["GL_ANGLE_explicit_context"] = enableableExtension(&Extensions::explicitContext);
         map["GL_KHR_parallel_shader_compile"] = enableableExtension(&Extensions::parallelShaderCompile);
+        map["GL_EXT_separate_shader_objects"] = enableableExtension(&Extensions::separateShaderObjects);
         map["GL_OES_texture_storage_multisample_2d_array"] = enableableExtension(&Extensions::textureStorageMultisample2DArrayOES);
         map["GL_ANGLE_multiview_multisample"] = enableableExtension(&Extensions::multiviewMultisample);
         map["GL_EXT_blend_func_extended"] = enableableExtension(&Extensions::blendFuncExtended);
@@ -1034,11 +1035,18 @@ const ExtensionInfoMap &GetExtensionInfoMap()
         map["GL_APPLE_clip_distance"] = enableableExtension(&Extensions::clipDistanceAPPLE);
         map["GL_EXT_EGL_image_array"] = enableableExtension(&Extensions::eglImageArray);
         map["GL_EXT_buffer_storage"] = enableableExtension(&Extensions::bufferStorageEXT);
+        map["GL_EXT_external_buffer"] = enableableExtension(&Extensions::externalBufferEXT);
         map["GL_OES_texture_stencil8"] = enableableExtension(&Extensions::stencilIndex8);
         map["GL_OES_sample_shading"] = enableableExtension(&Extensions::sampleShadingOES);
         map["GL_OES_shader_multisample_interpolation"] = enableableExtension(&Extensions::multisampleInterpolationOES);
+        map["GL_OES_shader_image_atomic"] = enableableExtension(&Extensions::shaderImageAtomicOES);
+        map["GL_OES_sample_variables"] = enableableExtension(&Extensions::sampleVariablesOES);
         map["GL_NV_robustness_video_memory_purge"] = esOnlyExtension(&Extensions::robustnessVideoMemoryPurgeNV);
         map["GL_ANGLE_get_tex_level_parameter"] = enableableExtension(&Extensions::getTexLevelParameterANGLE);
+        map["GL_EXT_copy_image"] = enableableExtension(&Extensions::copyImageEXT);
+        map["GL_OES_texture_buffer"] = enableableExtension(&Extensions::textureBufferOES);
+        map["GL_EXT_texture_buffer"] = enableableExtension(&Extensions::textureBufferEXT);
+        map["GL_EXT_YUV_target"] = enableableExtension(&Extensions::yuvTargetEXT);
         // GLES1 extensions
         map["GL_OES_point_size_array"] = enableableExtension(&Extensions::pointSizeArrayOES);
         map["GL_OES_texture_cube_map"] = enableableExtension(&Extensions::textureCubeMapOES);
@@ -1439,6 +1447,8 @@ std::vector<std::string> DeviceExtensions::getStrings() const
     //                   | Extension name                                 | Supported flag                | Output vector   |
     InsertExtensionString("EGL_ANGLE_device_d3d",                          deviceD3D,                      &extensionStrings);
     InsertExtensionString("EGL_ANGLE_device_cgl",                          deviceCGL,                      &extensionStrings);
+    InsertExtensionString("EGL_ANGLE_device_eagl",                         deviceEAGL,                     &extensionStrings);
+
     // clang-format on
 
     return extensionStrings;
@@ -1466,6 +1476,8 @@ std::vector<std::string> ClientExtensions::getStrings() const
     InsertExtensionString("EGL_ANGLE_platform_angle_vulkan",                  platformANGLEVulkan,                &extensionStrings);
     InsertExtensionString("EGL_ANGLE_platform_angle_metal",                   platformANGLEMetal,                 &extensionStrings);
     InsertExtensionString("EGL_ANGLE_platform_angle_context_virtualization",  platformANGLEContextVirtualization, &extensionStrings);
+    InsertExtensionString("EGL_ANGLE_platform_device_context_volatile_eagl",  platformANGLEDeviceContextVolatileEagl, &extensionStrings);
+    InsertExtensionString("EGL_ANGLE_platform_device_context_volatile_cgl",   platformANGLEDeviceContextVolatileCgl, &extensionStrings);
     InsertExtensionString("EGL_ANGLE_device_creation",                        deviceCreation,                     &extensionStrings);
     InsertExtensionString("EGL_ANGLE_device_creation_d3d11",                  deviceCreationD3D11,                &extensionStrings);
     InsertExtensionString("EGL_ANGLE_x11_visual",                             x11Visual,                          &extensionStrings);
