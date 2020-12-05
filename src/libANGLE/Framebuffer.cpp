@@ -630,6 +630,19 @@ bool FramebufferState::hasStencil() const
     return (mStencilAttachment.isAttached() && mStencilAttachment.getStencilSize() > 0);
 }
 
+bool FramebufferState::hasExternalTextureAttachment() const
+{
+    // External textures can only be bound to color attachment 0
+    return (mColorAttachments[0].isAttached() && mColorAttachments[0].isExternalTexture());
+}
+
+bool FramebufferState::hasYUVAttachment() const
+{
+    // The only attachments that can be YUV are external textures and surfaces, both are attached at
+    // color attachment 0.
+    return (mColorAttachments[0].isAttached() && mColorAttachments[0].isYUV());
+}
+
 bool FramebufferState::isMultiview() const
 {
     const FramebufferAttachment *attachment = getFirstNonNullAttachment();
@@ -1035,6 +1048,16 @@ bool Framebuffer::hasDepth() const
 bool Framebuffer::hasStencil() const
 {
     return mState.hasStencil();
+}
+
+bool Framebuffer::hasExternalTextureAttachment() const
+{
+    return mState.hasExternalTextureAttachment();
+}
+
+bool Framebuffer::hasYUVAttachment() const
+{
+    return mState.hasYUVAttachment();
 }
 
 bool Framebuffer::usingExtendedDrawBuffers() const
@@ -1460,8 +1483,10 @@ angle::Result Framebuffer::clearBufferfi(const Context *context,
                                          GLfloat depth,
                                          GLint stencil)
 {
-    bool clearDepth   = context->getState().getDepthStencilState().depthMask;
-    bool clearStencil = context->getState().getDepthStencilState().stencilWritemask != 0;
+    const bool clearDepth =
+        getDepthAttachment() != nullptr && context->getState().getDepthStencilState().depthMask;
+    const bool clearStencil = getStencilAttachment() != nullptr &&
+                              context->getState().getDepthStencilState().stencilWritemask != 0;
 
     if (clearDepth && clearStencil)
     {

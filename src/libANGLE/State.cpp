@@ -114,7 +114,7 @@ bool IsTextureCompatibleWithSampler(TextureType texture, TextureType sampler)
     return false;
 }
 
-int gIDCounter = 1;
+uint32_t gIDCounter = 1;
 }  // namespace
 
 template <typename BindingT, typename... ArgsT>
@@ -234,6 +234,7 @@ const angle::PackedEnumMap<BufferBinding, State::BufferBindingSetter> State::kBu
     GetBufferBindingSetter<BufferBinding::PixelPack>(),
     GetBufferBindingSetter<BufferBinding::PixelUnpack>(),
     GetBufferBindingSetter<BufferBinding::ShaderStorage>(),
+    GetBufferBindingSetter<BufferBinding::Texture>(),
     GetBufferBindingSetter<BufferBinding::TransformFeedback>(),
     GetBufferBindingSetter<BufferBinding::Uniform>(),
 }};
@@ -293,7 +294,7 @@ State::State(const State *shareContextState,
              bool robustResourceInit,
              bool programBinaryCacheEnabled,
              EGLenum contextPriority)
-    : mID(gIDCounter++),
+    : mID({gIDCounter++}),
       mClientType(clientType),
       mContextPriority(contextPriority),
       mClientVersion(clientVersion),
@@ -449,9 +450,13 @@ void State::initialize(Context *context)
         mShaderStorageBuffers.resize(caps.maxShaderStorageBufferBindings);
         mImageUnits.resize(caps.maxImageUnits);
     }
-    if (extensions.textureCubeMapArrayAny())
+    if (clientVersion >= Version(3, 2) || extensions.textureCubeMapArrayAny())
     {
         mSamplerTextures[TextureType::CubeMapArray].resize(caps.maxCombinedTextureImageUnits);
+    }
+    if (clientVersion >= Version(3, 2) || extensions.textureBufferAny())
+    {
+        mSamplerTextures[TextureType::Buffer].resize(caps.maxCombinedTextureImageUnits);
     }
     if (nativeExtensions.textureRectangle)
     {
@@ -631,12 +636,21 @@ ANGLE_INLINE void State::setActiveTextureDirty(size_t textureIndex, Texture *tex
     // If we defer the update until syncState it's too late and we've already passed validation.
     if (texture && mExecutable)
     {
-        const Sampler *sampler = mSamplers[textureIndex].get();
-        const SamplerState &samplerState =
-            sampler ? sampler->getSamplerState() : texture->getSamplerState();
+        // It is invalid to try to sample a non-yuv texture with a yuv sampler.
         mTexturesIncompatibleWithSamplers[textureIndex] =
-            !texture->getTextureState().compatibleWithSamplerFormat(
-                mExecutable->getSamplerFormatForTextureUnitIndex(textureIndex), samplerState);
+            mExecutable->getActiveYUVSamplers().test(textureIndex) && !texture->isYUV();
+
+        if (isWebGL())
+        {
+            const Sampler *sampler = mSamplers[textureIndex].get();
+            const SamplerState &samplerState =
+                sampler ? sampler->getSamplerState() : texture->getSamplerState();
+            if (!texture->getTextureState().compatibleWithSamplerFormatForWebGL(
+                    mExecutable->getSamplerFormatForTextureUnitIndex(textureIndex), samplerState))
+            {
+                mTexturesIncompatibleWithSamplers[textureIndex] = true;
+            }
+        }
     }
     else
     {
@@ -2747,6 +2761,18 @@ angle::Result State::getIntegerv(const Context *context, GLenum pname, GLint *pa
                                           TextureType::External)
                           .value;
             break;
+
+        // GL_OES_texture_buffer
+        case GL_TEXTURE_BINDING_BUFFER:
+            ASSERT(mActiveSampler < mMaxCombinedTextureImageUnits);
+            *params =
+                getSamplerTextureId(static_cast<unsigned int>(mActiveSampler), TextureType::Buffer)
+                    .value;
+            break;
+        case GL_TEXTURE_BUFFER_BINDING:
+            *params = mBoundBuffers[BufferBinding::Texture].id().value;
+            break;
+
         case GL_UNIFORM_BUFFER_BINDING:
             *params = mBoundBuffers[BufferBinding::Uniform].id().value;
             break;
@@ -2768,6 +2794,7 @@ angle::Result State::getIntegerv(const Context *context, GLenum pname, GLint *pa
         case GL_PIXEL_UNPACK_BUFFER_BINDING:
             *params = mBoundBuffers[BufferBinding::PixelUnpack].id().value;
             break;
+
         case GL_READ_BUFFER:
             *params = mReadFramebuffer->getReadBufferState();
             break;

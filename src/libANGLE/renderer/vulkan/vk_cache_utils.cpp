@@ -1184,26 +1184,37 @@ void GetRenderPassAndUpdateCounters(ContextVk *contextVk,
 }
 
 void InitializeSpecializationInfo(
-    vk::SpecializationConstantBitSet specConsts,
+    const vk::SpecializationConstants &specConsts,
     vk::SpecializationConstantMap<VkSpecializationMapEntry> *specializationEntriesOut,
-    vk::SpecializationConstantMap<VkBool32> *specializationValuesOut,
     VkSpecializationInfo *specializationInfoOut)
 {
     // Collect specialization constants.
     for (const sh::vk::SpecializationConstantId id :
          angle::AllEnums<sh::vk::SpecializationConstantId>())
     {
-        const uint32_t offset                      = static_cast<uint32_t>(id);
-        (*specializationValuesOut)[id]             = specConsts.test(id);
-        (*specializationEntriesOut)[id].constantID = offset;
-        (*specializationEntriesOut)[id].offset     = offset;
-        (*specializationEntriesOut)[id].size       = sizeof(VkBool32);
+        (*specializationEntriesOut)[id].constantID = static_cast<uint32_t>(id);
+        switch (id)
+        {
+            case sh::vk::SpecializationConstantId::LineRasterEmulation:
+                (*specializationEntriesOut)[id].offset =
+                    offsetof(vk::SpecializationConstants, lineRasterEmulation);
+                (*specializationEntriesOut)[id].size = sizeof(specConsts.lineRasterEmulation);
+                break;
+            case sh::vk::SpecializationConstantId::SurfaceRotation:
+                (*specializationEntriesOut)[id].offset =
+                    offsetof(vk::SpecializationConstants, surfaceRotation);
+                (*specializationEntriesOut)[id].size = sizeof(specConsts.surfaceRotation);
+                break;
+            default:
+                UNREACHABLE();
+                break;
+        }
     }
 
     specializationInfoOut->mapEntryCount = static_cast<uint32_t>(specializationEntriesOut->size());
     specializationInfoOut->pMapEntries   = specializationEntriesOut->data();
-    specializationInfoOut->dataSize      = specializationEntriesOut->size() * sizeof(VkBool32);
-    specializationInfoOut->pData         = specializationValuesOut->data();
+    specializationInfoOut->dataSize      = sizeof(specConsts);
+    specializationInfoOut->pData         = &specConsts;
 }
 
 // Utility for setting a value on a packed 4-bit integer array.
@@ -1520,7 +1531,8 @@ void GraphicsPipelineDesc::initDefaults()
 
     mDepthStencilStateInfo.enable.depthTest  = 0;
     mDepthStencilStateInfo.enable.depthWrite = 1;
-    SetBitField(mDepthStencilStateInfo.depthCompareOp, VK_COMPARE_OP_LESS);
+    SetBitField(mDepthStencilStateInfo.depthCompareOpAndSurfaceRotation.depthCompareOp,
+                VK_COMPARE_OP_LESS);
     mDepthStencilStateInfo.enable.depthBoundsTest = 0;
     mDepthStencilStateInfo.enable.stencilTest     = 0;
     mDepthStencilStateInfo.minDepthBounds         = 0.0f;
@@ -1539,6 +1551,9 @@ void GraphicsPipelineDesc::initDefaults()
     SetBitField(mDepthStencilStateInfo.back.compareMask, 0xFF);
     SetBitField(mDepthStencilStateInfo.back.writeMask, 0xFF);
     mDepthStencilStateInfo.backStencilReference = 0;
+
+    mDepthStencilStateInfo.depthCompareOpAndSurfaceRotation.surfaceRotation =
+        static_cast<uint8_t>(SurfaceRotation::Identity);
 
     PackedInputAssemblyAndColorBlendStateInfo &inputAndBlend = mInputAssemblyAndColorBlendStateInfo;
     inputAndBlend.logic.opEnable                             = 0;
@@ -1597,7 +1612,7 @@ angle::Result GraphicsPipelineDesc::initializePipeline(
     const ShaderModule *vertexModule,
     const ShaderModule *fragmentModule,
     const ShaderModule *geometryModule,
-    vk::SpecializationConstantBitSet specConsts,
+    const vk::SpecializationConstants specConsts,
     Pipeline *pipelineOut) const
 {
     angle::FixedVector<VkPipelineShaderStageCreateInfo, 3> shaderStages;
@@ -1613,9 +1628,7 @@ angle::Result GraphicsPipelineDesc::initializePipeline(
     VkGraphicsPipelineCreateInfo createInfo        = {};
 
     vk::SpecializationConstantMap<VkSpecializationMapEntry> specializationEntries;
-    vk::SpecializationConstantMap<VkBool32> specializationValues;
-    InitializeSpecializationInfo(specConsts, &specializationEntries, &specializationValues,
-                                 &specializationInfo);
+    InitializeSpecializationInfo(specConsts, &specializationEntries, &specializationInfo);
 
     // Vertex shader is always expected to be present.
     ASSERT(vertexModule != nullptr);
@@ -1829,8 +1842,8 @@ angle::Result GraphicsPipelineDesc::initializePipeline(
         static_cast<VkBool32>(mDepthStencilStateInfo.enable.depthTest);
     depthStencilState.depthWriteEnable =
         static_cast<VkBool32>(mDepthStencilStateInfo.enable.depthWrite);
-    depthStencilState.depthCompareOp =
-        static_cast<VkCompareOp>(mDepthStencilStateInfo.depthCompareOp);
+    depthStencilState.depthCompareOp = static_cast<VkCompareOp>(
+        mDepthStencilStateInfo.depthCompareOpAndSurfaceRotation.depthCompareOp);
     depthStencilState.depthBoundsTestEnable =
         static_cast<VkBool32>(mDepthStencilStateInfo.enable.depthBoundsTest);
     depthStencilState.stencilTestEnable =
@@ -2196,7 +2209,7 @@ void GraphicsPipelineDesc::setDepthWriteEnabled(bool enabled)
 
 void GraphicsPipelineDesc::setDepthFunc(VkCompareOp op)
 {
-    SetBitField(mDepthStencilStateInfo.depthCompareOp, op);
+    SetBitField(mDepthStencilStateInfo.depthCompareOpAndSurfaceRotation.depthCompareOp, op);
 }
 
 void GraphicsPipelineDesc::setDepthClampEnabled(bool enabled)
@@ -2269,7 +2282,17 @@ void GraphicsPipelineDesc::updateDepthFunc(GraphicsPipelineTransitionBits *trans
                                            const gl::DepthStencilState &depthStencilState)
 {
     setDepthFunc(PackGLCompareFunc(depthStencilState.depthFunc));
-    transition->set(ANGLE_GET_TRANSITION_BIT(mDepthStencilStateInfo, depthCompareOp));
+    transition->set(
+        ANGLE_GET_TRANSITION_BIT(mDepthStencilStateInfo, depthCompareOpAndSurfaceRotation));
+}
+
+void GraphicsPipelineDesc::updateSurfaceRotation(GraphicsPipelineTransitionBits *transition,
+                                                 const SurfaceRotation surfaceRotation)
+{
+    SetBitField(mDepthStencilStateInfo.depthCompareOpAndSurfaceRotation.surfaceRotation,
+                surfaceRotation);
+    transition->set(
+        ANGLE_GET_TRANSITION_BIT(mDepthStencilStateInfo, depthCompareOpAndSurfaceRotation));
 }
 
 void GraphicsPipelineDesc::updateDepthWriteEnabled(GraphicsPipelineTransitionBits *transition,
@@ -2715,7 +2738,7 @@ void PipelineHelper::addTransition(GraphicsPipelineTransitionBits bits,
 
 TextureDescriptorDesc::TextureDescriptorDesc() : mMaxIndex(0)
 {
-    mSerials.fill({kInvalidImageViewSubresourceSerial, kInvalidSamplerSerial});
+    mSerials.fill({kInvalidImageOrBufferViewSubresourceSerial, kInvalidSamplerSerial});
 }
 
 TextureDescriptorDesc::~TextureDescriptorDesc()                                  = default;
@@ -2724,7 +2747,7 @@ TextureDescriptorDesc &TextureDescriptorDesc::operator=(const TextureDescriptorD
     default;
 
 void TextureDescriptorDesc::update(size_t index,
-                                   ImageViewSubresourceSerial imageViewSerial,
+                                   ImageOrBufferViewSubresourceSerial viewSerial,
                                    SamplerSerial samplerSerial)
 {
     if (index >= mMaxIndex)
@@ -2732,8 +2755,8 @@ void TextureDescriptorDesc::update(size_t index,
         mMaxIndex = static_cast<uint32_t>(index + 1);
     }
 
-    mSerials[index].imageView = imageViewSerial;
-    mSerials[index].sampler   = samplerSerial;
+    mSerials[index].view    = viewSerial;
+    mSerials[index].sampler = samplerSerial;
 }
 
 size_t TextureDescriptorDesc::hash() const
@@ -2800,24 +2823,24 @@ FramebufferDesc::~FramebufferDesc()                            = default;
 FramebufferDesc::FramebufferDesc(const FramebufferDesc &other) = default;
 FramebufferDesc &FramebufferDesc::operator=(const FramebufferDesc &other) = default;
 
-void FramebufferDesc::update(uint32_t index, ImageViewSubresourceSerial serial)
+void FramebufferDesc::update(uint32_t index, ImageOrBufferViewSubresourceSerial serial)
 {
     static_assert(kMaxFramebufferAttachments + 1 < std::numeric_limits<uint8_t>::max(),
                   "mMaxIndex size is too small");
     ASSERT(index < kMaxFramebufferAttachments);
     mSerials[index] = serial;
-    if (serial.imageViewSerial.valid())
+    if (serial.viewSerial.valid())
     {
         mMaxIndex = std::max(mMaxIndex, static_cast<uint16_t>(index + 1));
     }
 }
 
-void FramebufferDesc::updateColor(uint32_t index, ImageViewSubresourceSerial serial)
+void FramebufferDesc::updateColor(uint32_t index, ImageOrBufferViewSubresourceSerial serial)
 {
     update(kFramebufferDescColorIndexOffset + index, serial);
 }
 
-void FramebufferDesc::updateColorResolve(uint32_t index, ImageViewSubresourceSerial serial)
+void FramebufferDesc::updateColorResolve(uint32_t index, ImageOrBufferViewSubresourceSerial serial)
 {
     update(kFramebufferDescColorResolveIndexOffset + index, serial);
 }
@@ -2827,12 +2850,12 @@ void FramebufferDesc::updateUnresolveMask(FramebufferNonResolveAttachmentMask un
     mUnresolveAttachmentMask = unresolveMask;
 }
 
-void FramebufferDesc::updateDepthStencil(ImageViewSubresourceSerial serial)
+void FramebufferDesc::updateDepthStencil(ImageOrBufferViewSubresourceSerial serial)
 {
     update(kFramebufferDescDepthStencilIndex, serial);
 }
 
-void FramebufferDesc::updateDepthStencilResolve(ImageViewSubresourceSerial serial)
+void FramebufferDesc::updateDepthStencilResolve(ImageOrBufferViewSubresourceSerial serial)
 {
     update(kFramebufferDescDepthStencilResolveIndexOffset, serial);
 }
@@ -2864,9 +2887,9 @@ bool FramebufferDesc::operator==(const FramebufferDesc &other) const
 uint32_t FramebufferDesc::attachmentCount() const
 {
     uint32_t count = 0;
-    for (const ImageViewSubresourceSerial &serial : mSerials)
+    for (const ImageOrBufferViewSubresourceSerial &serial : mSerials)
     {
-        if (serial.imageViewSerial.valid())
+        if (serial.viewSerial.valid())
         {
             count++;
         }
@@ -2925,16 +2948,6 @@ void SamplerDesc::update(const angle::FeaturesVk &featuresVk,
                          uint64_t externalFormat)
 {
     mMipLodBias = 0.0f;
-    for (size_t lodOffsetFeatureIdx = 0;
-         lodOffsetFeatureIdx < featuresVk.forceTextureLODOffset.size(); lodOffsetFeatureIdx++)
-    {
-        if (featuresVk.forceTextureLODOffset[lodOffsetFeatureIdx].enabled)
-        {
-            // Make sure only one forceTextureLODOffset feature is set.
-            ASSERT(mMipLodBias == 0.0f);
-            mMipLodBias = static_cast<float>(lodOffsetFeatureIdx + 1);
-        }
-    }
 
     mMaxAnisotropy = samplerState.getMaxAnisotropy();
     mMinLod        = samplerState.getMinLod();
@@ -2956,15 +2969,6 @@ void SamplerDesc::update(const angle::FeaturesVk &featuresVk,
 
     GLenum magFilter = samplerState.getMagFilter();
     GLenum minFilter = samplerState.getMinFilter();
-    if (featuresVk.forceNearestFiltering.enabled)
-    {
-        magFilter = gl::ConvertToNearestFilterMode(magFilter);
-        minFilter = gl::ConvertToNearestFilterMode(minFilter);
-    }
-    if (featuresVk.forceNearestMipFiltering.enabled)
-    {
-        minFilter = gl::ConvertToNearestMipFilterMode(minFilter);
-    }
 
     SetBitField(mMagFilter, gl_vk::GetFilter(magFilter));
     SetBitField(mMinFilter, gl_vk::GetFilter(minFilter));
@@ -3269,7 +3273,7 @@ angle::Result GraphicsPipelineCache::insertPipeline(
     const vk::ShaderModule *vertexModule,
     const vk::ShaderModule *fragmentModule,
     const vk::ShaderModule *geometryModule,
-    vk::SpecializationConstantBitSet specConsts,
+    const vk::SpecializationConstants specConsts,
     const vk::GraphicsPipelineDesc &desc,
     const vk::GraphicsPipelineDesc **descPtrOut,
     vk::PipelineHelper **pipelineOut)

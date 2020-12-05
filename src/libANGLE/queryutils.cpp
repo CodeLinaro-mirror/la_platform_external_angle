@@ -217,6 +217,18 @@ void QueryTexLevelParameterBase(const Texture *texture,
                 pname, texture->initState(ImageIndex::MakeFromTarget(target, level)) ==
                            InitState::Initialized);
             break;
+        case GL_TEXTURE_BUFFER_DATA_STORE_BINDING:
+            *params = CastFromStateValue<ParamType>(
+                pname, static_cast<GLint>(texture->getBuffer().id().value));
+            break;
+        case GL_TEXTURE_BUFFER_OFFSET:
+            *params = CastFromStateValue<ParamType>(
+                pname, static_cast<GLint>(texture->getBuffer().getOffset()));
+            break;
+        case GL_TEXTURE_BUFFER_SIZE:
+            *params = CastFromStateValue<ParamType>(
+                pname, static_cast<GLint>(GetBoundBufferAvailableSize(texture->getBuffer())));
+            break;
         default:
             UNREACHABLE();
             break;
@@ -352,6 +364,10 @@ void QueryTexParameterBase(const Context *context,
         case GL_RESOURCE_INITIALIZED_ANGLE:
             *params = CastFromGLintStateValue<ParamType>(
                 pname, texture->initState() == InitState::Initialized);
+            break;
+        case GL_REQUIRED_TEXTURE_IMAGE_UNITS_OES:
+            *params = CastFromGLintStateValue<ParamType>(
+                pname, texture->getRequiredTextureImageUnits(context));
             break;
         default:
             UNREACHABLE();
@@ -3636,6 +3652,20 @@ bool GetQueryParameterInfo(const State &glState,
         switch (pname)
         {
             case GL_TEXTURE_BINDING_CUBE_MAP_ARRAY:
+                *type      = GL_INT;
+                *numParams = 1;
+                return true;
+        }
+    }
+
+    if (extensions.textureBufferAny())
+    {
+        switch (pname)
+        {
+            case GL_TEXTURE_BUFFER_BINDING:
+            case GL_TEXTURE_BINDING_BUFFER:
+            case GL_TEXTURE_BUFFER_OFFSET_ALIGNMENT:
+            case GL_MAX_TEXTURE_BUFFER_SIZE:
                 *type      = GL_INT;
                 *numParams = 1;
                 return true;

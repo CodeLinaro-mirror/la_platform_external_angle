@@ -355,14 +355,14 @@ template_parameter_capture_value = """paramBuffer.addValueParam("{name}", ParamT
 template_parameter_capture_gl_enum = """paramBuffer.addEnumParam("{name}", GLenumGroup::{group}, ParamType::T{type}, {name});"""
 
 template_parameter_capture_pointer = """
-    if (isCallValid) 
+    if (isCallValid)
     {{
         ParamCapture {name}Param("{name}", ParamType::T{type});
         InitParamValue(ParamType::T{type}, {name}, &{name}Param.value);
         {capture_name}({params}, &{name}Param);
         paramBuffer.addParam(std::move({name}Param));
     }}
-    else 
+    else
     {{
         ParamCapture {name}Param("{name}", ParamType::T{type});
         InitParamValue(ParamType::T{type}, static_cast<{cast_type}>(nullptr), &{name}Param.value);
@@ -425,6 +425,7 @@ reinterpret_cast_to_dict = {
     "GLsync": "uintptr_t",
     "GLDEBUGPROC": "uintptr_t",
     "GLDEBUGPROCKHR": "uintptr_t",
+    "GLeglClientBufferEXT": "uintptr_t",
     "GLeglImageOES": "uintptr_t",
 }
 
@@ -436,6 +437,7 @@ format_dict = {
     "GLDEBUGPROC": "0x%016\" PRIxPTR \"",
     "GLDEBUGPROCKHR": "0x%016\" PRIxPTR \"",
     "GLdouble": "%f",
+    "GLeglClientBufferEXT": "0x%016\" PRIxPTR \"",
     "GLeglImageOES": "0x%016\" PRIxPTR \"",
     "GLenum": "%s",
     "GLfixed": "0x%X",
@@ -782,13 +784,13 @@ def param_print_argument(command_node, param):
 
 def param_format_string(param):
     if "*" in param:
-        return param + " = 0x%016\" PRIxPTR \""
+        return just_the_name(param) + " = 0x%016\" PRIxPTR \""
     else:
         type_only = just_the_type(param)
         if type_only not in format_dict:
             raise Exception(type_only + " is not a known type in 'format_dict'")
 
-        return param + " = " + format_dict[type_only]
+        return just_the_name(param) + " = " + format_dict[type_only]
 
 
 def default_return_value(cmd_name, return_type):
@@ -2172,6 +2174,9 @@ def main():
     gl_cmd_names = [cmd[2:] for cmd in glxml.all_cmd_names.get_all_commands()]
     cmd_names.extend([cmd for cmd in gl_cmd_names if cmd not in cmd_names])
     sorted_cmd_names = sorted(cmd_names)
+
+    # Ensure there are no duplicates
+    assert (len(sorted_cmd_names) == len(set(sorted_cmd_names))), "Duplicate command names found"
 
     entry_points_enum_header = template_entry_points_enum_header.format(
         script_name=os.path.basename(sys.argv[0]),
