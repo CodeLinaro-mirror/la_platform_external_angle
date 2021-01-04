@@ -219,11 +219,40 @@ inline PlatformParameters WithAllocateNonZeroMemory(const PlatformParameters &pa
     return allocateNonZero;
 }
 
+inline PlatformParameters WithEmulateCopyTexImage2DFromRenderbuffers(
+    const PlatformParameters &params)
+{
+    PlatformParameters p                                   = params;
+    p.eglParameters.emulateCopyTexImage2DFromRenderbuffers = EGL_TRUE;
+    return p;
+}
+
+inline PlatformParameters WithNoShaderStencilOutput(const PlatformParameters &params)
+{
+    PlatformParameters re                       = params;
+    re.eglParameters.shaderStencilOutputFeature = EGL_FALSE;
+    return re;
+}
+
+inline PlatformParameters WithNoGenMultipleMipsPerPass(const PlatformParameters &params)
+{
+    PlatformParameters re                          = params;
+    re.eglParameters.genMultipleMipsPerPassFeature = EGL_FALSE;
+    return re;
+}
+
 inline PlatformParameters WithRobustness(const PlatformParameters &params)
 {
     PlatformParameters withRobustness       = params;
     withRobustness.eglParameters.robustness = EGL_TRUE;
     return withRobustness;
+}
+
+inline PlatformParameters WithEmulatedPrerotation(const PlatformParameters &params, EGLint rotation)
+{
+    PlatformParameters prerotation                = params;
+    prerotation.eglParameters.emulatedPrerotation = rotation;
+    return prerotation;
 }
 }  // namespace angle
 
