@@ -50,6 +50,9 @@ class FramebufferVk;
 namespace vk
 {
 struct Format;
+
+static constexpr size_t kMaxExtensionNames = 200;
+using ExtensionNameList                    = angle::FixedVector<const char *, kMaxExtensionNames>;
 }  // namespace vk
 
 // Supports one semaphore from current surface, and one semaphore passed to
@@ -80,7 +83,7 @@ class RendererVk : angle::NonCopyable
                              const char *wsiLayer);
     // Reload volk vk* function ptrs if needed for an already initialized RendererVk
     void reloadVolkIfNeeded() const;
-    void onDestroy();
+    void onDestroy(vk::Context *context);
 
     void notifyDeviceLost();
     bool isDeviceLost() const;
@@ -168,17 +171,6 @@ class RendererVk : angle::NonCopyable
         return mPriorities[priority];
     }
 
-    // Queue submit that originates from the main thread
-    angle::Result queueSubmit(vk::Context *context,
-                              egl::ContextPriority priority,
-                              const VkSubmitInfo &submitInfo,
-                              vk::ResourceUseList *resourceList,
-                              const vk::Fence *fence,
-                              Serial *serialOut);
-    angle::Result queueWaitIdle(vk::Context *context, egl::ContextPriority priority);
-    angle::Result deviceWaitIdle(vk::Context *context);
-    VkResult queuePresent(egl::ContextPriority priority, const VkPresentInfoKHR &presentInfo);
-
     // This command buffer should be submitted immediately via queueSubmitOneOff.
     angle::Result getCommandBufferOneOff(vk::Context *context,
                                          vk::PrimaryCommandBuffer *commandBufferOut);
@@ -190,15 +182,6 @@ class RendererVk : angle::NonCopyable
                                     egl::ContextPriority priority,
                                     const vk::Fence *fence,
                                     Serial *serialOut);
-
-    angle::Result newSharedFence(vk::Context *context, vk::Shared<vk::Fence> *sharedFenceOut);
-    inline void resetSharedFence(vk::Shared<vk::Fence> *sharedFenceIn)
-    {
-        std::lock_guard<std::mutex> lock(mFenceRecyclerMutex);
-        sharedFenceIn->resetAndRecycle(&mFenceRecycler);
-    }
-
-    angle::Result getNextSubmitFence(vk::Shared<vk::Fence> *sharedFenceOut, bool reset);
 
     template <typename... ArgsT>
     void collectGarbageAndReinit(vk::SharedResourceUse *use, ArgsT... garbageIn)
@@ -227,15 +210,6 @@ class RendererVk : angle::NonCopyable
         }
     }
 
-    vk::Shared<vk::Fence> getLastSubmittedFence() const
-    {
-        return mCommandProcessor.getLastSubmittedFence();
-    }
-    void handleDeviceLost() { mCommandProcessor.handleDeviceLost(); }
-
-    static constexpr size_t kMaxExtensionNames = 200;
-    using ExtensionNameList = angle::FixedVector<const char *, kMaxExtensionNames>;
-
     angle::Result getPipelineCache(vk::PipelineCache **pipelineCache);
     void onNewGraphicsPipeline()
     {
@@ -250,29 +224,47 @@ class RendererVk : angle::NonCopyable
 
     ANGLE_INLINE Serial getCurrentQueueSerial()
     {
-        if (getFeatures().enableCommandProcessingThread.enabled)
+        if (mFeatures.asyncCommandQueue.enabled)
         {
             return mCommandProcessor.getCurrentQueueSerial();
         }
-        std::lock_guard<std::mutex> lock(mQueueSerialMutex);
-        return mCurrentQueueSerial;
-    }
-    ANGLE_INLINE Serial getLastSubmittedQueueSerial()
-    {
-        if (getFeatures().enableCommandProcessingThread.enabled)
+        else
         {
-            return mCommandProcessor.getLastSubmittedSerial();
+            std::lock_guard<std::mutex> lock(mCommandQueueMutex);
+            return mCommandQueue.getCurrentQueueSerial();
         }
-        std::lock_guard<std::mutex> lock(mQueueSerialMutex);
-        return mLastSubmittedQueueSerial;
-    }
-    ANGLE_INLINE Serial getLastCompletedQueueSerial()
-    {
-        std::lock_guard<std::mutex> lock(mQueueSerialMutex);
-        return mLastCompletedQueueSerial;
     }
 
-    void onCompletedSerial(Serial serial);
+    ANGLE_INLINE Serial getLastSubmittedQueueSerial()
+    {
+        if (mFeatures.asyncCommandQueue.enabled)
+        {
+            return mCommandProcessor.getLastSubmittedQueueSerial();
+        }
+        else
+        {
+            std::lock_guard<std::mutex> lock(mCommandQueueMutex);
+            return mCommandQueue.getLastSubmittedQueueSerial();
+        }
+    }
+
+    ANGLE_INLINE Serial getLastCompletedQueueSerial()
+    {
+        if (mFeatures.asyncCommandQueue.enabled)
+        {
+            return mCommandProcessor.getLastCompletedQueueSerial();
+        }
+        else
+        {
+            std::lock_guard<std::mutex> lock(mCommandQueueMutex);
+            return mCommandQueue.getLastCompletedQueueSerial();
+        }
+    }
+
+    VkResult getLastPresentResult(VkSwapchainKHR swapchain)
+    {
+        return mCommandProcessor.getLastPresentResult(swapchain);
+    }
 
     bool enableDebugUtils() const { return mEnableDebugUtils; }
 
@@ -280,25 +272,19 @@ class RendererVk : angle::NonCopyable
     SamplerYcbcrConversionCache &getYuvConversionCache() { return mYuvConversionCache; }
     vk::ActiveHandleCounter &getActiveHandleCounts() { return mActiveHandleCounts; }
 
-    // Queue commands to worker thread for processing
-    void queueCommand(vk::Context *context, vk::CommandProcessorTask *command)
+    // TODO(jmadill): Remove. b/172704839
+    angle::Result waitForCommandProcessorIdle(vk::Context *context)
     {
-        mCommandProcessor.queueCommand(context, command);
-    }
-    bool hasPendingError() const { return mCommandProcessor.hasPendingError(); }
-    vk::Error getAndClearPendingError() { return mCommandProcessor.getAndClearPendingError(); }
-    void waitForCommandProcessorIdle(vk::Context *context)
-    {
-        mCommandProcessor.waitForWorkComplete(context);
+        ASSERT(getFeatures().asyncCommandQueue.enabled);
+        return mCommandProcessor.waitForWorkComplete(context);
     }
 
-    void finishToSerial(vk::Context *context, Serial serial)
+    // TODO(jmadill): Remove. b/172704839
+    angle::Result finishAllWork(vk::Context *context)
     {
-        mCommandProcessor.finishToSerial(context, serial);
+        ASSERT(getFeatures().asyncCommandQueue.enabled);
+        return mCommandProcessor.finishAllWork(context);
     }
-
-    void finishAllWork(vk::Context *context) { mCommandProcessor.finishAllWork(context); }
-    VkQueue getVkQueue(egl::ContextPriority priority) const { return mQueues[priority]; }
 
     bool getEnableValidationLayers() const { return mEnableValidationLayers; }
 
@@ -308,13 +294,46 @@ class RendererVk : angle::NonCopyable
 
     void outputVmaStatString();
 
+    angle::Result cleanupGarbage(Serial lastCompletedQueueSerial);
+
+    angle::Result submitFrame(vk::Context *context,
+                              egl::ContextPriority contextPriority,
+                              std::vector<VkSemaphore> &&waitSemaphores,
+                              std::vector<VkPipelineStageFlags> &&waitSemaphoreStageMasks,
+                              const vk::Semaphore *signalSemaphore,
+                              vk::ResourceUseList &&resourceUseList,
+                              vk::GarbageList &&currentGarbage,
+                              vk::CommandPool *commandPool);
+
+    void handleDeviceLost();
+    angle::Result finishToSerial(vk::Context *context, Serial serial);
+    angle::Result waitForSerialWithUserTimeout(vk::Context *context,
+                                               Serial serial,
+                                               uint64_t timeout,
+                                               VkResult *result);
+    angle::Result finish(vk::Context *context);
+    angle::Result checkCompletedCommands(vk::Context *context);
+
+    angle::Result flushRenderPassCommands(vk::Context *context,
+                                          const vk::RenderPass &renderPass,
+                                          vk::CommandBufferHelper **renderPassCommands);
+    angle::Result flushOutsideRPCommands(vk::Context *context,
+                                         vk::CommandBufferHelper **outsideRPCommands);
+
+    VkResult queuePresent(vk::Context *context,
+                          egl::ContextPriority priority,
+                          const VkPresentInfoKHR &presentInfo);
+
+    vk::CommandBufferHelper *getCommandBufferHelper(bool hasRenderPass);
+    void recycleCommandBufferHelper(vk::CommandBufferHelper *commandBuffer);
+
   private:
     angle::Result initializeDevice(DisplayVk *displayVk, uint32_t queueFamilyIndex);
     void ensureCapsInitialized() const;
 
-    void queryDeviceExtensionFeatures(const ExtensionNameList &deviceExtensionNames);
+    void queryDeviceExtensionFeatures(const vk::ExtensionNameList &deviceExtensionNames);
 
-    void initFeatures(DisplayVk *display, const ExtensionNameList &extensions);
+    void initFeatures(DisplayVk *display, const vk::ExtensionNameList &extensions);
     void initPipelineCacheVkKey();
     angle::Result initPipelineCache(DisplayVk *display,
                                     vk::PipelineCache *pipelineCache,
@@ -326,8 +345,6 @@ class RendererVk : angle::NonCopyable
 
     template <VkFormatFeatureFlags VkFormatProperties::*features>
     bool hasFormatFeatureBits(VkFormat format, const VkFormatFeatureFlags featureBits) const;
-
-    angle::Result cleanupGarbage(bool block);
 
     egl::Display *mDisplay;
 
@@ -361,8 +378,6 @@ class RendererVk : angle::NonCopyable
     VkExternalSemaphoreProperties mExternalSemaphoreProperties;
     VkPhysicalDeviceSamplerYcbcrConversionFeatures mSamplerYcbcrConversionFeatures;
     std::vector<VkQueueFamilyProperties> mQueueFamilyProperties;
-    std::mutex mQueueMutex;
-    angle::PackedEnumMap<egl::ContextPriority, VkQueue> mQueues;
     angle::PackedEnumMap<egl::ContextPriority, egl::ContextPriority> mPriorities;
     uint32_t mCurrentQueueFamilyIndex;
     uint32_t mMaxVertexAttribDivisor;
@@ -370,18 +385,9 @@ class RendererVk : angle::NonCopyable
     VkDeviceSize mMinImportedHostPointerAlignment;
     uint32_t mDefaultUniformBufferSize;
     VkDevice mDevice;
-    AtomicSerialFactory mQueueSerialFactory;
     AtomicSerialFactory mShaderSerialFactory;
 
-    std::mutex mQueueSerialMutex;
-    Serial mLastCompletedQueueSerial;
-    Serial mLastSubmittedQueueSerial;
-    Serial mCurrentQueueSerial;
-
     bool mDeviceLost;
-
-    std::mutex mFenceRecyclerMutex;
-    vk::Recycler<vk::Fence> mFenceRecycler;
 
     std::mutex mGarbageMutex;
     vk::SharedGarbageList mSharedGarbage;
@@ -422,13 +428,15 @@ class RendererVk : angle::NonCopyable
     };
     std::deque<PendingOneOffCommands> mPendingOneOffCommands;
 
-    // Command Processor Thread
+    std::mutex mCommandQueueMutex;
+    vk::CommandQueue mCommandQueue;
+
+    // Command buffer pool management.
+    std::mutex mCommandBufferHelperFreeListMutex;
+    std::vector<vk::CommandBufferHelper *> mCommandBufferHelperFreeList;
+
+    // Async Command Queue
     vk::CommandProcessor mCommandProcessor;
-    std::thread mCommandProcessorThread;
-    // mNextSubmitFence is the fence that's going to be signaled at the next submission.  This is
-    // used to support SyncVk objects, which may outlive the context (as EGLSync objects).
-    vk::Shared<vk::Fence> mNextSubmitFence;
-    std::mutex mNextSubmitFenceMutex;
 
     // track whether we initialized (or released) glslang
     bool mGlslangInitialized;

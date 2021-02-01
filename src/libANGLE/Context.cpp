@@ -259,9 +259,21 @@ enum SubjectIndexes : angle::SubjectIndex
     kDrawFramebufferSubjectIndex
 };
 
-bool IsClearBufferEnabled(const FramebufferState &mState, GLenum buffer, GLint drawbuffer)
+bool IsClearBufferEnabled(const FramebufferState &fbState, GLenum buffer, GLint drawbuffer)
 {
-    return buffer != GL_COLOR || mState.getEnabledDrawBuffers()[drawbuffer];
+    return buffer != GL_COLOR || fbState.getEnabledDrawBuffers()[drawbuffer];
+}
+
+bool IsEmptyScissor(const State &glState)
+{
+    if (!glState.isScissorTestEnabled())
+    {
+        return false;
+    }
+
+    const Extents &dimensions = glState.getDrawFramebuffer()->getExtents();
+    Rectangle framebufferArea(0, 0, dimensions.width, dimensions.height);
+    return !ClipRectangle(framebufferArea, glState.getScissor(), nullptr);
 }
 
 bool IsColorMaskedOut(const BlendStateExt &blendStateExt, const GLint drawbuffer)
@@ -418,6 +430,12 @@ void Context::initialize()
         Texture *zeroTextureCubeMapArray =
             new Texture(mImplementation.get(), {0}, TextureType::CubeMapArray);
         mZeroTextures[TextureType::CubeMapArray].set(this, zeroTextureCubeMapArray);
+    }
+
+    if (getClientVersion() >= Version(3, 2) || mSupportedExtensions.textureBufferAny())
+    {
+        Texture *zeroTextureBuffer = new Texture(mImplementation.get(), {0}, TextureType::Buffer);
+        mZeroTextures[TextureType::Buffer].set(this, zeroTextureBuffer);
     }
 
     if (mSupportedExtensions.textureRectangle)
@@ -1856,10 +1874,20 @@ void Context::getIntegervImpl(GLenum pname, GLint *params) const
         case GL_MAX_DUAL_SOURCE_DRAW_BUFFERS_EXT:
             *params = mState.mExtensions.maxDualSourceDrawBuffers;
             break;
+
         // OES_shader_multisample_interpolation
         case GL_FRAGMENT_INTERPOLATION_OFFSET_BITS_OES:
             *params = mState.mCaps.subPixelInterpolationOffsetBits;
             break;
+
+        // GL_OES_texture_buffer
+        case GL_MAX_TEXTURE_BUFFER_SIZE:
+            *params = mState.mCaps.maxTextureBufferSize;
+            break;
+        case GL_TEXTURE_BUFFER_OFFSET_ALIGNMENT:
+            *params = mState.mCaps.textureBufferOffsetAlignment;
+            break;
+
         default:
             ANGLE_CONTEXT_TRY(mState.getIntegerv(this, pname, params));
             break;
@@ -2071,7 +2099,11 @@ void Context::getRenderbufferParameterivRobust(GLenum target,
 
 void Context::texBuffer(TextureType target, GLenum internalformat, BufferID buffer)
 {
-    UNIMPLEMENTED();
+    ASSERT(target == TextureType::Buffer);
+
+    Texture *texture  = getTextureByType(target);
+    Buffer *bufferObj = mState.mBufferManager->getBuffer(buffer);
+    ANGLE_CONTEXT_TRY(texture->setBuffer(this, bufferObj, internalformat));
 }
 
 void Context::texBufferRange(TextureType target,
@@ -2080,7 +2112,11 @@ void Context::texBufferRange(TextureType target,
                              GLintptr offset,
                              GLsizeiptr size)
 {
-    UNIMPLEMENTED();
+    ASSERT(target == TextureType::Buffer);
+
+    Texture *texture  = getTextureByType(target);
+    Buffer *bufferObj = mState.mBufferManager->getBuffer(buffer);
+    ANGLE_CONTEXT_TRY(texture->setBufferRange(this, bufferObj, internalformat, offset, size));
 }
 
 void Context::getTexParameterfv(TextureType target, GLenum pname, GLfloat *params)
@@ -3185,6 +3221,9 @@ Extensions Context::generateSupportedExtensions() const
         // between GLES 2.0 and 3.0, vertex type 10_10_10_2 is disabled
         // when the context version is lower than 3.0
         supportedExtensions.vertexAttribType1010102OES = false;
+
+        // GL_EXT_YUV_target requires ESSL3
+        supportedExtensions.yuvTargetEXT = false;
     }
 
     if (getClientVersion() < ES_3_1)
@@ -3473,9 +3512,6 @@ void Context::initCaps()
 
     ANGLE_LIMIT_CAP(mState.mCaps.maxSampleMaskWords, MAX_SAMPLE_MASK_WORDS);
 
-#undef ANGLE_LIMIT_CAP
-#undef ANGLE_LOG_CAP_LIMIT
-
     // WebGL compatibility
     mState.mExtensions.webglCompatibility = mWebGLContext;
     for (const auto &extensionInfo : GetExtensionInfoMap())
@@ -3496,6 +3532,12 @@ void Context::initCaps()
                << std::endl;
         mDisplay->overrideFrontendFeatures({"disable_program_binary"}, true);
 
+        // Set to the most common limit per gpuinfo.org. Required for several platforms we test.
+        constexpr GLint maxImageUnits = 8;
+        INFO() << "Limiting image unit count to " << maxImageUnits << " while FrameCapture enabled"
+               << std::endl;
+        ANGLE_LIMIT_CAP(mState.mCaps.maxImageUnits, maxImageUnits);
+
         INFO() << "Disabling GL_EXT_map_buffer_range and GL_OES_mapbuffer during capture, which "
                   "are not supported on some native drivers"
                << std::endl;
@@ -3510,6 +3552,9 @@ void Context::initCaps()
         mState.mCaps.shaderBinaryFormats.clear();
         mState.mCaps.programBinaryFormats.clear();
     }
+
+#undef ANGLE_LIMIT_CAP
+#undef ANGLE_LOG_CAP_LIMIT
 
     // Generate texture caps
     updateCaps();
@@ -3637,6 +3682,11 @@ void Context::updateCaps()
         mValidBufferBindings.set(BufferBinding::ShaderStorage);
         mValidBufferBindings.set(BufferBinding::DrawIndirect);
         mValidBufferBindings.set(BufferBinding::DispatchIndirect);
+    }
+
+    if (getClientVersion() >= ES_3_2 || mState.mExtensions.textureBufferAny())
+    {
+        mValidBufferBindings.set(BufferBinding::Texture);
     }
 
     mThreadPool = angle::WorkerThreadPool::Create(mState.mExtensions.parallelShaderCompile);
@@ -3799,6 +3849,12 @@ void Context::clear(GLbitfield mask)
         return;
     }
 
+    // Noop empty scissors.
+    if (IsEmptyScissor(mState))
+    {
+        return;
+    }
+
     // Remove clear bits that are ineffective. An effective clear changes at least one fragment. If
     // color/depth/stencil masks make the clear ineffective we skip it altogether.
 
@@ -3809,13 +3865,15 @@ void Context::clear(GLbitfield mask)
     }
 
     // If depth write is disabled, don't attempt to clear depth.
-    if (!mState.getDepthStencilState().depthMask)
+    if (mState.getDrawFramebuffer()->getDepthAttachment() == nullptr ||
+        !mState.getDepthStencilState().depthMask)
     {
         mask &= ~GL_DEPTH_BUFFER_BIT;
     }
 
     // If all stencil bits are masked, don't attempt to clear stencil.
-    if (mState.getDepthStencilState().stencilWritemask == 0)
+    if (mState.getDrawFramebuffer()->getStencilAttachment() == nullptr ||
+        mState.getDepthStencilState().stencilWritemask == 0)
     {
         mask &= ~GL_STENCIL_BUFFER_BIT;
     }
@@ -3855,7 +3913,8 @@ bool Context::noopClearBuffer(GLenum buffer, GLint drawbuffer) const
     Framebuffer *framebufferObject = mState.getDrawFramebuffer();
 
     return !IsClearBufferEnabled(framebufferObject->getState(), buffer, drawbuffer) ||
-           mState.isRasterizerDiscardEnabled() || isClearBufferMaskedOut(buffer, drawbuffer);
+           mState.isRasterizerDiscardEnabled() || isClearBufferMaskedOut(buffer, drawbuffer) ||
+           IsEmptyScissor(mState);
 }
 
 void Context::clearBufferfv(GLenum buffer, GLint drawbuffer, const GLfloat *values)
@@ -3871,8 +3930,8 @@ void Context::clearBufferfv(GLenum buffer, GLint drawbuffer, const GLfloat *valu
     {
         attachment = framebufferObject->getDepthAttachment();
     }
-    if (buffer == GL_COLOR &&
-        static_cast<size_t>(drawbuffer) < framebufferObject->getNumColorAttachments())
+    else if (buffer == GL_COLOR &&
+             static_cast<size_t>(drawbuffer) < framebufferObject->getNumColorAttachments())
     {
         attachment = framebufferObject->getColorAttachment(drawbuffer);
     }
@@ -3923,8 +3982,8 @@ void Context::clearBufferiv(GLenum buffer, GLint drawbuffer, const GLint *values
     {
         attachment = framebufferObject->getStencilAttachment();
     }
-    if (buffer == GL_COLOR &&
-        static_cast<size_t>(drawbuffer) < framebufferObject->getNumColorAttachments())
+    else if (buffer == GL_COLOR &&
+             static_cast<size_t>(drawbuffer) < framebufferObject->getNumColorAttachments())
     {
         attachment = framebufferObject->getColorAttachment(drawbuffer);
     }
@@ -4101,7 +4160,75 @@ void Context::copyImageSubData(GLuint srcName,
                                GLsizei srcHeight,
                                GLsizei srcDepth)
 {
-    UNIMPLEMENTED();
+    // if copy region is zero, the copy is a successful no-op
+    if ((srcWidth == 0) || (srcHeight == 0) || (srcDepth == 0))
+    {
+        return;
+    }
+
+    if (srcTarget == GL_RENDERBUFFER)
+    {
+        // Source target is a Renderbuffer
+        Renderbuffer *readBuffer = getRenderbuffer(FromGL<RenderbufferID>(srcName));
+        if (dstTarget == GL_RENDERBUFFER)
+        {
+            // Destination target is a Renderbuffer
+            Renderbuffer *writeBuffer = getRenderbuffer(FromGL<RenderbufferID>(dstName));
+
+            // Copy Renderbuffer to Renderbuffer
+            ANGLE_CONTEXT_TRY(writeBuffer->copyRenderbufferSubData(
+                this, readBuffer, srcLevel, srcX, srcY, srcZ, dstLevel, dstX, dstY, dstZ, srcWidth,
+                srcHeight, srcDepth));
+        }
+        else
+        {
+            // Destination target is a Texture
+            ASSERT(dstTarget == GL_TEXTURE_2D || dstTarget == GL_TEXTURE_2D_ARRAY ||
+                   dstTarget == GL_TEXTURE_3D || dstTarget == GL_TEXTURE_CUBE_MAP);
+
+            Texture *writeTexture = getTexture(FromGL<TextureID>(dstName));
+            ANGLE_CONTEXT_TRY(syncTextureForCopy(writeTexture));
+
+            // Copy Renderbuffer to Texture
+            ANGLE_CONTEXT_TRY(writeTexture->copyRenderbufferSubData(
+                this, readBuffer, srcLevel, srcX, srcY, srcZ, dstLevel, dstX, dstY, dstZ, srcWidth,
+                srcHeight, srcDepth));
+        }
+    }
+    else
+    {
+        // Source target is a Texture
+        ASSERT(srcTarget == GL_TEXTURE_2D || srcTarget == GL_TEXTURE_2D_ARRAY ||
+               srcTarget == GL_TEXTURE_3D || srcTarget == GL_TEXTURE_CUBE_MAP);
+
+        Texture *readTexture = getTexture(FromGL<TextureID>(srcName));
+        ANGLE_CONTEXT_TRY(syncTextureForCopy(readTexture));
+
+        if (dstTarget == GL_RENDERBUFFER)
+        {
+            // Destination target is a Renderbuffer
+            Renderbuffer *writeBuffer = getRenderbuffer(FromGL<RenderbufferID>(dstName));
+
+            // Copy Texture to Renderbuffer
+            ANGLE_CONTEXT_TRY(writeBuffer->copyTextureSubData(this, readTexture, srcLevel, srcX,
+                                                              srcY, srcZ, dstLevel, dstX, dstY,
+                                                              dstZ, srcWidth, srcHeight, srcDepth));
+        }
+        else
+        {
+            // Destination target is a Texture
+            ASSERT(dstTarget == GL_TEXTURE_2D || dstTarget == GL_TEXTURE_2D_ARRAY ||
+                   dstTarget == GL_TEXTURE_3D || dstTarget == GL_TEXTURE_CUBE_MAP);
+
+            Texture *writeTexture = getTexture(FromGL<TextureID>(dstName));
+            ANGLE_CONTEXT_TRY(syncTextureForCopy(writeTexture));
+
+            // Copy Texture to Texture
+            ANGLE_CONTEXT_TRY(writeTexture->copyTextureSubData(
+                this, readTexture, srcLevel, srcX, srcY, srcZ, dstLevel, dstX, dstY, dstZ, srcWidth,
+                srcHeight, srcDepth));
+        }
+    }
 }
 
 void Context::framebufferTexture2D(GLenum target,
@@ -4841,6 +4968,18 @@ angle::Result Context::syncStateForClear()
     return syncState(mClearDirtyBits, mClearDirtyObjects, Command::Clear);
 }
 
+angle::Result Context::syncTextureForCopy(Texture *texture)
+{
+    ASSERT(texture);
+    // Sync texture not active but scheduled for a copy
+    if (texture->hasAnyDirtyBit())
+    {
+        return texture->syncState(this, Command::Other);
+    }
+
+    return angle::Result::Continue;
+}
+
 void Context::activeShaderProgram(ProgramPipelineID pipeline, ShaderProgramID program)
 {
     Program *shaderProgram = getProgramNoResolveLink(program);
@@ -5476,6 +5615,27 @@ void Context::bufferStorage(BufferBinding target,
     Buffer *buffer = mState.getTargetBuffer(target);
     ASSERT(buffer);
     ANGLE_CONTEXT_TRY(buffer->bufferStorage(this, target, size, data, flags));
+}
+
+void Context::bufferStorageExternal(BufferBinding target,
+                                    GLintptr offset,
+                                    GLsizeiptr size,
+                                    GLeglClientBufferEXT clientBuffer,
+                                    GLbitfield flags)
+{
+    Buffer *buffer = mState.getTargetBuffer(target);
+    ASSERT(buffer);
+
+    ANGLE_CONTEXT_TRY(buffer->bufferStorageExternal(this, target, size, clientBuffer, flags));
+}
+
+void Context::namedBufferStorageExternal(GLuint buffer,
+                                         GLintptr offset,
+                                         GLsizeiptr size,
+                                         GLeglClientBufferEXT clientBuffer,
+                                         GLbitfield flags)
+{
+    UNIMPLEMENTED();
 }
 
 void Context::bufferData(BufferBinding target, GLsizeiptr size, const void *data, BufferUsage usage)
@@ -8910,6 +9070,7 @@ void StateCache::updateValidBindTextureTypes(Context *context)
         {TextureType::CubeMap, true},
         {TextureType::CubeMapArray, exts.textureCubeMapArrayAny()},
         {TextureType::VideoImage, exts.webglVideoTexture},
+        {TextureType::Buffer, exts.textureBufferAny()},
     }};
 }
 
@@ -9004,10 +9165,6 @@ void StateCache::updateActiveImageUnitIndices(Context *context)
     {
         for (const ImageBinding &imageBinding : executable->getImageBindings())
         {
-            if (imageBinding.unreferenced)
-            {
-                continue;
-            }
             for (GLuint binding : imageBinding.boundImageUnits)
             {
                 mCachedActiveImageUnitIndices.set(binding);

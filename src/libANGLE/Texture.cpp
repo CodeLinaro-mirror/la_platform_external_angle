@@ -24,6 +24,10 @@ namespace gl
 
 namespace
 {
+constexpr angle::SubjectIndex kBufferSubjectIndex = 2;
+static_assert(kBufferSubjectIndex != rx::kTextureImageImplObserverMessageIndex, "Index collision");
+static_assert(kBufferSubjectIndex != rx::kTextureImageSiblingMessageIndex, "Index collision");
+
 bool IsPointSampled(const SamplerState &samplerState)
 {
     return (samplerState.getMagFilter() == GL_NEAREST &&
@@ -93,6 +97,15 @@ GLenum ConvertToNearestMipFilterMode(GLenum filterMode)
         default:
             return filterMode;
     }
+}
+
+bool IsMipmapSupported(const TextureType &type)
+{
+    if (type == TextureType::_2DMultisample || type == TextureType::Buffer)
+    {
+        return false;
+    }
+    return true;
 }
 
 SwizzleState::SwizzleState()
@@ -300,6 +313,12 @@ SamplerFormat TextureState::computeRequiredSamplerFormat(const SamplerState &sam
 bool TextureState::computeSamplerCompleteness(const SamplerState &samplerState,
                                               const State &state) const
 {
+    // Buffer textures cannot be incomplete.
+    if (mType == TextureType::Buffer)
+    {
+        return true;
+    }
+
     if (mBaseLevel > mMaxLevel)
     {
         return false;
@@ -343,7 +362,7 @@ bool TextureState::computeSamplerCompleteness(const SamplerState &samplerState,
         }
     }
 
-    if (mType != TextureType::_2DMultisample && IsMipmapFiltered(samplerState.getMinFilter()))
+    if (IsMipmapSupported(mType) && IsMipmapFiltered(samplerState.getMinFilter()))
     {
         if (!npotSupport)
         {
@@ -698,6 +717,7 @@ Texture::Texture(rx::GLImplFactory *factory, TextureID id, TextureType type)
       mState(type),
       mTexture(factory->createTexture(mState)),
       mImplObserver(this, rx::kTextureImageImplObserverMessageIndex),
+      mBufferObserver(this, kBufferSubjectIndex),
       mLabel(),
       mBoundSurface(nullptr),
       mBoundStream(nullptr)
@@ -722,6 +742,8 @@ void Texture::onDestroy(const Context *context)
     }
 
     (void)(orphanImages(context));
+
+    mState.mBuffer.set(context, nullptr, 0, 0);
 
     if (mTexture)
     {
@@ -1326,6 +1348,52 @@ angle::Result Texture::copySubImage(Context *context,
     return angle::Result::Continue;
 }
 
+angle::Result Texture::copyRenderbufferSubData(Context *context,
+                                               const gl::Renderbuffer *srcBuffer,
+                                               GLint srcLevel,
+                                               GLint srcX,
+                                               GLint srcY,
+                                               GLint srcZ,
+                                               GLint dstLevel,
+                                               GLint dstX,
+                                               GLint dstY,
+                                               GLint dstZ,
+                                               GLsizei srcWidth,
+                                               GLsizei srcHeight,
+                                               GLsizei srcDepth)
+{
+    ANGLE_TRY(mTexture->copyRenderbufferSubData(context, srcBuffer, srcLevel, srcX, srcY, srcZ,
+                                                dstLevel, dstX, dstY, dstZ, srcWidth, srcHeight,
+                                                srcDepth));
+
+    signalDirtyStorage(InitState::Initialized);
+
+    return angle::Result::Continue;
+}
+
+angle::Result Texture::copyTextureSubData(Context *context,
+                                          const gl::Texture *srcTexture,
+                                          GLint srcLevel,
+                                          GLint srcX,
+                                          GLint srcY,
+                                          GLint srcZ,
+                                          GLint dstLevel,
+                                          GLint dstX,
+                                          GLint dstY,
+                                          GLint dstZ,
+                                          GLsizei srcWidth,
+                                          GLsizei srcHeight,
+                                          GLsizei srcDepth)
+{
+    ANGLE_TRY(mTexture->copyTextureSubData(context, srcTexture, srcLevel, srcX, srcY, srcZ,
+                                           dstLevel, dstX, dstY, dstZ, srcWidth, srcHeight,
+                                           srcDepth));
+
+    signalDirtyStorage(InitState::Initialized);
+
+    return angle::Result::Continue;
+}
+
 angle::Result Texture::copyTexture(Context *context,
                                    TextureTarget target,
                                    GLint level,
@@ -1811,6 +1879,17 @@ const ColorGeneric &Texture::getBorderColor() const
     return mState.mSamplerState.getBorderColor();
 }
 
+GLint Texture::getRequiredTextureImageUnits(const Context *context) const
+{
+    // Only external texture types can return non-1.
+    if (mState.mType != TextureType::External)
+    {
+        return 1;
+    }
+
+    return mTexture->getRequiredExternalTextureImageUnits(context);
+}
+
 void Texture::setCrop(const Rectangle &rect)
 {
     mState.setCrop(rect);
@@ -1829,6 +1908,55 @@ void Texture::setGenerateMipmapHint(GLenum hint)
 GLenum Texture::getGenerateMipmapHint() const
 {
     return mState.getGenerateMipmapHint();
+}
+
+angle::Result Texture::setBuffer(const gl::Context *context,
+                                 gl::Buffer *buffer,
+                                 GLenum internalFormat)
+{
+    // Use 0 to indicate that the size is taken from whatever size the buffer has when the texture
+    // buffer is used.
+    return setBufferRange(context, buffer, internalFormat, 0, 0);
+}
+
+angle::Result Texture::setBufferRange(const gl::Context *context,
+                                      gl::Buffer *buffer,
+                                      GLenum internalFormat,
+                                      GLintptr offset,
+                                      GLsizeiptr size)
+{
+    mState.mImmutableFormat = true;
+    mState.mBuffer.set(context, buffer, offset, size);
+    ANGLE_TRY(mTexture->setBuffer(context, internalFormat));
+
+    mState.clearImageDescs();
+    if (buffer == nullptr)
+    {
+        mBufferObserver.reset();
+        signalDirtyStorage(InitState::MayNeedInit);
+        return angle::Result::Continue;
+    }
+
+    size = GetBoundBufferAvailableSize(mState.mBuffer);
+
+    mState.mImmutableLevels           = static_cast<GLuint>(1);
+    InternalFormat internalFormatInfo = GetSizedInternalFormatInfo(internalFormat);
+    Format format(internalFormat);
+    Extents extents(static_cast<GLuint>(size / internalFormatInfo.pixelBytes), 1, 1);
+    mState.setImageDesc(TextureTarget::Buffer, 0,
+                        ImageDesc(extents, format, InitState::MayNeedInit));
+
+    signalDirtyStorage(InitState::MayNeedInit);
+
+    // Observe modifications to the buffer, so that extents can be updated.
+    mBufferObserver.bind(buffer);
+
+    return angle::Result::Continue;
+}
+
+const OffsetBindingPointer<Buffer> &Texture::getBuffer() const
+{
+    return mState.mBuffer;
 }
 
 void Texture::onAttach(const Context *context, rx::Serial framebufferSerial)
@@ -1890,12 +2018,12 @@ bool Texture::isSamplerComplete(const Context *context, const Sampler *optionalS
 }
 
 Texture::SamplerCompletenessCache::SamplerCompletenessCache()
-    : context(0), samplerState(), samplerComplete(false)
+    : context({0}), samplerState(), samplerComplete(false)
 {}
 
 void Texture::invalidateCompletenessCache() const
 {
-    mCompletenessCache.context = 0;
+    mCompletenessCache.context = {0};
 }
 
 angle::Result Texture::ensureInitialized(const Context *context)
@@ -2034,11 +2162,21 @@ void Texture::onSubjectStateChange(angle::SubjectIndex index, angle::SubjectMess
     switch (message)
     {
         case angle::SubjectMessage::ContentsChanged:
-            // ContentsChange is originates from TextureStorage11::resolveAndReleaseTexture
-            // which resolves the underlying multisampled texture if it exists and so
-            // Texture will signal dirty storage to invalidate its own cache and the
-            // attached framebuffer's cache.
-            signalDirtyStorage(InitState::Initialized);
+            if (index == kBufferSubjectIndex)
+            {
+                // If the contents of the buffer attached to a texture buffer has changed, mark the
+                // texture dirty.
+                signalDirtyState(DIRTY_BIT_IMPLEMENTATION);
+                onStateChange(angle::SubjectMessage::ContentsChanged);
+            }
+            else
+            {
+                // ContentsChange originates from TextureStorage11::resolveAndReleaseTexture
+                // which resolves the underlying multisampled texture if it exists and so
+                // Texture will signal dirty storage to invalidate its own cache and the
+                // attached framebuffer's cache.
+                signalDirtyStorage(InitState::Initialized);
+            }
             break;
         case angle::SubjectMessage::DirtyBitsFlagged:
             signalDirtyState(DIRTY_BIT_IMPLEMENTATION);
@@ -2059,6 +2197,25 @@ void Texture::onSubjectStateChange(angle::SubjectIndex index, angle::SubjectMess
             {
                 notifySiblings(message);
             }
+            else if (index == kBufferSubjectIndex)
+            {
+                const gl::Buffer *buffer = mState.mBuffer.get();
+                ASSERT(buffer != nullptr);
+
+                // Update cached image desc based on buffer size.
+                GLsizeiptr size = GetBoundBufferAvailableSize(mState.mBuffer);
+
+                ImageDesc desc          = mState.getImageDesc(TextureTarget::Buffer, 0);
+                const GLuint pixelBytes = desc.format.info->pixelBytes;
+                desc.size.width         = static_cast<GLuint>(size / pixelBytes);
+
+                mState.setImageDesc(TextureTarget::Buffer, 0, desc);
+            }
+            break;
+        case angle::SubjectMessage::SubjectMapped:
+        case angle::SubjectMessage::SubjectUnmapped:
+        case angle::SubjectMessage::BindingChanged:
+            ASSERT(index == kBufferSubjectIndex);
             break;
         default:
             UNREACHABLE();

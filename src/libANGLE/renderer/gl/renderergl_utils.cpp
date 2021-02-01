@@ -1357,12 +1357,17 @@ void GenerateCaps(const FunctionsGL *functions,
         functions->hasGLESExtension("GL_EXT_compressed_ETC1_RGB8_sub_texture");
 
 #if defined(ANGLE_PLATFORM_MACOS) || defined(ANGLE_PLATFORM_MACCATALYST)
-    VendorID vendor = GetVendorID(functions);
-    if ((IsAMD(vendor) || IsIntel(vendor)) && *maxSupportedESVersion >= gl::Version(3, 0))
+    angle::SystemInfo info;
+    if (angle::GetSystemInfo(&info) && !info.needsEAGLOnMac)
     {
-        // Apple Intel/AMD drivers do not correctly use the TEXTURE_SRGB_DECODE property of sampler
-        // states.  Disable this extension when we would advertise any ES version that has samplers.
-        extensions->textureSRGBDecode = false;
+        VendorID vendor = GetVendorID(functions);
+        if ((IsAMD(vendor) || IsIntel(vendor)) && *maxSupportedESVersion >= gl::Version(3, 0))
+        {
+            // Apple Intel/AMD drivers do not correctly use the TEXTURE_SRGB_DECODE property of
+            // sampler states.  Disable this extension when we would advertise any ES version
+            // that has samplers.
+            extensions->textureSRGBDecode = false;
+        }
     }
 #endif
 
@@ -1564,6 +1569,38 @@ void GenerateCaps(const FunctionsGL *functions,
     {
         caps->maxClipDistances = 0;
     }
+
+    // GL_OES_shader_image_atomic
+    //
+    // Note that imageAtomicExchange() is allowed to accept float textures (of r32f format) in this
+    // extension, but that's not supported by ARB_shader_image_load_store which this extension is
+    // based on, neither in the spec it was merged into it.  This support was only added to desktop
+    // GLSL in version 4.5
+    if (functions->isAtLeastGL(gl::Version(4, 5)) || functions->isAtLeastGLES(gl::Version(3, 2)) ||
+        functions->hasGLESExtension("GL_OES_shader_image_atomic"))
+    {
+        extensions->shaderImageAtomicOES = true;
+    }
+
+    // GL_OES_texture_buffer
+    if (functions->isAtLeastGL(gl::Version(4, 3)) || functions->isAtLeastGLES(gl::Version(3, 2)) ||
+        functions->hasGLESExtension("GL_OES_texture_buffer") ||
+        functions->hasGLESExtension("GL_EXT_texture_buffer") ||
+        functions->hasGLExtension("GL_ARB_texture_buffer_object"))
+    {
+        caps->maxTextureBufferSize = QuerySingleGLInt(functions, GL_MAX_TEXTURE_BUFFER_SIZE);
+        caps->textureBufferOffsetAlignment =
+            QuerySingleGLInt(functions, GL_TEXTURE_BUFFER_OFFSET_ALIGNMENT);
+        extensions->textureBufferOES = true;
+        extensions->textureBufferEXT = true;
+    }
+    else
+    {
+        // Can't support ES3.2 without texture buffer objects
+        LimitVersion(maxSupportedESVersion, gl::Version(3, 1));
+    }
+
+    extensions->yuvTargetEXT = functions->hasGLESExtension("GL_EXT_YUV_target");
 }
 
 void InitializeFeatures(const FunctionsGL *functions, angle::FeaturesGL *features)
@@ -1962,6 +1999,8 @@ GLenum GetTextureBindingQuery(gl::TextureType textureType)
             return GL_TEXTURE_BINDING_CUBE_MAP;
         case gl::TextureType::CubeMapArray:
             return GL_TEXTURE_BINDING_CUBE_MAP_ARRAY_OES;
+        case gl::TextureType::Buffer:
+            return GL_TEXTURE_BINDING_BUFFER;
         default:
             UNREACHABLE();
             return 0;
@@ -2006,6 +2045,8 @@ GLenum GetBufferBindingQuery(gl::BufferBinding bufferBinding)
             return GL_TRANSFORM_FEEDBACK_BUFFER_BINDING;
         case gl::BufferBinding::Uniform:
             return GL_UNIFORM_BUFFER_BINDING;
+        case gl::BufferBinding::Texture:
+            return GL_TEXTURE_BUFFER_BINDING;
         default:
             UNREACHABLE();
             return 0;

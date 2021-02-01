@@ -808,6 +808,74 @@ void main()
     }
 }
 
+// When an image array is declared without a binding qualifier, all elements are bound to unit zero.
+// Check that the unused uniform image array element does not cause any corruption. Checks for a bug
+// where unused element could make the whole array seem as unused.
+TEST_P(ComputeShaderTest, ImageArrayUnusedElement)
+{
+    ANGLE_SKIP_TEST_IF(IsD3D11());
+
+    // TODO(xinghua.cao@intel.com): On AMD desktop OpenGL, bind two image variables to unit 0,
+    // only one variable is valid.
+    ANGLE_SKIP_TEST_IF(IsAMD() && IsDesktopOpenGL());
+
+    // Vulkan is currently unable to handle unbound image units in compute shaders.
+    // http://anglebug.com/5026
+    ANGLE_SKIP_TEST_IF(IsVulkan());
+
+    GLFramebuffer framebuffer;
+    constexpr char kCS[] = R"(#version 310 es
+layout(local_size_x=1, local_size_y=1, local_size_z=1) in;
+layout(r32ui, binding=0) writeonly uniform highp uimage2D uOut;
+layout(r32ui, binding=1) readonly uniform highp uimage2D uIn[2];
+
+void main()
+{
+    uvec4 inValue = imageLoad(uIn[0], ivec2(gl_LocalInvocationID.xy));
+    imageStore(uOut, ivec2(gl_LocalInvocationIndex, 0), inValue);
+    imageStore(uOut, ivec2(gl_LocalInvocationIndex, 1), inValue);
+})";
+
+    ANGLE_GL_COMPUTE_PROGRAM(program, kCS);
+    glUseProgram(program.get());
+    constexpr int kTextureWidth = 1, kTextureHeight = 2;
+    GLuint inputValues[] = {100, 100};
+    GLTexture in;
+    glBindTexture(GL_TEXTURE_2D, in);
+    glTexStorage2D(GL_TEXTURE_2D, 1, GL_R32UI, kTextureWidth, kTextureHeight);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, kTextureWidth, kTextureHeight, GL_RED_INTEGER,
+                    GL_UNSIGNED_INT, inputValues);
+    EXPECT_GL_NO_ERROR();
+    glBindImageTexture(1, in, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R32UI);
+
+    GLuint initValues[] = {111, 111};
+    GLTexture out;
+    glBindTexture(GL_TEXTURE_2D, out);
+    glTexStorage2D(GL_TEXTURE_2D, 1, GL_R32UI, kTextureWidth, kTextureHeight);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, kTextureWidth, kTextureHeight, GL_RED_INTEGER,
+                    GL_UNSIGNED_INT, initValues);
+    EXPECT_GL_NO_ERROR();
+
+    glBindImageTexture(0, out, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_R32UI);
+    glDispatchCompute(1, 1, 1);
+    EXPECT_GL_NO_ERROR();
+
+    glMemoryBarrier(GL_FRAMEBUFFER_BARRIER_BIT);
+    glUseProgram(0);
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer);
+
+    glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, out, 0);
+    GLuint outputValues[kTextureWidth * kTextureHeight];
+    glReadPixels(0, 0, kTextureWidth, kTextureHeight, GL_RED_INTEGER, GL_UNSIGNED_INT,
+                 outputValues);
+    EXPECT_GL_NO_ERROR();
+
+    GLuint expectedValue = 100;
+    for (int i = 0; i < kTextureWidth * kTextureHeight; i++)
+    {
+        EXPECT_EQ(expectedValue, outputValues[i]);
+    }
+}
 // imageLoad functions
 TEST_P(ComputeShaderTest, ImageLoad)
 {
@@ -3980,6 +4048,127 @@ void main() {
         glMapBufferRange(GL_ATOMIC_COUNTER_BUFFER, 0, sizeof(GLuint), GL_MAP_READ_BIT));
     EXPECT_EQ(kVertexCount * 2, mappedBuffer[0]);
     glUnmapBuffer(GL_ATOMIC_COUNTER_BUFFER);
+}
+
+// Write to image array with an aliasing format.
+TEST_P(ComputeShaderTest, AliasingFormatForImageArray)
+{
+    // http://anglebug.com/5352
+    ANGLE_SKIP_TEST_IF(IsD3D11());
+
+    constexpr char kCS[] = R"(#version 310 es
+layout(local_size_x=1, local_size_y=1, local_size_z=2) in;
+layout(r32ui, binding = 0) writeonly uniform highp uimage2DArray image;
+void main()
+{
+    uint yellow = 0xFF00FFFFu;
+    imageStore(image, ivec3(gl_LocalInvocationID.xyz), uvec4(yellow, 0, 0, 0));
+})";
+
+    constexpr int kWidth = 1, kHeight = 1, kDepth = 2;
+
+    const std::vector<GLColor> kInitData(kWidth * kHeight * kDepth, GLColor::black);
+
+    GLTexture texture;
+    glBindTexture(GL_TEXTURE_2D_ARRAY, texture);
+    glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_RGBA8, kWidth, kHeight, kDepth);
+    glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, 0, kWidth, kHeight, kDepth, GL_RGBA,
+                    GL_UNSIGNED_BYTE, kInitData.data());
+    EXPECT_GL_NO_ERROR();
+
+    ANGLE_GL_COMPUTE_PROGRAM(program, kCS);
+    glUseProgram(program);
+
+    // Output yellow to both layers.
+    glBindImageTexture(0, texture, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_R32UI);
+    glDispatchCompute(1, 1, 1);
+    EXPECT_GL_NO_ERROR();
+
+    // Verify results.
+    glMemoryBarrier(GL_FRAMEBUFFER_BARRIER_BIT);
+    EXPECT_GL_NO_ERROR();
+
+    GLFramebuffer framebuffer;
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer);
+    glFramebufferTextureLayer(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texture, 0, 0);
+    glFramebufferTextureLayer(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, texture, 0, 1);
+    EXPECT_GL_NO_ERROR();
+
+    glReadBuffer(GL_COLOR_ATTACHMENT0);
+    EXPECT_PIXEL_COLOR_EQ(0, 0, GLColor::yellow);
+
+    glReadBuffer(GL_COLOR_ATTACHMENT1);
+    EXPECT_PIXEL_COLOR_EQ(0, 0, GLColor::yellow);
+}
+
+// Write to one layer of image array with an aliasing format.
+TEST_P(ComputeShaderTest, AliasingFormatForOneLayerOfImageArray)
+{
+    // http://anglebug.com/5352
+    ANGLE_SKIP_TEST_IF(IsD3D11());
+
+    constexpr char kCS[] = R"(#version 310 es
+layout(local_size_x=1, local_size_y=1, local_size_z=1) in;
+layout(r32ui, binding = 0) writeonly uniform highp uimage2D image;
+void main()
+{
+    uint yellow = 0xFF00FFFFu;
+    imageStore(image, ivec2(gl_LocalInvocationID.xy), uvec4(yellow, 0, 0, 0));
+})";
+
+    constexpr int kWidth = 1, kHeight = 1, kDepth = 2;
+
+    const std::vector<GLColor> kInitData(kWidth * kHeight * kDepth, GLColor::black);
+
+    GLTexture texture;
+    glBindTexture(GL_TEXTURE_2D_ARRAY, texture);
+    glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_RGBA8, kWidth, kHeight, kDepth);
+    glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, 0, kWidth, kHeight, kDepth, GL_RGBA,
+                    GL_UNSIGNED_BYTE, kInitData.data());
+    EXPECT_GL_NO_ERROR();
+
+    GLFramebuffer framebuffer;
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer);
+    glFramebufferTextureLayer(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texture, 0, 0);
+    glFramebufferTextureLayer(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, texture, 0, 1);
+    EXPECT_GL_NO_ERROR();
+
+    ANGLE_GL_COMPUTE_PROGRAM(program, kCS);
+    glUseProgram(program);
+
+    // Output yellow to layer 0.
+    glBindImageTexture(0, texture, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_R32UI);
+    glDispatchCompute(1, 1, 1);
+    EXPECT_GL_NO_ERROR();
+
+    // Verify that only layer 0 was changed.
+    glMemoryBarrier(GL_FRAMEBUFFER_BARRIER_BIT);
+    EXPECT_GL_NO_ERROR();
+
+    glReadBuffer(GL_COLOR_ATTACHMENT0);
+    EXPECT_PIXEL_COLOR_EQ(0, 0, GLColor::yellow);
+
+    glReadBuffer(GL_COLOR_ATTACHMENT1);
+    EXPECT_PIXEL_COLOR_EQ(0, 0, GLColor::black);
+
+    // Reset texture back to black.
+    glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, 0, kWidth, kHeight, kDepth, GL_RGBA,
+                    GL_UNSIGNED_BYTE, kInitData.data());
+
+    // Output yellow to layer 1.
+    glBindImageTexture(0, texture, 0, GL_FALSE, 1, GL_WRITE_ONLY, GL_R32UI);
+    glDispatchCompute(1, 1, 1);
+    EXPECT_GL_NO_ERROR();
+
+    // Verify that only layer 1 was changed.
+    glMemoryBarrier(GL_FRAMEBUFFER_BARRIER_BIT);
+    EXPECT_GL_NO_ERROR();
+
+    glReadBuffer(GL_COLOR_ATTACHMENT0);
+    EXPECT_PIXEL_COLOR_EQ(0, 0, GLColor::black);
+
+    glReadBuffer(GL_COLOR_ATTACHMENT1);
+    EXPECT_PIXEL_COLOR_EQ(0, 0, GLColor::yellow);
 }
 
 ANGLE_INSTANTIATE_TEST_ES31(ComputeShaderTest);
