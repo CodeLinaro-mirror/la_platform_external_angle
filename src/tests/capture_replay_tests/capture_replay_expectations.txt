@@ -63,7 +63,6 @@ CopyCompressedTextureTest.InternalFormat/*
 DebugMarkerTest.*
 DebugTest.*
 DepthStencilTest.*
-DiscardFramebufferEXTTest.*
 DrawBuffersTest.*
 EGLPrintEGLinfoTest.PrintGLESCapabilities/*
 EGLStreamTest.*
@@ -105,15 +104,8 @@ LineLoopTest.DISABLED_DrawArraysWithLargeCount/*
 MipmapTest.DISABLED_ThreeLevelsInitData/*
 
 # Compile failed tests
-EGLSyncTest.AndroidNativeFence_WaitSync/*
-ExplicitContextTest.GetProcAddress/*
 GetImageTest.*
 GetTexLevelParameterTest.Queries/*
-MemoryObjectTest.MemoryObjectQueries/*
-MemoryObjectTest.MemoryObjectShouldBeMemoryObject/*
-MemoryObjectTest.ShouldFailValidationOnImportFdUnsupportedHandleType/*
-PointSpritesTest.PointWithoutAttributesCompliance/*
-RobustBufferAccessBehaviorTest.EmptyBuffer/*
 RobustClientMemoryTest.*
 RobustResourceInitTest.*
 SemaphoreTest.*
