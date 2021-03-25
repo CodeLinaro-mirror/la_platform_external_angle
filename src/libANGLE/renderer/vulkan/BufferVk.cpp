@@ -87,9 +87,18 @@ ANGLE_INLINE VkMemoryPropertyFlags GetStorageMemoryType(GLbitfield storageFlags,
         (VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
          VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
-    if (((storageFlags & GL_MAP_COHERENT_BIT_EXT) != 0) ||
-        ((storageFlags & GL_MAP_PERSISTENT_BIT_EXT) != 0) || externalBuffer)
+    const bool isCoherentMap   = (storageFlags & GL_MAP_COHERENT_BIT_EXT) != 0;
+    const bool isPersistentMap = (storageFlags & GL_MAP_PERSISTENT_BIT_EXT) != 0;
+
+    if (isCoherentMap || isPersistentMap || externalBuffer)
     {
+        // We currently allocate coherent memory for persistently mapped buffers.
+        // GL_EXT_buffer_storage allows non-coherent memory, but currently the implementation of
+        // |glMemoryBarrier(CLIENT_MAPPED_BUFFER_BARRIER_BIT_EXT)| relies on the mapping being
+        // coherent.
+        //
+        // If persistently mapped buffers ever use non-coherent memory, then said |glMemoryBarrier|
+        // call must result in |vkInvalidateMappedMemoryRanges| for all persistently mapped buffers.
         return kDeviceLocalHostCoherentFlags;
     }
 
@@ -112,7 +121,8 @@ ConversionBuffer::ConversionBuffer(RendererVk *renderer,
                                    bool hostVisible)
     : dirty(true), lastAllocationOffset(0)
 {
-    data.init(renderer, usageFlags, alignment, initialSize, hostVisible);
+    data.init(renderer, usageFlags, alignment, initialSize, hostVisible,
+              vk::DynamicBufferPolicy::OneShotUse);
 }
 
 ConversionBuffer::~ConversionBuffer() = default;
@@ -329,7 +339,8 @@ angle::Result BufferVk::setDataWithMemoryType(const gl::Context *context,
         constexpr size_t kBufferHelperPoolInitialSize = 0;
 
         mBufferPool.initWithFlags(contextVk->getRenderer(), usageFlags, kBufferHelperAlignment,
-                                  kBufferHelperPoolInitialSize, memoryPropertyFlags);
+                                  kBufferHelperPoolInitialSize, memoryPropertyFlags,
+                                  vk::DynamicBufferPolicy::FrequentSmallAllocations);
 
         ANGLE_TRY(acquireBufferHelper(contextVk, size, &mBuffer));
 
