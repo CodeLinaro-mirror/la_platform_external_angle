@@ -40,6 +40,13 @@
 namespace
 {
 constexpr VkFormatFeatureFlags kInvalidFormatFeatureFlags = static_cast<VkFormatFeatureFlags>(-1);
+
+#if defined(ANGLE_EXPOSE_NON_CONFORMANT_EXTENSIONS_AND_VERSIONS)
+constexpr bool kExposeNonConformantExtensionsAndVersions = true;
+#else
+constexpr bool kExposeNonConformantExtensionsAndVersions = false;
+#endif
+
 }  // anonymous namespace
 
 namespace rx
@@ -166,6 +173,8 @@ constexpr const char *kSkippedMessages[] = {
     "VUID-VkSubpassDescriptionDepthStencilResolve-stencilResolveMode-parameter",
     // https://crbug.com/1183542
     "VUID-vkCmdBindDescriptorSets-pDescriptorSets-01979",
+    // https://issuetracker.google.com/175584609
+    "VUID-vkCmdDraw-None-04584",
 };
 
 // Suppress validation errors that are known
@@ -1767,7 +1776,8 @@ gl::Version RendererVk::getMaxSupportedESVersion() const
     // either none or IMPLEMENTATION_MAX_ATOMIC_COUNTER_BUFFERS atomic counter buffers.  So if
     // Vulkan doesn't support at least that many storage buffers in compute, we don't support 3.1.
     const uint32_t kMinimumStorageBuffersForES31 =
-        gl::limits::kMinimumComputeStorageBuffers + gl::IMPLEMENTATION_MAX_ATOMIC_COUNTER_BUFFERS;
+        gl::limits::kMinimumComputeStorageBuffers +
+        gl::IMPLEMENTATION_MAX_ATOMIC_COUNTER_BUFFER_BINDINGS;
     if (mPhysicalDeviceProperties.limits.maxPerStageDescriptorStorageBuffers <
         kMinimumStorageBuffersForES31)
     {
@@ -1934,6 +1944,13 @@ void RendererVk::initFeatures(DisplayVk *displayVk,
     ANGLE_FEATURE_CONDITION(
         &mFeatures, supportsIncrementalPresent,
         ExtensionFound(VK_KHR_INCREMENTAL_PRESENT_EXTENSION_NAME, deviceExtensionNames));
+
+    // The Vulkan specification for the VK_KHR_incremental_present extension does not address
+    // rotation.  In Android, this extension is implemented on top of the same platform code as
+    // eglSwapBuffersWithDamageKHR(), which code assumes that it should rotate each rectangle.  To
+    // avoid double-rotating damage rectangles on Android, we must avoid pre-rotating
+    // application-provided rectangles.   See: https://issuetracker.google.com/issues/181796746
+    ANGLE_FEATURE_CONDITION(&mFeatures, disablePreRotateIncrementalPresentRectangles, IsAndroid());
 
 #if defined(ANGLE_PLATFORM_ANDROID)
     ANGLE_FEATURE_CONDITION(
@@ -2143,6 +2160,17 @@ void RendererVk::initFeatures(DisplayVk *displayVk,
 
     // Negative viewports are exposed in the Maintenance1 extension and in core Vulkan 1.1+.
     ANGLE_FEATURE_CONDITION(&mFeatures, supportsNegativeViewport, supportsNegativeViewport);
+
+    // Whether non-conformant configurations and extensions should be exposed.
+    ANGLE_FEATURE_CONDITION(&mFeatures, exposeNonConformantExtensionsAndVersions,
+                            kExposeNonConformantExtensionsAndVersions);
+
+    // The EGL_EXT_buffer_age implementation causes
+    // android.graphics.cts.BitmapTest#testDrawingHardwareBitmapNotLeaking to fail on Cuttlefish
+    // with SwANGLE. Needs investigation whether this is a race condition which could affect other
+    // Vulkan drivers, or if it's a SwiftShader bug.
+    // http://anglebug.com/3529
+    ANGLE_FEATURE_CONDITION(&mFeatures, enableBufferAge, !isSwiftShader);
 
     angle::PlatformMethods *platform = ANGLEPlatformCurrent();
     platform->overrideFeaturesVk(platform, &mFeatures);

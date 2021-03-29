@@ -16,6 +16,7 @@
 #include "angry_birds_2_1500/angry_birds_2_1500_capture_context1.h"
 #include "arena_of_valor/arena_of_valor_capture_context1.h"
 #include "asphalt_8/asphalt_8_capture_context2.h"
+#include "avakin_life/avakin_life_capture_context2.h"
 #include "brawl_stars/brawl_stars_capture_context1.h"
 #include "bus_simulator_indonesia/bus_simulator_indonesia_capture_context1.h"
 #include "candy_crush_500/candy_crush_500_capture_context1.h"
@@ -28,6 +29,7 @@
 #include "efootball_pes_2021/efootball_pes_2021_capture_context7.h"
 #include "egypt_1500/egypt_1500_capture_context1.h"
 #include "eight_ball_pool/eight_ball_pool_capture_context2.h"
+#include "extreme_car_driving_simulator/extreme_car_driving_simulator_capture_context3.h"
 #include "fallout_shelter_online/fallout_shelter_online_capture_context3.h"
 #include "fate_grand_order/fate_grand_order_capture_context1.h"
 #include "fifa_mobile/fifa_mobile_capture_context2.h"
@@ -37,9 +39,11 @@
 #include "hay_day/hay_day_capture_context2.h"
 #include "hearthstone/hearthstone_capture_context2.h"
 #include "hill_climb_racing/hill_climb_racing_capture_context2.h"
+#include "junes_journey/junes_journey_capture_context2.h"
 #include "kartrider_rush/kartrider_rush_capture_context1.h"
 #include "klondike_adventures/klondike_adventures_capture_context2.h"
 #include "lego_legacy/lego_legacy_capture_context2.h"
+#include "lineage_m/lineage_m_capture_context2.h"
 #include "magic_tiles_3/magic_tiles_3_capture_context2.h"
 #include "manhattan_10/manhattan_10_capture_context1.h"
 #include "manhattan_31/manhattan_31_capture_context6.h"
@@ -49,9 +53,12 @@
 #include "mobile_legends/mobile_legends_capture_context1.h"
 #include "nba2k20_800/nba2k20_800_capture_context1.h"
 #include "one_punch_man/one_punch_man_capture_context3.h"
+#include "plants_vs_zombies_2/plants_vs_zombies_2_capture_context1.h"
 #include "pubg_mobile_lite/pubg_mobile_lite_capture_context1.h"
+#include "ragnarok_m_eternal_love/ragnarok_m_eternal_love_capture_context3.h"
 #include "raid_shadow_legends/raid_shadow_legends_capture_context2.h"
 #include "real_commando_secret_mission/real_commando_secret_mission_capture_context1.h"
+#include "real_cricket_20/real_cricket_20_capture_context2.h"
 #include "real_gangster_crime/real_gangster_crime_capture_context3.h"
 #include "rise_of_kingdoms/rise_of_kingdoms_capture_context4.h"
 #include "romancing_saga/romancing_saga_capture_context3.h"
@@ -97,6 +104,10 @@ constexpr angle::PackedEnumMap<RestrictedTraceID, TraceInfo> kTraceInfos = {
      {kDefaultReplayContextClientMajorVersion, kDefaultReplayContextClientMinorVersion,
       asphalt_8::kReplayFrameStart, asphalt_8::kReplayFrameEnd, asphalt_8::kReplayDrawSurfaceWidth,
       asphalt_8::kReplayDrawSurfaceHeight, "asphalt_8"}},
+    {RestrictedTraceID::avakin_life,
+     {avakin_life::kReplayContextClientMajorVersion, avakin_life::kReplayContextClientMinorVersion,
+      avakin_life::kReplayFrameStart, avakin_life::kReplayFrameEnd,
+      avakin_life::kReplayDrawSurfaceWidth, avakin_life::kReplayDrawSurfaceHeight, "avakin_life"}},
     {RestrictedTraceID::brawl_stars,
      {kDefaultReplayContextClientMajorVersion, kDefaultReplayContextClientMinorVersion,
       brawl_stars::kReplayFrameStart, brawl_stars::kReplayFrameEnd,
@@ -155,6 +166,13 @@ constexpr angle::PackedEnumMap<RestrictedTraceID, TraceInfo> kTraceInfos = {
       eight_ball_pool::kReplayContextClientMinorVersion, eight_ball_pool::kReplayFrameStart,
       eight_ball_pool::kReplayFrameEnd, eight_ball_pool::kReplayDrawSurfaceWidth,
       eight_ball_pool::kReplayDrawSurfaceHeight, "eight_ball_pool"}},
+    {RestrictedTraceID::extreme_car_driving_simulator,
+     {extreme_car_driving_simulator::kReplayContextClientMajorVersion,
+      extreme_car_driving_simulator::kReplayContextClientMinorVersion,
+      extreme_car_driving_simulator::kReplayFrameStart,
+      extreme_car_driving_simulator::kReplayFrameEnd,
+      extreme_car_driving_simulator::kReplayDrawSurfaceWidth,
+      extreme_car_driving_simulator::kReplayDrawSurfaceHeight, "extreme_car_driving_simulator"}},
     {RestrictedTraceID::fallout_shelter_online,
      {fallout_shelter_online::kReplayContextClientMajorVersion,
       fallout_shelter_online::kReplayContextClientMinorVersion,
@@ -195,6 +213,11 @@ constexpr angle::PackedEnumMap<RestrictedTraceID, TraceInfo> kTraceInfos = {
       hill_climb_racing::kReplayContextClientMinorVersion, hill_climb_racing::kReplayFrameStart,
       hill_climb_racing::kReplayFrameEnd, hill_climb_racing::kReplayDrawSurfaceWidth,
       hill_climb_racing::kReplayDrawSurfaceHeight, "hill_climb_racing"}},
+    {RestrictedTraceID::junes_journey,
+     {junes_journey::kReplayContextClientMajorVersion,
+      junes_journey::kReplayContextClientMinorVersion, junes_journey::kReplayFrameStart,
+      junes_journey::kReplayFrameEnd, junes_journey::kReplayDrawSurfaceWidth,
+      junes_journey::kReplayDrawSurfaceHeight, "junes_journey"}},
     {RestrictedTraceID::kartrider_rush,
      {kDefaultReplayContextClientMajorVersion, kDefaultReplayContextClientMinorVersion,
       kartrider_rush::kReplayFrameStart, kartrider_rush::kReplayFrameEnd,
@@ -209,6 +232,10 @@ constexpr angle::PackedEnumMap<RestrictedTraceID, TraceInfo> kTraceInfos = {
      {kDefaultReplayContextClientMajorVersion, kDefaultReplayContextClientMinorVersion,
       lego_legacy::kReplayFrameStart, lego_legacy::kReplayFrameEnd,
       lego_legacy::kReplayDrawSurfaceWidth, lego_legacy::kReplayDrawSurfaceHeight, "lego_legacy"}},
+    {RestrictedTraceID::lineage_m,
+     {lineage_m::kReplayContextClientMajorVersion, lineage_m::kReplayContextClientMinorVersion,
+      lineage_m::kReplayFrameStart, lineage_m::kReplayFrameEnd, lineage_m::kReplayDrawSurfaceWidth,
+      lineage_m::kReplayDrawSurfaceHeight, "lineage_m"}},
     {RestrictedTraceID::magic_tiles_3,
      {kDefaultReplayContextClientMajorVersion, kDefaultReplayContextClientMinorVersion,
       magic_tiles_3::kReplayFrameStart, magic_tiles_3::kReplayFrameEnd,
@@ -252,11 +279,22 @@ constexpr angle::PackedEnumMap<RestrictedTraceID, TraceInfo> kTraceInfos = {
       one_punch_man::kReplayContextClientMinorVersion, one_punch_man::kReplayFrameStart,
       one_punch_man::kReplayFrameEnd, one_punch_man::kReplayDrawSurfaceWidth,
       one_punch_man::kReplayDrawSurfaceHeight, "one_punch_man"}},
+    {RestrictedTraceID::plants_vs_zombies_2,
+     {plants_vs_zombies_2::kReplayContextClientMajorVersion,
+      plants_vs_zombies_2::kReplayContextClientMinorVersion, plants_vs_zombies_2::kReplayFrameStart,
+      plants_vs_zombies_2::kReplayFrameEnd, plants_vs_zombies_2::kReplayDrawSurfaceWidth,
+      plants_vs_zombies_2::kReplayDrawSurfaceHeight, "plants_vs_zombies_2"}},
     {RestrictedTraceID::pubg_mobile_lite,
      {kDefaultReplayContextClientMajorVersion, kDefaultReplayContextClientMinorVersion,
       pubg_mobile_lite::kReplayFrameStart, pubg_mobile_lite::kReplayFrameEnd,
       pubg_mobile_lite::kReplayDrawSurfaceWidth, pubg_mobile_lite::kReplayDrawSurfaceHeight,
       "pubg_mobile_lite"}},
+    {RestrictedTraceID::ragnarok_m_eternal_love,
+     {ragnarok_m_eternal_love::kReplayContextClientMajorVersion,
+      ragnarok_m_eternal_love::kReplayContextClientMinorVersion,
+      ragnarok_m_eternal_love::kReplayFrameStart, ragnarok_m_eternal_love::kReplayFrameEnd,
+      ragnarok_m_eternal_love::kReplayDrawSurfaceWidth,
+      ragnarok_m_eternal_love::kReplayDrawSurfaceHeight, "ragnarok_m_eternal_love"}},
     {RestrictedTraceID::raid_shadow_legends,
      {raid_shadow_legends::kReplayContextClientMajorVersion,
       raid_shadow_legends::kReplayContextClientMinorVersion, raid_shadow_legends::kReplayFrameStart,
@@ -268,6 +306,11 @@ constexpr angle::PackedEnumMap<RestrictedTraceID, TraceInfo> kTraceInfos = {
       real_commando_secret_mission::kReplayFrameEnd,
       real_commando_secret_mission::kReplayDrawSurfaceWidth,
       real_commando_secret_mission::kReplayDrawSurfaceHeight, "real_commando_secret_mission"}},
+    {RestrictedTraceID::real_cricket_20,
+     {real_cricket_20::kReplayContextClientMajorVersion,
+      real_cricket_20::kReplayContextClientMinorVersion, real_cricket_20::kReplayFrameStart,
+      real_cricket_20::kReplayFrameEnd, real_cricket_20::kReplayDrawSurfaceWidth,
+      real_cricket_20::kReplayDrawSurfaceHeight, "real_cricket_20"}},
     {RestrictedTraceID::real_gangster_crime,
      {kDefaultReplayContextClientMajorVersion, kDefaultReplayContextClientMinorVersion,
       real_gangster_crime::kReplayFrameStart, real_gangster_crime::kReplayFrameEnd,
@@ -376,6 +419,9 @@ void ReplayFrame(RestrictedTraceID traceID, uint32_t frameIndex)
         case RestrictedTraceID::asphalt_8:
             asphalt_8::ReplayContext2Frame(frameIndex);
             break;
+        case RestrictedTraceID::avakin_life:
+            avakin_life::ReplayContext2Frame(frameIndex);
+            break;
         case RestrictedTraceID::brawl_stars:
             brawl_stars::ReplayContext1Frame(frameIndex);
             break;
@@ -412,6 +458,9 @@ void ReplayFrame(RestrictedTraceID traceID, uint32_t frameIndex)
         case RestrictedTraceID::eight_ball_pool:
             eight_ball_pool::ReplayContext2Frame(frameIndex);
             break;
+        case RestrictedTraceID::extreme_car_driving_simulator:
+            extreme_car_driving_simulator::ReplayContext3Frame(frameIndex);
+            break;
         case RestrictedTraceID::fallout_shelter_online:
             fallout_shelter_online::ReplayContext3Frame(frameIndex);
             break;
@@ -439,6 +488,9 @@ void ReplayFrame(RestrictedTraceID traceID, uint32_t frameIndex)
         case RestrictedTraceID::hill_climb_racing:
             hill_climb_racing::ReplayContext2Frame(frameIndex);
             break;
+        case RestrictedTraceID::junes_journey:
+            junes_journey::ReplayContext2Frame(frameIndex);
+            break;
         case RestrictedTraceID::kartrider_rush:
             kartrider_rush::ReplayContext1Frame(frameIndex);
             break;
@@ -447,6 +499,9 @@ void ReplayFrame(RestrictedTraceID traceID, uint32_t frameIndex)
             break;
         case RestrictedTraceID::lego_legacy:
             lego_legacy::ReplayContext2Frame(frameIndex);
+            break;
+        case RestrictedTraceID::lineage_m:
+            lineage_m::ReplayContext2Frame(frameIndex);
             break;
         case RestrictedTraceID::magic_tiles_3:
             magic_tiles_3::ReplayContext2Frame(frameIndex);
@@ -475,14 +530,23 @@ void ReplayFrame(RestrictedTraceID traceID, uint32_t frameIndex)
         case RestrictedTraceID::one_punch_man:
             one_punch_man::ReplayContext3Frame(frameIndex);
             break;
+        case RestrictedTraceID::plants_vs_zombies_2:
+            plants_vs_zombies_2::ReplayContext1Frame(frameIndex);
+            break;
         case RestrictedTraceID::pubg_mobile_lite:
             pubg_mobile_lite::ReplayContext1Frame(frameIndex);
+            break;
+        case RestrictedTraceID::ragnarok_m_eternal_love:
+            ragnarok_m_eternal_love::ReplayContext3Frame(frameIndex);
             break;
         case RestrictedTraceID::raid_shadow_legends:
             raid_shadow_legends::ReplayContext2Frame(frameIndex);
             break;
         case RestrictedTraceID::real_commando_secret_mission:
             real_commando_secret_mission::ReplayContext1Frame(frameIndex);
+            break;
+        case RestrictedTraceID::real_cricket_20:
+            real_cricket_20::ReplayContext2Frame(frameIndex);
             break;
         case RestrictedTraceID::real_gangster_crime:
             real_gangster_crime::ReplayContext3Frame(frameIndex);
@@ -561,6 +625,9 @@ void ResetReplay(RestrictedTraceID traceID)
         case RestrictedTraceID::asphalt_8:
             asphalt_8::ResetContext2Replay();
             break;
+        case RestrictedTraceID::avakin_life:
+            avakin_life::ResetContext2Replay();
+            break;
         case RestrictedTraceID::brawl_stars:
             brawl_stars::ResetContext1Replay();
             break;
@@ -597,6 +664,9 @@ void ResetReplay(RestrictedTraceID traceID)
         case RestrictedTraceID::eight_ball_pool:
             eight_ball_pool::ResetContext2Replay();
             break;
+        case RestrictedTraceID::extreme_car_driving_simulator:
+            extreme_car_driving_simulator::ResetContext3Replay();
+            break;
         case RestrictedTraceID::fallout_shelter_online:
             fallout_shelter_online::ResetContext3Replay();
             break;
@@ -624,6 +694,9 @@ void ResetReplay(RestrictedTraceID traceID)
         case RestrictedTraceID::hill_climb_racing:
             hill_climb_racing::ResetContext2Replay();
             break;
+        case RestrictedTraceID::junes_journey:
+            junes_journey::ResetContext2Replay();
+            break;
         case RestrictedTraceID::kartrider_rush:
             kartrider_rush::ResetContext1Replay();
             break;
@@ -632,6 +705,9 @@ void ResetReplay(RestrictedTraceID traceID)
             break;
         case RestrictedTraceID::lego_legacy:
             lego_legacy::ResetContext2Replay();
+            break;
+        case RestrictedTraceID::lineage_m:
+            lineage_m::ResetContext2Replay();
             break;
         case RestrictedTraceID::magic_tiles_3:
             magic_tiles_3::ResetContext2Replay();
@@ -660,14 +736,23 @@ void ResetReplay(RestrictedTraceID traceID)
         case RestrictedTraceID::one_punch_man:
             one_punch_man::ResetContext3Replay();
             break;
+        case RestrictedTraceID::plants_vs_zombies_2:
+            plants_vs_zombies_2::ResetContext1Replay();
+            break;
         case RestrictedTraceID::pubg_mobile_lite:
             pubg_mobile_lite::ResetContext1Replay();
+            break;
+        case RestrictedTraceID::ragnarok_m_eternal_love:
+            ragnarok_m_eternal_love::ResetContext3Replay();
             break;
         case RestrictedTraceID::raid_shadow_legends:
             raid_shadow_legends::ResetContext2Replay();
             break;
         case RestrictedTraceID::real_commando_secret_mission:
             real_commando_secret_mission::ResetContext1Replay();
+            break;
+        case RestrictedTraceID::real_cricket_20:
+            real_cricket_20::ResetContext2Replay();
             break;
         case RestrictedTraceID::real_gangster_crime:
             real_gangster_crime::ResetContext3Replay();
@@ -746,6 +831,9 @@ void SetupReplay(RestrictedTraceID traceID)
         case RestrictedTraceID::asphalt_8:
             asphalt_8::SetupContext2Replay();
             break;
+        case RestrictedTraceID::avakin_life:
+            avakin_life::SetupContext2Replay();
+            break;
         case RestrictedTraceID::brawl_stars:
             brawl_stars::SetupContext1Replay();
             break;
@@ -782,6 +870,9 @@ void SetupReplay(RestrictedTraceID traceID)
         case RestrictedTraceID::eight_ball_pool:
             eight_ball_pool::SetupContext2Replay();
             break;
+        case RestrictedTraceID::extreme_car_driving_simulator:
+            extreme_car_driving_simulator::SetupContext3Replay();
+            break;
         case RestrictedTraceID::fallout_shelter_online:
             fallout_shelter_online::SetupContext3Replay();
             break;
@@ -809,6 +900,9 @@ void SetupReplay(RestrictedTraceID traceID)
         case RestrictedTraceID::hill_climb_racing:
             hill_climb_racing::SetupContext2Replay();
             break;
+        case RestrictedTraceID::junes_journey:
+            junes_journey::SetupContext2Replay();
+            break;
         case RestrictedTraceID::kartrider_rush:
             kartrider_rush::SetupContext1Replay();
             break;
@@ -817,6 +911,9 @@ void SetupReplay(RestrictedTraceID traceID)
             break;
         case RestrictedTraceID::lego_legacy:
             lego_legacy::SetupContext2Replay();
+            break;
+        case RestrictedTraceID::lineage_m:
+            lineage_m::SetupContext2Replay();
             break;
         case RestrictedTraceID::magic_tiles_3:
             magic_tiles_3::SetupContext2Replay();
@@ -845,14 +942,23 @@ void SetupReplay(RestrictedTraceID traceID)
         case RestrictedTraceID::one_punch_man:
             one_punch_man::SetupContext3Replay();
             break;
+        case RestrictedTraceID::plants_vs_zombies_2:
+            plants_vs_zombies_2::SetupContext1Replay();
+            break;
         case RestrictedTraceID::pubg_mobile_lite:
             pubg_mobile_lite::SetupContext1Replay();
+            break;
+        case RestrictedTraceID::ragnarok_m_eternal_love:
+            ragnarok_m_eternal_love::SetupContext3Replay();
             break;
         case RestrictedTraceID::raid_shadow_legends:
             raid_shadow_legends::SetupContext2Replay();
             break;
         case RestrictedTraceID::real_commando_secret_mission:
             real_commando_secret_mission::SetupContext1Replay();
+            break;
+        case RestrictedTraceID::real_cricket_20:
+            real_cricket_20::SetupContext2Replay();
             break;
         case RestrictedTraceID::real_gangster_crime:
             real_gangster_crime::SetupContext3Replay();
@@ -931,6 +1037,9 @@ void SetBinaryDataDir(RestrictedTraceID traceID, const char *dataDir)
         case RestrictedTraceID::asphalt_8:
             asphalt_8::SetBinaryDataDir(dataDir);
             break;
+        case RestrictedTraceID::avakin_life:
+            avakin_life::SetBinaryDataDir(dataDir);
+            break;
         case RestrictedTraceID::brawl_stars:
             brawl_stars::SetBinaryDataDir(dataDir);
             break;
@@ -967,6 +1076,9 @@ void SetBinaryDataDir(RestrictedTraceID traceID, const char *dataDir)
         case RestrictedTraceID::eight_ball_pool:
             eight_ball_pool::SetBinaryDataDir(dataDir);
             break;
+        case RestrictedTraceID::extreme_car_driving_simulator:
+            extreme_car_driving_simulator::SetBinaryDataDir(dataDir);
+            break;
         case RestrictedTraceID::fallout_shelter_online:
             fallout_shelter_online::SetBinaryDataDir(dataDir);
             break;
@@ -994,6 +1106,9 @@ void SetBinaryDataDir(RestrictedTraceID traceID, const char *dataDir)
         case RestrictedTraceID::hill_climb_racing:
             hill_climb_racing::SetBinaryDataDir(dataDir);
             break;
+        case RestrictedTraceID::junes_journey:
+            junes_journey::SetBinaryDataDir(dataDir);
+            break;
         case RestrictedTraceID::kartrider_rush:
             kartrider_rush::SetBinaryDataDir(dataDir);
             break;
@@ -1002,6 +1117,9 @@ void SetBinaryDataDir(RestrictedTraceID traceID, const char *dataDir)
             break;
         case RestrictedTraceID::lego_legacy:
             lego_legacy::SetBinaryDataDir(dataDir);
+            break;
+        case RestrictedTraceID::lineage_m:
+            lineage_m::SetBinaryDataDir(dataDir);
             break;
         case RestrictedTraceID::magic_tiles_3:
             magic_tiles_3::SetBinaryDataDir(dataDir);
@@ -1030,14 +1148,23 @@ void SetBinaryDataDir(RestrictedTraceID traceID, const char *dataDir)
         case RestrictedTraceID::one_punch_man:
             one_punch_man::SetBinaryDataDir(dataDir);
             break;
+        case RestrictedTraceID::plants_vs_zombies_2:
+            plants_vs_zombies_2::SetBinaryDataDir(dataDir);
+            break;
         case RestrictedTraceID::pubg_mobile_lite:
             pubg_mobile_lite::SetBinaryDataDir(dataDir);
+            break;
+        case RestrictedTraceID::ragnarok_m_eternal_love:
+            ragnarok_m_eternal_love::SetBinaryDataDir(dataDir);
             break;
         case RestrictedTraceID::raid_shadow_legends:
             raid_shadow_legends::SetBinaryDataDir(dataDir);
             break;
         case RestrictedTraceID::real_commando_secret_mission:
             real_commando_secret_mission::SetBinaryDataDir(dataDir);
+            break;
+        case RestrictedTraceID::real_cricket_20:
+            real_cricket_20::SetBinaryDataDir(dataDir);
             break;
         case RestrictedTraceID::real_gangster_crime:
             real_gangster_crime::SetBinaryDataDir(dataDir);
@@ -1116,6 +1243,9 @@ void SetBinaryDataDecompressCallback(RestrictedTraceID traceID, DecompressCallba
         case RestrictedTraceID::asphalt_8:
             asphalt_8::SetBinaryDataDecompressCallback(callback);
             break;
+        case RestrictedTraceID::avakin_life:
+            avakin_life::SetBinaryDataDecompressCallback(callback);
+            break;
         case RestrictedTraceID::brawl_stars:
             brawl_stars::SetBinaryDataDecompressCallback(callback);
             break;
@@ -1152,6 +1282,9 @@ void SetBinaryDataDecompressCallback(RestrictedTraceID traceID, DecompressCallba
         case RestrictedTraceID::eight_ball_pool:
             eight_ball_pool::SetBinaryDataDecompressCallback(callback);
             break;
+        case RestrictedTraceID::extreme_car_driving_simulator:
+            extreme_car_driving_simulator::SetBinaryDataDecompressCallback(callback);
+            break;
         case RestrictedTraceID::fallout_shelter_online:
             fallout_shelter_online::SetBinaryDataDecompressCallback(callback);
             break;
@@ -1179,6 +1312,9 @@ void SetBinaryDataDecompressCallback(RestrictedTraceID traceID, DecompressCallba
         case RestrictedTraceID::hill_climb_racing:
             hill_climb_racing::SetBinaryDataDecompressCallback(callback);
             break;
+        case RestrictedTraceID::junes_journey:
+            junes_journey::SetBinaryDataDecompressCallback(callback);
+            break;
         case RestrictedTraceID::kartrider_rush:
             kartrider_rush::SetBinaryDataDecompressCallback(callback);
             break;
@@ -1187,6 +1323,9 @@ void SetBinaryDataDecompressCallback(RestrictedTraceID traceID, DecompressCallba
             break;
         case RestrictedTraceID::lego_legacy:
             lego_legacy::SetBinaryDataDecompressCallback(callback);
+            break;
+        case RestrictedTraceID::lineage_m:
+            lineage_m::SetBinaryDataDecompressCallback(callback);
             break;
         case RestrictedTraceID::magic_tiles_3:
             magic_tiles_3::SetBinaryDataDecompressCallback(callback);
@@ -1215,14 +1354,23 @@ void SetBinaryDataDecompressCallback(RestrictedTraceID traceID, DecompressCallba
         case RestrictedTraceID::one_punch_man:
             one_punch_man::SetBinaryDataDecompressCallback(callback);
             break;
+        case RestrictedTraceID::plants_vs_zombies_2:
+            plants_vs_zombies_2::SetBinaryDataDecompressCallback(callback);
+            break;
         case RestrictedTraceID::pubg_mobile_lite:
             pubg_mobile_lite::SetBinaryDataDecompressCallback(callback);
+            break;
+        case RestrictedTraceID::ragnarok_m_eternal_love:
+            ragnarok_m_eternal_love::SetBinaryDataDecompressCallback(callback);
             break;
         case RestrictedTraceID::raid_shadow_legends:
             raid_shadow_legends::SetBinaryDataDecompressCallback(callback);
             break;
         case RestrictedTraceID::real_commando_secret_mission:
             real_commando_secret_mission::SetBinaryDataDecompressCallback(callback);
+            break;
+        case RestrictedTraceID::real_cricket_20:
+            real_cricket_20::SetBinaryDataDecompressCallback(callback);
             break;
         case RestrictedTraceID::real_gangster_crime:
             real_gangster_crime::SetBinaryDataDecompressCallback(callback);

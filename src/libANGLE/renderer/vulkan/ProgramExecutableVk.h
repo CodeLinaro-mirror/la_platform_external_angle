@@ -37,14 +37,14 @@ class ShaderInfo final : angle::NonCopyable
 
     ANGLE_INLINE bool valid() const { return mIsInitialized; }
 
-    const gl::ShaderMap<SpirvBlob> &getSpirvBlobs() const { return mSpirvBlobs; }
+    const gl::ShaderMap<angle::spirv::Blob> &getSpirvBlobs() const { return mSpirvBlobs; }
 
     // Save and load implementation for GLES Program Binary support.
     void load(gl::BinaryInputStream *stream);
     void save(gl::BinaryOutputStream *stream);
 
   private:
-    gl::ShaderMap<SpirvBlob> mSpirvBlobs;
+    gl::ShaderMap<angle::spirv::Blob> mSpirvBlobs;
     bool mIsInitialized = false;
 };
 
@@ -101,6 +101,14 @@ struct DefaultUniformBlock final : private angle::NonCopyable
     std::vector<sh::BlockMemberInfo> uniformLayout;
 };
 
+// Performance and resource counters.
+using DescriptorSetCountList = angle::PackedEnumMap<DescriptorSetIndex, uint32_t>;
+
+struct ProgramExecutablePerfCounters
+{
+    DescriptorSetCountList descriptorSetsAllocated;
+};
+
 class ProgramExecutableVk
 {
   public:
@@ -154,7 +162,7 @@ class ProgramExecutableVk
         gl::ShaderMap<DefaultUniformBlock> &defaultUniformBlocks,
         vk::BufferHelper *defaultUniformBuffer,
         ContextVk *contextVk,
-        const vk::UniformsAndXfbDesc &xfbBufferDesc);
+        const vk::UniformsAndXfbDescriptorDesc &xfbBufferDesc);
     angle::Result updateInputAttachmentDescriptorSet(const gl::ProgramExecutable &executable,
                                                      const gl::ShaderType shaderType,
                                                      ContextVk *contextVk,
@@ -175,22 +183,16 @@ class ProgramExecutableVk
         mProgramPipeline = pipeline;
     }
 
-    using DescriptorSetCountList = std::array<uint32_t, DescriptorSetIndex::EnumCount>;
-    // Performance and resource counters.
-    struct PerfCounters
-    {
-        DescriptorSetCountList descriptorSetsAllocated;
-    };
-
-    const PerfCounters getObjectPerfCounters() const { return mObjectPerfCounters; }
+    ProgramExecutablePerfCounters getAndResetObjectPerfCounters();
 
   private:
     friend class ProgramVk;
     friend class ProgramPipelineVk;
 
-    angle::Result allocUniformAndXfbDescriptorSet(ContextVk *contextVk,
-                                                  const vk::UniformsAndXfbDesc &xfbBufferDesc,
-                                                  bool *newDescriptorSetAllocated);
+    angle::Result allocUniformAndXfbDescriptorSet(
+        ContextVk *contextVk,
+        const vk::UniformsAndXfbDescriptorDesc &xfbBufferDesc,
+        bool *newDescriptorSetAllocated);
 
     angle::Result allocateDescriptorSet(ContextVk *contextVk,
                                         DescriptorSetIndex descriptorSetIndex);
@@ -221,6 +223,8 @@ class ProgramExecutableVk
                                             ContextVk *contextVk);
     void updateTransformFeedbackDescriptorSetImpl(const gl::ProgramState &programState,
                                                   ContextVk *contextVk);
+    angle::Result getOrAllocateShaderResourcesDescriptorSet(ContextVk *contextVk,
+                                                            VkDescriptorSet *descriptorSetOut);
     angle::Result updateBuffersDescriptorSet(ContextVk *contextVk,
                                              const gl::ShaderType shaderType,
                                              vk::CommandBufferHelper *commandBufferHelper,
@@ -247,8 +251,8 @@ class ProgramExecutableVk
     size_t mNumDefaultUniformDescriptors;
     vk::BufferSerial mCurrentDefaultUniformBufferSerial;
 
-    DescriptorSetCache<vk::UniformsAndXfbDesc, VulkanCacheType::UniformsAndXfbDescriptorSet>
-        mUniformsAndXfbDescriptorSetCache;
+    DescriptorSetCache<vk::UniformsAndXfbDescriptorDesc, VulkanCacheType::UniformsAndXfbDescriptors>
+        mUniformsAndXfbDescriptorsCache;
     DescriptorSetCache<vk::TextureDescriptorDesc, VulkanCacheType::TextureDescriptors>
         mTextureDescriptorsCache;
 
@@ -282,7 +286,8 @@ class ProgramExecutableVk
     ProgramVk *mProgram;
     ProgramPipelineVk *mProgramPipeline;
 
-    PerfCounters mObjectPerfCounters;
+    ProgramExecutablePerfCounters mPerfCounters;
+    ProgramExecutablePerfCounters mCumulativePerfCounters;
 };
 
 }  // namespace rx

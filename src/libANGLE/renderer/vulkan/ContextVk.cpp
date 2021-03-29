@@ -397,7 +397,8 @@ ContextVk::ContextVk(const gl::State &state, gl::ErrorSet *errorSet, RendererVk 
       mGpuClockSync{std::numeric_limits<double>::max(), std::numeric_limits<double>::max()},
       mGpuEventTimestampOrigin(0),
       mPerfCounters{},
-      mObjectPerfCounters{},
+      mContextPerfCounters{},
+      mCumulativeContextPerfCounters{},
       mContextPriority(renderer->getDriverPriority(GetContextPriority(state))),
       mShareGroupVk(vk::GetImpl(state.getShareGroup()))
 {
@@ -431,7 +432,7 @@ ContextVk::ContextVk(const gl::State &state, gl::ErrorSet *errorSet, RendererVk 
                   DIRTY_BIT_DESCRIPTOR_SETS, DIRTY_BIT_DRIVER_UNIFORMS_BINDING};
 
     mGraphicsDirtyBitHandlers[DIRTY_BIT_MEMORY_BARRIER] =
-        &ContextVk::handleDirtyGraphicsMemorybarrier;
+        &ContextVk::handleDirtyGraphicsMemoryBarrier;
     mGraphicsDirtyBitHandlers[DIRTY_BIT_EVENT_LOG] = &ContextVk::handleDirtyGraphicsEventLog;
     mGraphicsDirtyBitHandlers[DIRTY_BIT_DEFAULT_ATTRIBS] =
         &ContextVk::handleDirtyGraphicsDefaultAttribs;
@@ -521,8 +522,6 @@ ContextVk::ContextVk(const gl::State &state, gl::ErrorSet *errorSet, RendererVk 
     mDescriptorBufferInfos.reserve(kDescriptorBufferInfosInitialSize);
     mDescriptorImageInfos.reserve(kDescriptorImageInfosInitialSize);
     mWriteDescriptorSets.reserve(kDescriptorWriteInfosInitialSize);
-
-    mObjectPerfCounters.descriptorSetsAllocated.fill(0);
 }
 
 ContextVk::~ContextVk() = default;
@@ -1070,15 +1069,15 @@ angle::Result ContextVk::setupDispatch(const gl::Context *context)
     return angle::Result::Continue;
 }
 
-angle::Result ContextVk::handleDirtyGraphicsMemorybarrier(DirtyBits::Iterator *dirtyBitsIterator,
+angle::Result ContextVk::handleDirtyGraphicsMemoryBarrier(DirtyBits::Iterator *dirtyBitsIterator,
                                                           DirtyBits dirtyBitMask)
 {
-    return handleDirtyMemorybarrierImpl(dirtyBitsIterator, dirtyBitMask);
+    return handleDirtyMemoryBarrierImpl(dirtyBitsIterator, dirtyBitMask);
 }
 
 angle::Result ContextVk::handleDirtyComputeMemoryBarrier()
 {
-    return handleDirtyMemorybarrierImpl(nullptr, {});
+    return handleDirtyMemoryBarrierImpl(nullptr, {});
 }
 
 bool ContextVk::renderPassUsesStorageResources() const
@@ -1173,7 +1172,7 @@ bool ContextVk::renderPassUsesStorageResources() const
     return false;
 }
 
-angle::Result ContextVk::handleDirtyMemorybarrierImpl(DirtyBits::Iterator *dirtyBitsIterator,
+angle::Result ContextVk::handleDirtyMemoryBarrierImpl(DirtyBits::Iterator *dirtyBitsIterator,
                                                       DirtyBits dirtyBitMask)
 {
     const gl::ProgramExecutable *executable = mState.getProgramExecutable();
@@ -1488,6 +1487,13 @@ ANGLE_INLINE angle::Result ContextVk::handleDirtyTexturesImpl(
             // using specialized barriers without breaking the RenderPass.
             textureLayout = vk::ImageLayout::DepthStencilReadOnly;
         }
+        else if (image.hasRenderPassUseFlag(vk::RenderPassUsage::RenderTargetAttachment))
+        {
+            // Right now we set this flag only when RenderTargetAttachment is set since we do not
+            // track all textures in the renderpass.
+            image.setRenderPassUsageFlag(vk::RenderPassUsage::TextureSampler);
+            textureLayout = vk::ImageLayout::ColorAttachmentAndShaderRead;
+        }
         else
         {
             gl::ShaderBitSet remainingShaderBits =
@@ -1673,8 +1679,9 @@ angle::Result ContextVk::handleDirtyGraphicsTransformFeedbackBuffersEmulation(
     }
 
     // TODO(http://anglebug.com/3570): Need to update to handle Program Pipelines
-    vk::BufferHelper *uniformBuffer      = mDefaultUniformStorage.getCurrentBuffer();
-    vk::UniformsAndXfbDesc xfbBufferDesc = transformFeedbackVk->getTransformFeedbackDesc();
+    vk::BufferHelper *uniformBuffer = mDefaultUniformStorage.getCurrentBuffer();
+    vk::UniformsAndXfbDescriptorDesc xfbBufferDesc =
+        transformFeedbackVk->getTransformFeedbackDesc();
     xfbBufferDesc.updateDefaultUniformBuffer(uniformBuffer ? uniformBuffer->getBufferSerial()
                                                            : vk::kInvalidBufferSerial);
 
@@ -1778,10 +1785,43 @@ angle::Result ContextVk::handleDirtyDescriptorSetsImpl(vk::CommandBuffer *comman
     return mExecutable->updateDescriptorSets(this, commandBuffer);
 }
 
+void ContextVk::syncObjectPerfCounters()
+{
+    uint32_t descriptorSetAllocations = 0;
+
+    // ContextVk's descriptor set allocations
+    ContextVkPerfCounters contextCounters = getAndResetObjectPerfCounters();
+    for (uint32_t count : contextCounters.descriptorSetsAllocated)
+    {
+        descriptorSetAllocations += count;
+    }
+    // UtilsVk's descriptor set allocations
+    descriptorSetAllocations += mUtils.getAndResetObjectPerfCounters().descriptorSetsAllocated;
+    // ProgramExecutableVk's descriptor set allocations
+    const gl::State &state                             = getState();
+    const gl::ShaderProgramManager &shadersAndPrograms = state.getShaderProgramManagerForCapture();
+    const gl::ResourceMap<gl::Program, gl::ShaderProgramID> &programs =
+        shadersAndPrograms.getProgramsForCaptureAndPerf();
+    for (const std::pair<GLuint, gl::Program *> &resource : programs)
+    {
+        ProgramVk *programVk = vk::GetImpl(resource.second);
+        ProgramExecutablePerfCounters progPerfCounters =
+            programVk->getExecutable().getAndResetObjectPerfCounters();
+
+        for (const uint32_t count : progPerfCounters.descriptorSetsAllocated)
+        {
+            descriptorSetAllocations += count;
+        }
+    }
+    mPerfCounters.descriptorSetAllocations = descriptorSetAllocations;
+}
+
 void ContextVk::updateOverlayOnPresent()
 {
     const gl::OverlayType *overlay = mState.getOverlay();
     ASSERT(overlay->isEnabled());
+
+    syncObjectPerfCounters();
 
     // Update overlay if active.
     {
@@ -1801,39 +1841,10 @@ void ContextVk::updateOverlayOnPresent()
     }
 
     {
-        uint32_t descriptorSetAllocations = 0;
-
-        // ContextVk's descriptor set allocations
-        for (const uint32_t count : mObjectPerfCounters.descriptorSetsAllocated)
-        {
-            descriptorSetAllocations += count;
-        }
-        // UtilsVk's descriptor set allocations
-        descriptorSetAllocations += mUtils.getObjectPerfCounters().descriptorSetsAllocated;
-        // ProgramExecutableVk's descriptor set allocations
-        const gl::State &state = getState();
-        const gl::ShaderProgramManager &shadersAndPrograms =
-            state.getShaderProgramManagerForCapture();
-        const gl::ResourceMap<gl::Program, gl::ShaderProgramID> &programs =
-            shadersAndPrograms.getProgramsForCaptureAndPerf();
-        for (const std::pair<GLuint, gl::Program *> &resource : programs)
-        {
-            ProgramVk *programVk = vk::GetImpl(resource.second);
-            ProgramExecutableVk::PerfCounters progPerfCounters =
-                programVk->getExecutable().getObjectPerfCounters();
-
-            for (const uint32_t count : progPerfCounters.descriptorSetsAllocated)
-            {
-                descriptorSetAllocations += count;
-            }
-        }
-
         gl::RunningGraphWidget *descriptorSetAllocationCount =
             overlay->getRunningGraphWidget(gl::WidgetId::VulkanDescriptorSetAllocations);
-        descriptorSetAllocationCount->add(descriptorSetAllocations -
-                                          mPerfCounters.descriptorSetAllocations);
+        descriptorSetAllocationCount->add(mPerfCounters.descriptorSetAllocations);
         descriptorSetAllocationCount->next();
-        mPerfCounters.descriptorSetAllocations = descriptorSetAllocations;
     }
 
     {
@@ -2670,12 +2681,7 @@ void ContextVk::optimizeRenderPassForPresent(VkFramebuffer framebufferHandle)
 
     // Use finalLayout instead of extra barrier for layout change to present
     vk::ImageHelper &image = color0RenderTarget->getImageForWrite();
-    image.setCurrentImageLayout(vk::ImageLayout::Present);
-    // TODO(syoussefi):  We currently don't store the layout of the resolve attachments, so once
-    // multisampled backbuffers are optimized to use resolve attachments, this information needs to
-    // be stored somewhere.  http://anglebug.com/4836
-    mRenderPassCommands->updateRenderPassAttachmentFinalLayout(vk::kAttachmentIndexZero,
-                                                               image.getCurrentImageLayout());
+    mRenderPassCommands->setImageOptimizeForPresent(&image);
 }
 
 gl::GraphicsResetStatus ContextVk::getResetStatus()
@@ -3325,7 +3331,7 @@ angle::Result ContextVk::syncState(const gl::Context *context,
                 break;
             case gl::State::DIRTY_BIT_COVERAGE_MODULATION:
                 break;
-            case gl::State::DIRTY_BIT_FRAMEBUFFER_SRGB:
+            case gl::State::DIRTY_BIT_FRAMEBUFFER_SRGB_WRITE_CONTROL_MODE:
                 break;
             case gl::State::DIRTY_BIT_CURRENT_VALUES:
             {
@@ -3939,7 +3945,7 @@ void ContextVk::invalidateComputePipelineBinding()
 void ContextVk::invalidateGraphicsDescriptorSet(DescriptorSetIndex usedDescriptorSet)
 {
     // UtilsVk currently only uses set 0
-    ASSERT(usedDescriptorSet == DescriptorSetIndex::DriverUniforms);
+    ASSERT(usedDescriptorSet == DescriptorSetIndex::Internal);
     if (mDriverUniforms[PipelineType::Graphics].descriptorSet != VK_NULL_HANDLE)
     {
         mGraphicsDirtyBits.set(DIRTY_BIT_DRIVER_UNIFORMS_BINDING);
@@ -3949,7 +3955,7 @@ void ContextVk::invalidateGraphicsDescriptorSet(DescriptorSetIndex usedDescripto
 void ContextVk::invalidateComputeDescriptorSet(DescriptorSetIndex usedDescriptorSet)
 {
     // UtilsVk currently only uses set 0
-    ASSERT(usedDescriptorSet == DescriptorSetIndex::DriverUniforms);
+    ASSERT(usedDescriptorSet == DescriptorSetIndex::Internal);
     if (mDriverUniforms[PipelineType::Compute].descriptorSet != VK_NULL_HANDLE)
     {
         mComputeDirtyBits.set(DIRTY_BIT_DRIVER_UNIFORMS_BINDING);
@@ -4352,7 +4358,7 @@ void ContextVk::handleDirtyDriverUniformsBindingImpl(vk::CommandBuffer *commandB
     }
 
     commandBuffer->bindDescriptorSets(
-        mExecutable->getPipelineLayout(), bindPoint, DescriptorSetIndex::DriverUniforms, 1,
+        mExecutable->getPipelineLayout(), bindPoint, DescriptorSetIndex::Internal, 1,
         &driverUniforms->descriptorSet, 1, &driverUniforms->dynamicOffset);
 }
 
@@ -4424,7 +4430,7 @@ angle::Result ContextVk::updateDriverUniformsDescriptorSet(
     ANGLE_TRY(mDriverUniformsDescriptorPools[pipelineType].allocateSetsAndGetInfo(
         this, driverUniforms->descriptorSetLayout.get().ptr(), 1,
         &driverUniforms->descriptorPoolBinding, &driverUniforms->descriptorSet, &newPoolAllocated));
-    mObjectPerfCounters.descriptorSetsAllocated[ToUnderlying(pipelineType)]++;
+    mContextPerfCounters.descriptorSetsAllocated[pipelineType]++;
 
     // Clear descriptor set cache. It may no longer be valid.
     if (newPoolAllocated)
@@ -5026,6 +5032,7 @@ angle::Result ContextVk::beginNewRenderPass(
     const gl::Rectangle &renderArea,
     const vk::RenderPassDesc &renderPassDesc,
     const vk::AttachmentOpsArray &renderPassAttachmentOps,
+    const vk::PackedAttachmentCount colorAttachmentCount,
     const vk::PackedAttachmentIndex depthStencilAttachmentIndex,
     const vk::PackedClearValuesArray &clearValues,
     vk::CommandBuffer **commandBufferOut)
@@ -5033,9 +5040,9 @@ angle::Result ContextVk::beginNewRenderPass(
     // Next end any currently outstanding renderPass
     ANGLE_TRY(flushCommandsAndEndRenderPass());
 
-    mRenderPassCommands->beginRenderPass(framebuffer, renderArea, renderPassDesc,
-                                         renderPassAttachmentOps, depthStencilAttachmentIndex,
-                                         clearValues, commandBufferOut);
+    mRenderPassCommands->beginRenderPass(
+        framebuffer, renderArea, renderPassDesc, renderPassAttachmentOps, colorAttachmentCount,
+        depthStencilAttachmentIndex, clearValues, commandBufferOut);
     mPerfCounters.renderPasses++;
 
     return angle::Result::Continue;
@@ -5300,6 +5307,10 @@ angle::Result ContextVk::flushOutsideRenderPassCommands()
     }
 
     ANGLE_TRY(mRenderer->flushOutsideRPCommands(this, &mOutsideRenderPassCommands));
+
+    // Make sure appropriate dirty bits are set, in case another thread makes a submission before
+    // the next dispatch call.
+    mComputeDirtyBits |= mNewComputeCommandBufferDirtyBits;
 
     mPerfCounters.flushedOutsideRenderPassCommandBuffers++;
     return angle::Result::Continue;
@@ -5700,18 +5711,25 @@ void ContextVk::outputCumulativePerfCounters()
         return;
     }
 
-    {
-        INFO() << "Context Descriptor Set Allocations: ";
+    INFO() << "Context Descriptor Set Allocations: ";
 
-        for (size_t pipelineType = 0;
-             pipelineType < mObjectPerfCounters.descriptorSetsAllocated.size(); ++pipelineType)
+    for (PipelineType pipelineType : angle::AllEnums<PipelineType>())
+    {
+        uint32_t count = mCumulativeContextPerfCounters.descriptorSetsAllocated[pipelineType];
+        if (count > 0)
         {
-            uint32_t count = mObjectPerfCounters.descriptorSetsAllocated[pipelineType];
-            if (count > 0)
-            {
-                INFO() << "    PipelineType " << pipelineType << ": " << count;
-            }
+            INFO() << "    PipelineType " << ToUnderlying(pipelineType) << ": " << count;
         }
     }
+}
+
+ContextVkPerfCounters ContextVk::getAndResetObjectPerfCounters()
+{
+    mCumulativeContextPerfCounters.descriptorSetsAllocated +=
+        mContextPerfCounters.descriptorSetsAllocated;
+
+    ContextVkPerfCounters counters               = mContextPerfCounters;
+    mContextPerfCounters.descriptorSetsAllocated = {};
+    return counters;
 }
 }  // namespace rx
