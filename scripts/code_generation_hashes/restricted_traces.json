@@ -1,6 +1,6 @@
 {
   "src/tests/restricted_traces/.gitignore":
-    "97d094f939508ea18d5b2c8f45e01785",
+    "24d49f46fdfd0758737db4ffef33e80e",
   "src/tests/restricted_traces/aliexpress.tar.gz.sha1":
     "12f48ff0c4ca7980ea879c81b0c9518b",
   "src/tests/restricted_traces/among_us.tar.gz.sha1":
@@ -11,6 +11,8 @@
     "b775f6c42b1a09065c9c19660fb82113",
   "src/tests/restricted_traces/asphalt_8.tar.gz.sha1":
     "83e8aa4663fa6130db0bff09fb915f36",
+  "src/tests/restricted_traces/avakin_life.tar.gz.sha1":
+    "371845cdb84fddc484fed2c857d3b9db",
   "src/tests/restricted_traces/brawl_stars.tar.gz.sha1":
     "8b1cf8ebd8a1099b4d298bb3b446e8bd",
   "src/tests/restricted_traces/bus_simulator_indonesia.tar.gz.sha1":
@@ -35,6 +37,8 @@
     "0d569cbab0adf4df1027f671c65f7bff",
   "src/tests/restricted_traces/eight_ball_pool.tar.gz.sha1":
     "5826ab8ccdef774fbec4106ddef76720",
+  "src/tests/restricted_traces/extreme_car_driving_simulator.tar.gz.sha1":
+    "935f2d28778428e1c608d785f9a3664e",
   "src/tests/restricted_traces/fallout_shelter_online.tar.gz.sha1":
     "6f2784d375489b6d6f44092de1a859e0",
   "src/tests/restricted_traces/fate_grand_order.tar.gz.sha1":
@@ -55,12 +59,16 @@
     "73fa97c4ab9be39017725c219666e908",
   "src/tests/restricted_traces/hill_climb_racing.tar.gz.sha1":
     "3026eeb93388fe35fa3e5e4eed95ef96",
+  "src/tests/restricted_traces/junes_journey.tar.gz.sha1":
+    "a7bd336ada3bf24c79b3e9529906fd60",
   "src/tests/restricted_traces/kartrider_rush.tar.gz.sha1":
     "c11aab56dcaba570a1993c1f8ebe4668",
   "src/tests/restricted_traces/klondike_adventures.tar.gz.sha1":
     "8f467e30dd52312c0a1c257d76db9589",
   "src/tests/restricted_traces/lego_legacy.tar.gz.sha1":
     "543b6beed660d7206c2839c6811aa9f4",
+  "src/tests/restricted_traces/lineage_m.tar.gz.sha1":
+    "dff18018a646039b905aa1fc18900778",
   "src/tests/restricted_traces/magic_tiles_3.tar.gz.sha1":
     "e31a9dcfc1734a407d3f54183941f965",
   "src/tests/restricted_traces/manhattan_10.tar.gz.sha1":
@@ -79,22 +87,28 @@
     "9a97bffd4c6c156a14308bb1c6f50a7e",
   "src/tests/restricted_traces/one_punch_man.tar.gz.sha1":
     "d7af01fd688a3cbbb9b7d58ed31620fb",
+  "src/tests/restricted_traces/plants_vs_zombies_2.tar.gz.sha1":
+    "fe1d7c220de5c5942195c0bc56267149",
   "src/tests/restricted_traces/pubg_mobile_lite.tar.gz.sha1":
     "6a77372489ee4b43639b684a39ab8d71",
+  "src/tests/restricted_traces/ragnarok_m_eternal_love.tar.gz.sha1":
+    "370d7d960100a8244fe0e811af65006b",
   "src/tests/restricted_traces/raid_shadow_legends.tar.gz.sha1":
     "18b0f7f021bd65340f25a70b79dd4789",
   "src/tests/restricted_traces/real_commando_secret_mission.tar.gz.sha1":
     "4b484dd9c53a79100ec13b6f1c86040d",
+  "src/tests/restricted_traces/real_cricket_20.tar.gz.sha1":
+    "c03e3ca87a7a992e39d664f7b16a22ca",
   "src/tests/restricted_traces/real_gangster_crime.tar.gz.sha1":
     "c85be329035a760edad673eb2ca7c3f1",
   "src/tests/restricted_traces/restricted_traces.json":
-    "e1d1b013f60fc9349d0f9190e7efa5b2",
+    "c0c306f167628f727a9516f016fd08a4",
   "src/tests/restricted_traces/restricted_traces_autogen.cpp":
-    "8cda6f05df47a23e663ef1ce44f6ad3b",
+    "de7ab1e146944a3db14d0d84fa0d7822",
   "src/tests/restricted_traces/restricted_traces_autogen.gni":
-    "7380c5d634735e54aebf3b7d968158b0",
+    "e9c67294eb60275115ad90152f824acd",
   "src/tests/restricted_traces/restricted_traces_autogen.h":
-    "d6c08b0e6e023c3132ed34bb154f3ec1",
+    "3c853089df2a7fb2f616b5d69ef65b50",
   "src/tests/restricted_traces/rise_of_kingdoms.tar.gz.sha1":
     "d4618f857c44f0dfa642ae3af8f161d9",
   "src/tests/restricted_traces/romancing_saga.tar.gz.sha1":
