@@ -15,10 +15,12 @@
 #include "libANGLE/renderer/driver_utils.h"
 #include "libANGLE/renderer/glslang_wrapper_utils.h"
 #include "libANGLE/renderer/metal/ContextMtl.h"
+#include "libANGLE/renderer/metal/DeviceMtl.h"
 #include "libANGLE/renderer/metal/SurfaceMtl.h"
 #include "libANGLE/renderer/metal/SyncMtl.h"
 #include "libANGLE/renderer/metal/mtl_common.h"
 #include "libANGLE/renderer/metal/shaders/mtl_default_shaders_src_autogen.inc"
+#include "libANGLE/trace.h"
 #include "platform/Platform.h"
 
 #include "EGL/eglext.h"
@@ -56,9 +58,8 @@ struct DefaultShaderAsyncInfoMtl
     bool compiled = false;
 };
 
-DisplayMtl::DisplayMtl(const egl::DisplayState &state)
-    : DisplayImpl(state), mUtils(this), mGlslangInitialized(false)
-{}
+// DisplayMtl implementation
+DisplayMtl::DisplayMtl(const egl::DisplayState &state) : DisplayImpl(state), mUtils(this) {}
 
 DisplayMtl::~DisplayMtl() {}
 
@@ -90,10 +91,9 @@ angle::Result DisplayMtl::initializeImpl(egl::Display *display)
 
         mCapsInitialized = false;
 
-        if (!mGlslangInitialized)
         {
-            GlslangInitialize();
-            mGlslangInitialized = true;
+            ANGLE_TRACE_EVENT0("gpu.angle,startup", "GlslangWarmup");
+            sh::InitializeGlslang();
         }
 
         if (!mState.featuresAllDisabled)
@@ -121,11 +121,7 @@ void DisplayMtl::terminate()
 
     mMetalDeviceVendorId = 0;
 
-    if (mGlslangInitialized)
-    {
-        GlslangRelease();
-        mGlslangInitialized = false;
-    }
+    sh::FinalizeGlslang();
 }
 
 bool DisplayMtl::testDeviceLost()
@@ -166,6 +162,11 @@ std::string DisplayMtl::getVersionString()
         NSProcessInfo *procInfo = [NSProcessInfo processInfo];
         return procInfo.operatingSystemVersionString.UTF8String;
     }
+}
+
+DeviceImpl *DisplayMtl::createDevice()
+{
+    return new DeviceMtl();
 }
 
 egl::Error DisplayMtl::waitClient(const gl::Context *context)
@@ -641,10 +642,9 @@ void DisplayMtl::initializeExtensions() const
     // backend to be used in Chrome (http://anglebug.com/4946)
     mNativeExtensions.debugMarker = true;
 
-    mNativeExtensions.robustness             = true;
-    mNativeExtensions.textureBorderClampOES  = false;  // not implemented yet
-    mNativeExtensions.translatedShaderSource = true;
-    mNativeExtensions.discardFramebuffer     = true;
+    mNativeExtensions.robustness            = true;
+    mNativeExtensions.textureBorderClampOES = false;  // not implemented yet
+    mNativeExtensions.discardFramebuffer    = true;
 
     // Enable EXT_blend_minmax
     mNativeExtensions.blendMinMax = true;
