@@ -269,7 +269,7 @@ std::unique_ptr<LinkEvent> ProgramVk::link(const gl::Context *context,
 
     // Gather variable info and transform sources.
     gl::ShaderMap<std::string> shaderSources;
-    GlslangWrapperVk::GetShaderSource(contextVk->getRenderer()->getFeatures(), mState, resources,
+    GlslangWrapperVk::GetShaderSource(contextVk->getFeatures(), mState, resources,
                                       &mGlslangProgramInterfaceInfo, &shaderSources,
                                       &mExecutable.mVariableInfoMap);
 
@@ -354,7 +354,8 @@ void ProgramVk::initDefaultUniformLayoutMapping(gl::ShaderMap<sh::BlockLayoutMap
         if (location.used() && !location.ignored)
         {
             const auto &uniform = uniforms[location.index];
-            if (uniform.isInDefaultBlock() && !uniform.isSampler() && !uniform.isImage())
+            if (uniform.isInDefaultBlock() && !uniform.isSampler() && !uniform.isImage() &&
+                !uniform.isFragmentInOut)
             {
                 std::string uniformName = uniform.name;
                 if (uniform.isArray())
@@ -772,8 +773,8 @@ angle::Result ProgramVk::updateUniforms(ContextVk *contextVk)
     {
         // We need to reinitialize the descriptor sets if we newly allocated buffers since we can't
         // modify the descriptor sets once initialized.
-        vk::UniformsAndXfbDesc defaultUniformsDesc;
-        vk::UniformsAndXfbDesc *uniformsAndXfbBufferDesc;
+        vk::UniformsAndXfbDescriptorDesc defaultUniformsDesc;
+        vk::UniformsAndXfbDescriptorDesc *uniformsAndXfbBufferDesc;
 
         if (glExecutable.hasTransformFeedbackOutput())
         {

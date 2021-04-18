@@ -87,12 +87,17 @@ class TransformFeedbackVk : public TransformFeedbackImpl
         return mBufferSizes;
     }
 
+    gl::TransformFeedbackBuffersArray<vk::BufferHelper> &getCounterBufferHelpers()
+    {
+        return mCounterBufferHelpers;
+    }
+
     const gl::TransformFeedbackBuffersArray<VkBuffer> &getCounterBufferHandles() const
     {
         return mCounterBufferHandles;
     }
 
-    vk::UniformsAndXfbDesc &getTransformFeedbackDesc() { return mXFBBuffersDesc; }
+    vk::UniformsAndXfbDescriptorDesc &getTransformFeedbackDesc() { return mXFBBuffersDesc; }
 
   private:
     void writeDescriptorSet(ContextVk *contextVk,
@@ -102,6 +107,8 @@ class TransformFeedbackVk : public TransformFeedbackImpl
                             VkDescriptorSet descSet) const;
 
     void initializeXFBBuffersDesc(ContextVk *contextVk, size_t xfbBufferCount);
+
+    void releaseCounterBuffers(RendererVk *renderer);
 
     // This member variable is set when glBindTransformFeedbackBuffers/glBeginTransformFeedback
     // is called and unset in dirty bit handler for transform feedback state change. If this
@@ -122,7 +129,7 @@ class TransformFeedbackVk : public TransformFeedbackImpl
     gl::TransformFeedbackBuffersArray<VkBuffer> mCounterBufferHandles;
 
     // Keys to look up in the descriptor set cache
-    vk::UniformsAndXfbDesc mXFBBuffersDesc;
+    vk::UniformsAndXfbDescriptorDesc mXFBBuffersDesc;
 };
 
 }  // namespace rx

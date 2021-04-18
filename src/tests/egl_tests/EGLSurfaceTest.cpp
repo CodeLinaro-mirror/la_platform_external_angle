@@ -457,6 +457,7 @@ TEST_P(EGLSurfaceTest, ResizeWindow)
     ANGLE_SKIP_TEST_IF(IsLinux() && isSwiftshader());
     // http://anglebug.com/5485
     ANGLE_SKIP_TEST_IF(IsIOS());
+    ANGLE_SKIP_TEST_IF(IsLinux() && IsARM());
 
     // Necessary for a window resizing test if there is no per-frame window size query
     setWindowVisible(mOSWindow, true);
@@ -1311,11 +1312,15 @@ ANGLE_INSTANTIATE_TEST(EGLSurfaceTest,
                        WithNoFixture(ES3_VULKAN()),
                        WithNoFixture(ES2_VULKAN_SWIFTSHADER()),
                        WithNoFixture(ES3_VULKAN_SWIFTSHADER()));
+
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(EGLFloatSurfaceTest);
 ANGLE_INSTANTIATE_TEST(EGLFloatSurfaceTest,
                        WithNoFixture(ES2_OPENGL()),
                        WithNoFixture(ES3_OPENGL()),
                        WithNoFixture(ES2_VULKAN()),
                        WithNoFixture(ES3_VULKAN()));
+
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(EGLSurfaceTest3);
 ANGLE_INSTANTIATE_TEST(EGLSurfaceTest3, WithNoFixture(ES3_VULKAN()));
 
 #if defined(ANGLE_ENABLE_D3D11)
