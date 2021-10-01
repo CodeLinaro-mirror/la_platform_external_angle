@@ -8689,6 +8689,10 @@
         {
           "enumerant" : "Const",
           "value" : "0x0008"
+        },
+        {
+          "enumerant" : "OptNoneINTEL",
+          "value" : "0x10000"
         }
       ]
     },
@@ -9445,7 +9449,9 @@
           "value" : 39,
           "capabilities" : [ "Kernel" ],
           "parameters" : [
-            { "kind" : "IdRef", "name" : "'Local Size Hint'" }
+            { "kind" : "IdRef", "name" : "'x size hint'" },
+            { "kind" : "IdRef", "name" : "'y size hint'" },
+            { "kind" : "IdRef", "name" : "'z size hint'" }
           ],
           "version" : "1.2"
         },
@@ -13449,6 +13455,12 @@
           "enumerant" : "LongConstantCompositeINTEL",
           "value" : 6089,
           "extensions" : [ "SPV_INTEL_long_constant_composite" ],
+          "version" : "None"
+        },
+        {
+          "enumerant" : "OptNoneINTEL",
+          "value" : 6094,
+          "extensions" : [ "SPV_INTEL_optnone" ],
           "version" : "None"
         },
         {
