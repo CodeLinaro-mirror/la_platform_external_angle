@@ -724,6 +724,10 @@ namespace VULKAN_HPP_NAMESPACE
       VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_INHERITED_VIEWPORT_SCISSOR_FEATURES_NV,
     eCommandBufferInheritanceViewportScissorInfoNV =
       VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_VIEWPORT_SCISSOR_INFO_NV,
+    ePhysicalDeviceShaderIntegerDotProductFeaturesKHR =
+      VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_INTEGER_DOT_PRODUCT_FEATURES_KHR,
+    ePhysicalDeviceShaderIntegerDotProductPropertiesKHR =
+      VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_INTEGER_DOT_PRODUCT_PROPERTIES_KHR,
     ePhysicalDeviceTexelBufferAlignmentFeaturesEXT =
       VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TEXEL_BUFFER_ALIGNMENT_FEATURES_EXT,
     ePhysicalDeviceTexelBufferAlignmentPropertiesEXT =
@@ -812,12 +816,24 @@ namespace VULKAN_HPP_NAMESPACE
     eVertexInputBindingDescription2EXT   = VK_STRUCTURE_TYPE_VERTEX_INPUT_BINDING_DESCRIPTION_2_EXT,
     eVertexInputAttributeDescription2EXT = VK_STRUCTURE_TYPE_VERTEX_INPUT_ATTRIBUTE_DESCRIPTION_2_EXT,
     ePhysicalDeviceDrmPropertiesEXT      = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DRM_PROPERTIES_EXT,
+    ePhysicalDevicePrimitiveTopologyListRestartFeaturesEXT =
+      VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PRIMITIVE_TOPOLOGY_LIST_RESTART_FEATURES_EXT,
 #if defined( VK_USE_PLATFORM_FUCHSIA )
-    eImportMemoryZirconHandleInfoFUCHSIA    = VK_STRUCTURE_TYPE_IMPORT_MEMORY_ZIRCON_HANDLE_INFO_FUCHSIA,
-    eMemoryZirconHandlePropertiesFUCHSIA    = VK_STRUCTURE_TYPE_MEMORY_ZIRCON_HANDLE_PROPERTIES_FUCHSIA,
-    eMemoryGetZirconHandleInfoFUCHSIA       = VK_STRUCTURE_TYPE_MEMORY_GET_ZIRCON_HANDLE_INFO_FUCHSIA,
-    eImportSemaphoreZirconHandleInfoFUCHSIA = VK_STRUCTURE_TYPE_IMPORT_SEMAPHORE_ZIRCON_HANDLE_INFO_FUCHSIA,
-    eSemaphoreGetZirconHandleInfoFUCHSIA    = VK_STRUCTURE_TYPE_SEMAPHORE_GET_ZIRCON_HANDLE_INFO_FUCHSIA,
+    eImportMemoryZirconHandleInfoFUCHSIA     = VK_STRUCTURE_TYPE_IMPORT_MEMORY_ZIRCON_HANDLE_INFO_FUCHSIA,
+    eMemoryZirconHandlePropertiesFUCHSIA     = VK_STRUCTURE_TYPE_MEMORY_ZIRCON_HANDLE_PROPERTIES_FUCHSIA,
+    eMemoryGetZirconHandleInfoFUCHSIA        = VK_STRUCTURE_TYPE_MEMORY_GET_ZIRCON_HANDLE_INFO_FUCHSIA,
+    eImportSemaphoreZirconHandleInfoFUCHSIA  = VK_STRUCTURE_TYPE_IMPORT_SEMAPHORE_ZIRCON_HANDLE_INFO_FUCHSIA,
+    eSemaphoreGetZirconHandleInfoFUCHSIA     = VK_STRUCTURE_TYPE_SEMAPHORE_GET_ZIRCON_HANDLE_INFO_FUCHSIA,
+    eBufferCollectionCreateInfoFUCHSIA       = VK_STRUCTURE_TYPE_BUFFER_COLLECTION_CREATE_INFO_FUCHSIA,
+    eImportMemoryBufferCollectionFUCHSIA     = VK_STRUCTURE_TYPE_IMPORT_MEMORY_BUFFER_COLLECTION_FUCHSIA,
+    eBufferCollectionImageCreateInfoFUCHSIA  = VK_STRUCTURE_TYPE_BUFFER_COLLECTION_IMAGE_CREATE_INFO_FUCHSIA,
+    eBufferCollectionPropertiesFUCHSIA       = VK_STRUCTURE_TYPE_BUFFER_COLLECTION_PROPERTIES_FUCHSIA,
+    eBufferConstraintsInfoFUCHSIA            = VK_STRUCTURE_TYPE_BUFFER_CONSTRAINTS_INFO_FUCHSIA,
+    eBufferCollectionBufferCreateInfoFUCHSIA = VK_STRUCTURE_TYPE_BUFFER_COLLECTION_BUFFER_CREATE_INFO_FUCHSIA,
+    eImageConstraintsInfoFUCHSIA             = VK_STRUCTURE_TYPE_IMAGE_CONSTRAINTS_INFO_FUCHSIA,
+    eImageFormatConstraintsInfoFUCHSIA       = VK_STRUCTURE_TYPE_IMAGE_FORMAT_CONSTRAINTS_INFO_FUCHSIA,
+    eSysmemColorSpaceFUCHSIA                 = VK_STRUCTURE_TYPE_SYSMEM_COLOR_SPACE_FUCHSIA,
+    eBufferCollectionConstraintsInfoFUCHSIA  = VK_STRUCTURE_TYPE_BUFFER_COLLECTION_CONSTRAINTS_INFO_FUCHSIA,
 #endif /*VK_USE_PLATFORM_FUCHSIA*/
     eSubpassShadingPipelineCreateInfoHUAWEI       = VK_STRUCTURE_TYPE_SUBPASS_SHADING_PIPELINE_CREATE_INFO_HUAWEI,
     ePhysicalDeviceSubpassShadingFeaturesHUAWEI   = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBPASS_SHADING_FEATURES_HUAWEI,
@@ -834,9 +850,11 @@ namespace VULKAN_HPP_NAMESPACE
     ePipelineColorWriteCreateInfoEXT           = VK_STRUCTURE_TYPE_PIPELINE_COLOR_WRITE_CREATE_INFO_EXT,
     ePhysicalDeviceGlobalPriorityQueryFeaturesEXT =
       VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_GLOBAL_PRIORITY_QUERY_FEATURES_EXT,
-    eQueueFamilyGlobalPriorityPropertiesEXT  = VK_STRUCTURE_TYPE_QUEUE_FAMILY_GLOBAL_PRIORITY_PROPERTIES_EXT,
-    ePhysicalDeviceMultiDrawFeaturesEXT      = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MULTI_DRAW_FEATURES_EXT,
-    ePhysicalDeviceMultiDrawPropertiesEXT    = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MULTI_DRAW_PROPERTIES_EXT,
+    eQueueFamilyGlobalPriorityPropertiesEXT = VK_STRUCTURE_TYPE_QUEUE_FAMILY_GLOBAL_PRIORITY_PROPERTIES_EXT,
+    ePhysicalDeviceMultiDrawFeaturesEXT     = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MULTI_DRAW_FEATURES_EXT,
+    ePhysicalDeviceMultiDrawPropertiesEXT   = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MULTI_DRAW_PROPERTIES_EXT,
+    ePhysicalDevicePageableDeviceLocalMemoryFeaturesEXT =
+      VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PAGEABLE_DEVICE_LOCAL_MEMORY_FEATURES_EXT,
     eAttachmentDescription2KHR               = VK_STRUCTURE_TYPE_ATTACHMENT_DESCRIPTION_2_KHR,
     eAttachmentDescriptionStencilLayoutKHR   = VK_STRUCTURE_TYPE_ATTACHMENT_DESCRIPTION_STENCIL_LAYOUT_KHR,
     eAttachmentReference2KHR                 = VK_STRUCTURE_TYPE_ATTACHMENT_REFERENCE_2_KHR,
@@ -1619,6 +1637,10 @@ namespace VULKAN_HPP_NAMESPACE
         return "PhysicalDeviceInheritedViewportScissorFeaturesNV";
       case StructureType::eCommandBufferInheritanceViewportScissorInfoNV:
         return "CommandBufferInheritanceViewportScissorInfoNV";
+      case StructureType::ePhysicalDeviceShaderIntegerDotProductFeaturesKHR:
+        return "PhysicalDeviceShaderIntegerDotProductFeaturesKHR";
+      case StructureType::ePhysicalDeviceShaderIntegerDotProductPropertiesKHR:
+        return "PhysicalDeviceShaderIntegerDotProductPropertiesKHR";
       case StructureType::ePhysicalDeviceTexelBufferAlignmentFeaturesEXT:
         return "PhysicalDeviceTexelBufferAlignmentFeaturesEXT";
       case StructureType::ePhysicalDeviceTexelBufferAlignmentPropertiesEXT:
@@ -1711,12 +1733,24 @@ namespace VULKAN_HPP_NAMESPACE
       case StructureType::eVertexInputBindingDescription2EXT: return "VertexInputBindingDescription2EXT";
       case StructureType::eVertexInputAttributeDescription2EXT: return "VertexInputAttributeDescription2EXT";
       case StructureType::ePhysicalDeviceDrmPropertiesEXT: return "PhysicalDeviceDrmPropertiesEXT";
+      case StructureType::ePhysicalDevicePrimitiveTopologyListRestartFeaturesEXT:
+        return "PhysicalDevicePrimitiveTopologyListRestartFeaturesEXT";
 #if defined( VK_USE_PLATFORM_FUCHSIA )
       case StructureType::eImportMemoryZirconHandleInfoFUCHSIA: return "ImportMemoryZirconHandleInfoFUCHSIA";
       case StructureType::eMemoryZirconHandlePropertiesFUCHSIA: return "MemoryZirconHandlePropertiesFUCHSIA";
       case StructureType::eMemoryGetZirconHandleInfoFUCHSIA: return "MemoryGetZirconHandleInfoFUCHSIA";
       case StructureType::eImportSemaphoreZirconHandleInfoFUCHSIA: return "ImportSemaphoreZirconHandleInfoFUCHSIA";
       case StructureType::eSemaphoreGetZirconHandleInfoFUCHSIA: return "SemaphoreGetZirconHandleInfoFUCHSIA";
+      case StructureType::eBufferCollectionCreateInfoFUCHSIA: return "BufferCollectionCreateInfoFUCHSIA";
+      case StructureType::eImportMemoryBufferCollectionFUCHSIA: return "ImportMemoryBufferCollectionFUCHSIA";
+      case StructureType::eBufferCollectionImageCreateInfoFUCHSIA: return "BufferCollectionImageCreateInfoFUCHSIA";
+      case StructureType::eBufferCollectionPropertiesFUCHSIA: return "BufferCollectionPropertiesFUCHSIA";
+      case StructureType::eBufferConstraintsInfoFUCHSIA: return "BufferConstraintsInfoFUCHSIA";
+      case StructureType::eBufferCollectionBufferCreateInfoFUCHSIA: return "BufferCollectionBufferCreateInfoFUCHSIA";
+      case StructureType::eImageConstraintsInfoFUCHSIA: return "ImageConstraintsInfoFUCHSIA";
+      case StructureType::eImageFormatConstraintsInfoFUCHSIA: return "ImageFormatConstraintsInfoFUCHSIA";
+      case StructureType::eSysmemColorSpaceFUCHSIA: return "SysmemColorSpaceFUCHSIA";
+      case StructureType::eBufferCollectionConstraintsInfoFUCHSIA: return "BufferCollectionConstraintsInfoFUCHSIA";
 #endif /*VK_USE_PLATFORM_FUCHSIA*/
       case StructureType::eSubpassShadingPipelineCreateInfoHUAWEI: return "SubpassShadingPipelineCreateInfoHUAWEI";
       case StructureType::ePhysicalDeviceSubpassShadingFeaturesHUAWEI:
@@ -1741,6 +1775,8 @@ namespace VULKAN_HPP_NAMESPACE
       case StructureType::eQueueFamilyGlobalPriorityPropertiesEXT: return "QueueFamilyGlobalPriorityPropertiesEXT";
       case StructureType::ePhysicalDeviceMultiDrawFeaturesEXT: return "PhysicalDeviceMultiDrawFeaturesEXT";
       case StructureType::ePhysicalDeviceMultiDrawPropertiesEXT: return "PhysicalDeviceMultiDrawPropertiesEXT";
+      case StructureType::ePhysicalDevicePageableDeviceLocalMemoryFeaturesEXT:
+        return "PhysicalDevicePageableDeviceLocalMemoryFeaturesEXT";
       default: return "invalid ( " + VULKAN_HPP_NAMESPACE::toHexString( static_cast<uint32_t>( value ) ) + " )";
     }
   }
@@ -1794,8 +1830,11 @@ namespace VULKAN_HPP_NAMESPACE
     eDeferredOperationKHR          = VK_OBJECT_TYPE_DEFERRED_OPERATION_KHR,
     eIndirectCommandsLayoutNV      = VK_OBJECT_TYPE_INDIRECT_COMMANDS_LAYOUT_NV,
     ePrivateDataSlotEXT            = VK_OBJECT_TYPE_PRIVATE_DATA_SLOT_EXT,
-    eDescriptorUpdateTemplateKHR   = VK_OBJECT_TYPE_DESCRIPTOR_UPDATE_TEMPLATE_KHR,
-    eSamplerYcbcrConversionKHR     = VK_OBJECT_TYPE_SAMPLER_YCBCR_CONVERSION_KHR
+#if defined( VK_USE_PLATFORM_FUCHSIA )
+    eBufferCollectionFUCHSIA = VK_OBJECT_TYPE_BUFFER_COLLECTION_FUCHSIA,
+#endif /*VK_USE_PLATFORM_FUCHSIA*/
+    eDescriptorUpdateTemplateKHR = VK_OBJECT_TYPE_DESCRIPTOR_UPDATE_TEMPLATE_KHR,
+    eSamplerYcbcrConversionKHR   = VK_OBJECT_TYPE_SAMPLER_YCBCR_CONVERSION_KHR
   };
 
   VULKAN_HPP_INLINE std::string to_string( ObjectType value )
@@ -1849,6 +1888,9 @@ namespace VULKAN_HPP_NAMESPACE
       case ObjectType::eDeferredOperationKHR: return "DeferredOperationKHR";
       case ObjectType::eIndirectCommandsLayoutNV: return "IndirectCommandsLayoutNV";
       case ObjectType::ePrivateDataSlotEXT: return "PrivateDataSlotEXT";
+#if defined( VK_USE_PLATFORM_FUCHSIA )
+      case ObjectType::eBufferCollectionFUCHSIA: return "BufferCollectionFUCHSIA";
+#endif /*VK_USE_PLATFORM_FUCHSIA*/
       default: return "invalid ( " + VULKAN_HPP_NAMESPACE::toHexString( static_cast<uint32_t>( value ) ) + " )";
     }
   }
@@ -2844,20 +2886,6 @@ namespace VULKAN_HPP_NAMESPACE
     return "(void)";
   }
 
-  enum class DeviceQueueCreateFlagBits : VkDeviceQueueCreateFlags
-  {
-    eProtected = VK_DEVICE_QUEUE_CREATE_PROTECTED_BIT
-  };
-
-  VULKAN_HPP_INLINE std::string to_string( DeviceQueueCreateFlagBits value )
-  {
-    switch ( value )
-    {
-      case DeviceQueueCreateFlagBits::eProtected: return "Protected";
-      default: return "invalid ( " + VULKAN_HPP_NAMESPACE::toHexString( static_cast<uint32_t>( value ) ) + " )";
-    }
-  }
-
   enum class DeviceCreateFlagBits
   {
   };
@@ -3433,20 +3461,6 @@ namespace VULKAN_HPP_NAMESPACE
   VULKAN_HPP_INLINE std::string to_string( ShaderModuleCreateFlagBits )
   {
     return "(void)";
-  }
-
-  enum class PipelineCacheCreateFlagBits : VkPipelineCacheCreateFlags
-  {
-    eExternallySynchronizedEXT = VK_PIPELINE_CACHE_CREATE_EXTERNALLY_SYNCHRONIZED_BIT_EXT
-  };
-
-  VULKAN_HPP_INLINE std::string to_string( PipelineCacheCreateFlagBits value )
-  {
-    switch ( value )
-    {
-      case PipelineCacheCreateFlagBits::eExternallySynchronizedEXT: return "ExternallySynchronizedEXT";
-      default: return "invalid ( " + VULKAN_HPP_NAMESPACE::toHexString( static_cast<uint32_t>( value ) ) + " )";
-    }
   }
 
   enum class BlendFactor
@@ -4422,7 +4436,8 @@ namespace VULKAN_HPP_NAMESPACE
   {
     eLoad     = VK_ATTACHMENT_LOAD_OP_LOAD,
     eClear    = VK_ATTACHMENT_LOAD_OP_CLEAR,
-    eDontCare = VK_ATTACHMENT_LOAD_OP_DONT_CARE
+    eDontCare = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+    eNoneEXT  = VK_ATTACHMENT_LOAD_OP_NONE_EXT
   };
 
   VULKAN_HPP_INLINE std::string to_string( AttachmentLoadOp value )
@@ -4432,6 +4447,7 @@ namespace VULKAN_HPP_NAMESPACE
       case AttachmentLoadOp::eLoad: return "Load";
       case AttachmentLoadOp::eClear: return "Clear";
       case AttachmentLoadOp::eDontCare: return "DontCare";
+      case AttachmentLoadOp::eNoneEXT: return "NoneEXT";
       default: return "invalid ( " + VULKAN_HPP_NAMESPACE::toHexString( static_cast<uint32_t>( value ) ) + " )";
     }
   }
@@ -4440,6 +4456,7 @@ namespace VULKAN_HPP_NAMESPACE
   {
     eStore    = VK_ATTACHMENT_STORE_OP_STORE,
     eDontCare = VK_ATTACHMENT_STORE_OP_DONT_CARE,
+    eNoneEXT  = VK_ATTACHMENT_STORE_OP_NONE_EXT,
     eNoneQCOM = VK_ATTACHMENT_STORE_OP_NONE_QCOM
   };
 
@@ -4449,7 +4466,7 @@ namespace VULKAN_HPP_NAMESPACE
     {
       case AttachmentStoreOp::eStore: return "Store";
       case AttachmentStoreOp::eDontCare: return "DontCare";
-      case AttachmentStoreOp::eNoneQCOM: return "NoneQCOM";
+      case AttachmentStoreOp::eNoneEXT: return "NoneEXT";
       default: return "invalid ( " + VULKAN_HPP_NAMESPACE::toHexString( static_cast<uint32_t>( value ) ) + " )";
     }
   }
@@ -4809,6 +4826,20 @@ namespace VULKAN_HPP_NAMESPACE
     }
   }
 
+  enum class DeviceQueueCreateFlagBits : VkDeviceQueueCreateFlags
+  {
+    eProtected = VK_DEVICE_QUEUE_CREATE_PROTECTED_BIT
+  };
+
+  VULKAN_HPP_INLINE std::string to_string( DeviceQueueCreateFlagBits value )
+  {
+    switch ( value )
+    {
+      case DeviceQueueCreateFlagBits::eProtected: return "Protected";
+      default: return "invalid ( " + VULKAN_HPP_NAMESPACE::toHexString( static_cast<uint32_t>( value ) ) + " )";
+    }
+  }
+
   enum class SamplerYcbcrModelConversion
   {
     eRgbIdentity   = VK_SAMPLER_YCBCR_MODEL_CONVERSION_RGB_IDENTITY,
@@ -5092,7 +5123,11 @@ namespace VULKAN_HPP_NAMESPACE
     eMesaLlvmpipe            = VK_DRIVER_ID_MESA_LLVMPIPE,
     eMoltenvk                = VK_DRIVER_ID_MOLTENVK,
     eCoreaviProprietary      = VK_DRIVER_ID_COREAVI_PROPRIETARY,
-    eJuiceProprietary        = VK_DRIVER_ID_JUICE_PROPRIETARY
+    eJuiceProprietary        = VK_DRIVER_ID_JUICE_PROPRIETARY,
+    eVerisiliconProprietary  = VK_DRIVER_ID_VERISILICON_PROPRIETARY,
+    eMesaTurnip              = VK_DRIVER_ID_MESA_TURNIP,
+    eMesaV3Dv                = VK_DRIVER_ID_MESA_V3DV,
+    eMesaPanvk               = VK_DRIVER_ID_MESA_PANVK
   };
   using DriverIdKHR = DriverId;
 
@@ -5116,6 +5151,10 @@ namespace VULKAN_HPP_NAMESPACE
       case DriverId::eMoltenvk: return "Moltenvk";
       case DriverId::eCoreaviProprietary: return "CoreaviProprietary";
       case DriverId::eJuiceProprietary: return "JuiceProprietary";
+      case DriverId::eVerisiliconProprietary: return "VerisiliconProprietary";
+      case DriverId::eMesaTurnip: return "MesaTurnip";
+      case DriverId::eMesaV3Dv: return "MesaV3Dv";
+      case DriverId::eMesaPanvk: return "MesaPanvk";
       default: return "invalid ( " + VULKAN_HPP_NAMESPACE::toHexString( static_cast<uint32_t>( value ) ) + " )";
     }
   }
@@ -5527,44 +5566,47 @@ namespace VULKAN_HPP_NAMESPACE
 
   enum class DebugReportObjectTypeEXT
   {
-    eUnknown                     = VK_DEBUG_REPORT_OBJECT_TYPE_UNKNOWN_EXT,
-    eInstance                    = VK_DEBUG_REPORT_OBJECT_TYPE_INSTANCE_EXT,
-    ePhysicalDevice              = VK_DEBUG_REPORT_OBJECT_TYPE_PHYSICAL_DEVICE_EXT,
-    eDevice                      = VK_DEBUG_REPORT_OBJECT_TYPE_DEVICE_EXT,
-    eQueue                       = VK_DEBUG_REPORT_OBJECT_TYPE_QUEUE_EXT,
-    eSemaphore                   = VK_DEBUG_REPORT_OBJECT_TYPE_SEMAPHORE_EXT,
-    eCommandBuffer               = VK_DEBUG_REPORT_OBJECT_TYPE_COMMAND_BUFFER_EXT,
-    eFence                       = VK_DEBUG_REPORT_OBJECT_TYPE_FENCE_EXT,
-    eDeviceMemory                = VK_DEBUG_REPORT_OBJECT_TYPE_DEVICE_MEMORY_EXT,
-    eBuffer                      = VK_DEBUG_REPORT_OBJECT_TYPE_BUFFER_EXT,
-    eImage                       = VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_EXT,
-    eEvent                       = VK_DEBUG_REPORT_OBJECT_TYPE_EVENT_EXT,
-    eQueryPool                   = VK_DEBUG_REPORT_OBJECT_TYPE_QUERY_POOL_EXT,
-    eBufferView                  = VK_DEBUG_REPORT_OBJECT_TYPE_BUFFER_VIEW_EXT,
-    eImageView                   = VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_VIEW_EXT,
-    eShaderModule                = VK_DEBUG_REPORT_OBJECT_TYPE_SHADER_MODULE_EXT,
-    ePipelineCache               = VK_DEBUG_REPORT_OBJECT_TYPE_PIPELINE_CACHE_EXT,
-    ePipelineLayout              = VK_DEBUG_REPORT_OBJECT_TYPE_PIPELINE_LAYOUT_EXT,
-    eRenderPass                  = VK_DEBUG_REPORT_OBJECT_TYPE_RENDER_PASS_EXT,
-    ePipeline                    = VK_DEBUG_REPORT_OBJECT_TYPE_PIPELINE_EXT,
-    eDescriptorSetLayout         = VK_DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_SET_LAYOUT_EXT,
-    eSampler                     = VK_DEBUG_REPORT_OBJECT_TYPE_SAMPLER_EXT,
-    eDescriptorPool              = VK_DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_POOL_EXT,
-    eDescriptorSet               = VK_DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_SET_EXT,
-    eFramebuffer                 = VK_DEBUG_REPORT_OBJECT_TYPE_FRAMEBUFFER_EXT,
-    eCommandPool                 = VK_DEBUG_REPORT_OBJECT_TYPE_COMMAND_POOL_EXT,
-    eSurfaceKHR                  = VK_DEBUG_REPORT_OBJECT_TYPE_SURFACE_KHR_EXT,
-    eSwapchainKHR                = VK_DEBUG_REPORT_OBJECT_TYPE_SWAPCHAIN_KHR_EXT,
-    eDebugReportCallbackEXT      = VK_DEBUG_REPORT_OBJECT_TYPE_DEBUG_REPORT_CALLBACK_EXT_EXT,
-    eDisplayKHR                  = VK_DEBUG_REPORT_OBJECT_TYPE_DISPLAY_KHR_EXT,
-    eDisplayModeKHR              = VK_DEBUG_REPORT_OBJECT_TYPE_DISPLAY_MODE_KHR_EXT,
-    eValidationCacheEXT          = VK_DEBUG_REPORT_OBJECT_TYPE_VALIDATION_CACHE_EXT_EXT,
-    eSamplerYcbcrConversion      = VK_DEBUG_REPORT_OBJECT_TYPE_SAMPLER_YCBCR_CONVERSION_EXT,
-    eDescriptorUpdateTemplate    = VK_DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_UPDATE_TEMPLATE_EXT,
-    eCuModuleNVX                 = VK_DEBUG_REPORT_OBJECT_TYPE_CU_MODULE_NVX_EXT,
-    eCuFunctionNVX               = VK_DEBUG_REPORT_OBJECT_TYPE_CU_FUNCTION_NVX_EXT,
-    eAccelerationStructureKHR    = VK_DEBUG_REPORT_OBJECT_TYPE_ACCELERATION_STRUCTURE_KHR_EXT,
-    eAccelerationStructureNV     = VK_DEBUG_REPORT_OBJECT_TYPE_ACCELERATION_STRUCTURE_NV_EXT,
+    eUnknown                  = VK_DEBUG_REPORT_OBJECT_TYPE_UNKNOWN_EXT,
+    eInstance                 = VK_DEBUG_REPORT_OBJECT_TYPE_INSTANCE_EXT,
+    ePhysicalDevice           = VK_DEBUG_REPORT_OBJECT_TYPE_PHYSICAL_DEVICE_EXT,
+    eDevice                   = VK_DEBUG_REPORT_OBJECT_TYPE_DEVICE_EXT,
+    eQueue                    = VK_DEBUG_REPORT_OBJECT_TYPE_QUEUE_EXT,
+    eSemaphore                = VK_DEBUG_REPORT_OBJECT_TYPE_SEMAPHORE_EXT,
+    eCommandBuffer            = VK_DEBUG_REPORT_OBJECT_TYPE_COMMAND_BUFFER_EXT,
+    eFence                    = VK_DEBUG_REPORT_OBJECT_TYPE_FENCE_EXT,
+    eDeviceMemory             = VK_DEBUG_REPORT_OBJECT_TYPE_DEVICE_MEMORY_EXT,
+    eBuffer                   = VK_DEBUG_REPORT_OBJECT_TYPE_BUFFER_EXT,
+    eImage                    = VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_EXT,
+    eEvent                    = VK_DEBUG_REPORT_OBJECT_TYPE_EVENT_EXT,
+    eQueryPool                = VK_DEBUG_REPORT_OBJECT_TYPE_QUERY_POOL_EXT,
+    eBufferView               = VK_DEBUG_REPORT_OBJECT_TYPE_BUFFER_VIEW_EXT,
+    eImageView                = VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_VIEW_EXT,
+    eShaderModule             = VK_DEBUG_REPORT_OBJECT_TYPE_SHADER_MODULE_EXT,
+    ePipelineCache            = VK_DEBUG_REPORT_OBJECT_TYPE_PIPELINE_CACHE_EXT,
+    ePipelineLayout           = VK_DEBUG_REPORT_OBJECT_TYPE_PIPELINE_LAYOUT_EXT,
+    eRenderPass               = VK_DEBUG_REPORT_OBJECT_TYPE_RENDER_PASS_EXT,
+    ePipeline                 = VK_DEBUG_REPORT_OBJECT_TYPE_PIPELINE_EXT,
+    eDescriptorSetLayout      = VK_DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_SET_LAYOUT_EXT,
+    eSampler                  = VK_DEBUG_REPORT_OBJECT_TYPE_SAMPLER_EXT,
+    eDescriptorPool           = VK_DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_POOL_EXT,
+    eDescriptorSet            = VK_DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_SET_EXT,
+    eFramebuffer              = VK_DEBUG_REPORT_OBJECT_TYPE_FRAMEBUFFER_EXT,
+    eCommandPool              = VK_DEBUG_REPORT_OBJECT_TYPE_COMMAND_POOL_EXT,
+    eSurfaceKHR               = VK_DEBUG_REPORT_OBJECT_TYPE_SURFACE_KHR_EXT,
+    eSwapchainKHR             = VK_DEBUG_REPORT_OBJECT_TYPE_SWAPCHAIN_KHR_EXT,
+    eDebugReportCallbackEXT   = VK_DEBUG_REPORT_OBJECT_TYPE_DEBUG_REPORT_CALLBACK_EXT_EXT,
+    eDisplayKHR               = VK_DEBUG_REPORT_OBJECT_TYPE_DISPLAY_KHR_EXT,
+    eDisplayModeKHR           = VK_DEBUG_REPORT_OBJECT_TYPE_DISPLAY_MODE_KHR_EXT,
+    eValidationCacheEXT       = VK_DEBUG_REPORT_OBJECT_TYPE_VALIDATION_CACHE_EXT_EXT,
+    eSamplerYcbcrConversion   = VK_DEBUG_REPORT_OBJECT_TYPE_SAMPLER_YCBCR_CONVERSION_EXT,
+    eDescriptorUpdateTemplate = VK_DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_UPDATE_TEMPLATE_EXT,
+    eCuModuleNVX              = VK_DEBUG_REPORT_OBJECT_TYPE_CU_MODULE_NVX_EXT,
+    eCuFunctionNVX            = VK_DEBUG_REPORT_OBJECT_TYPE_CU_FUNCTION_NVX_EXT,
+    eAccelerationStructureKHR = VK_DEBUG_REPORT_OBJECT_TYPE_ACCELERATION_STRUCTURE_KHR_EXT,
+    eAccelerationStructureNV  = VK_DEBUG_REPORT_OBJECT_TYPE_ACCELERATION_STRUCTURE_NV_EXT,
+#if defined( VK_USE_PLATFORM_FUCHSIA )
+    eBufferCollectionFUCHSIA = VK_DEBUG_REPORT_OBJECT_TYPE_BUFFER_COLLECTION_FUCHSIA_EXT,
+#endif /*VK_USE_PLATFORM_FUCHSIA*/
     eDebugReport                 = VK_DEBUG_REPORT_OBJECT_TYPE_DEBUG_REPORT_EXT,
     eDescriptorUpdateTemplateKHR = VK_DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_UPDATE_TEMPLATE_KHR_EXT,
     eSamplerYcbcrConversionKHR   = VK_DEBUG_REPORT_OBJECT_TYPE_SAMPLER_YCBCR_CONVERSION_KHR_EXT,
@@ -5613,6 +5655,9 @@ namespace VULKAN_HPP_NAMESPACE
       case DebugReportObjectTypeEXT::eCuFunctionNVX: return "CuFunctionNVX";
       case DebugReportObjectTypeEXT::eAccelerationStructureKHR: return "AccelerationStructureKHR";
       case DebugReportObjectTypeEXT::eAccelerationStructureNV: return "AccelerationStructureNV";
+#if defined( VK_USE_PLATFORM_FUCHSIA )
+      case DebugReportObjectTypeEXT::eBufferCollectionFUCHSIA: return "BufferCollectionFUCHSIA";
+#endif /*VK_USE_PLATFORM_FUCHSIA*/
       default: return "invalid ( " + VULKAN_HPP_NAMESPACE::toHexString( static_cast<uint32_t>( value ) ) + " )";
     }
   }
@@ -5754,7 +5799,6 @@ namespace VULKAN_HPP_NAMESPACE
 
   enum class VideoCodingQualityPresetFlagBitsKHR : VkVideoCodingQualityPresetFlagsKHR
   {
-    eDefault = VK_VIDEO_CODING_QUALITY_PRESET_DEFAULT_BIT_KHR,
     eNormal  = VK_VIDEO_CODING_QUALITY_PRESET_NORMAL_BIT_KHR,
     ePower   = VK_VIDEO_CODING_QUALITY_PRESET_POWER_BIT_KHR,
     eQuality = VK_VIDEO_CODING_QUALITY_PRESET_QUALITY_BIT_KHR
@@ -5764,7 +5808,6 @@ namespace VULKAN_HPP_NAMESPACE
   {
     switch ( value )
     {
-      case VideoCodingQualityPresetFlagBitsKHR::eDefault: return "Default";
       case VideoCodingQualityPresetFlagBitsKHR::eNormal: return "Normal";
       case VideoCodingQualityPresetFlagBitsKHR::ePower: return "Power";
       case VideoCodingQualityPresetFlagBitsKHR::eQuality: return "Quality";
@@ -6531,11 +6574,13 @@ namespace VULKAN_HPP_NAMESPACE
 
   enum class GeometryInstanceFlagBitsKHR : VkGeometryInstanceFlagsKHR
   {
-    eTriangleFacingCullDisable     = VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR,
-    eTriangleFrontCounterclockwise = VK_GEOMETRY_INSTANCE_TRIANGLE_FRONT_COUNTERCLOCKWISE_BIT_KHR,
-    eForceOpaque                   = VK_GEOMETRY_INSTANCE_FORCE_OPAQUE_BIT_KHR,
-    eForceNoOpaque                 = VK_GEOMETRY_INSTANCE_FORCE_NO_OPAQUE_BIT_KHR,
-    eTriangleCullDisable           = VK_GEOMETRY_INSTANCE_TRIANGLE_CULL_DISABLE_BIT_NV
+    eTriangleFacingCullDisable        = VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR,
+    eTriangleFlipFacing               = VK_GEOMETRY_INSTANCE_TRIANGLE_FLIP_FACING_BIT_KHR,
+    eForceOpaque                      = VK_GEOMETRY_INSTANCE_FORCE_OPAQUE_BIT_KHR,
+    eForceNoOpaque                    = VK_GEOMETRY_INSTANCE_FORCE_NO_OPAQUE_BIT_KHR,
+    eTriangleCullDisable              = VK_GEOMETRY_INSTANCE_TRIANGLE_CULL_DISABLE_BIT_NV,
+    eTriangleFrontCounterclockwiseKHR = VK_GEOMETRY_INSTANCE_TRIANGLE_FRONT_COUNTERCLOCKWISE_BIT_KHR,
+    eTriangleFrontCounterclockwise    = VK_GEOMETRY_INSTANCE_TRIANGLE_FRONT_COUNTERCLOCKWISE_BIT_NV
   };
   using GeometryInstanceFlagBitsNV = GeometryInstanceFlagBitsKHR;
 
@@ -6544,7 +6589,7 @@ namespace VULKAN_HPP_NAMESPACE
     switch ( value )
     {
       case GeometryInstanceFlagBitsKHR::eTriangleFacingCullDisable: return "TriangleFacingCullDisable";
-      case GeometryInstanceFlagBitsKHR::eTriangleFrontCounterclockwise: return "TriangleFrontCounterclockwise";
+      case GeometryInstanceFlagBitsKHR::eTriangleFlipFacing: return "TriangleFlipFacing";
       case GeometryInstanceFlagBitsKHR::eForceOpaque: return "ForceOpaque";
       case GeometryInstanceFlagBitsKHR::eForceNoOpaque: return "ForceNoOpaque";
       default: return "invalid ( " + VULKAN_HPP_NAMESPACE::toHexString( static_cast<uint32_t>( value ) ) + " )";
@@ -7419,6 +7464,22 @@ namespace VULKAN_HPP_NAMESPACE
     return "(void)";
   }
 
+  //=== VK_EXT_pipeline_creation_cache_control ===
+
+  enum class PipelineCacheCreateFlagBits : VkPipelineCacheCreateFlags
+  {
+    eExternallySynchronizedEXT = VK_PIPELINE_CACHE_CREATE_EXTERNALLY_SYNCHRONIZED_BIT_EXT
+  };
+
+  VULKAN_HPP_INLINE std::string to_string( PipelineCacheCreateFlagBits value )
+  {
+    switch ( value )
+    {
+      case PipelineCacheCreateFlagBits::eExternallySynchronizedEXT: return "ExternallySynchronizedEXT";
+      default: return "invalid ( " + VULKAN_HPP_NAMESPACE::toHexString( static_cast<uint32_t>( value ) ) + " )";
+    }
+  }
+
 #if defined( VK_ENABLE_BETA_EXTENSIONS )
   //=== VK_KHR_video_encode_queue ===
 
@@ -7844,6 +7905,41 @@ namespace VULKAN_HPP_NAMESPACE
     }
   }
 
+#if defined( VK_USE_PLATFORM_FUCHSIA )
+  //=== VK_FUCHSIA_buffer_collection ===
+
+  enum class ImageFormatConstraintsFlagBitsFUCHSIA : VkImageFormatConstraintsFlagsFUCHSIA
+  {
+  };
+
+  VULKAN_HPP_INLINE std::string to_string( ImageFormatConstraintsFlagBitsFUCHSIA )
+  {
+    return "(void)";
+  }
+
+  enum class ImageConstraintsInfoFlagBitsFUCHSIA : VkImageConstraintsInfoFlagsFUCHSIA
+  {
+    eCpuReadRarely     = VK_IMAGE_CONSTRAINTS_INFO_CPU_READ_RARELY_FUCHSIA,
+    eCpuReadOften      = VK_IMAGE_CONSTRAINTS_INFO_CPU_READ_OFTEN_FUCHSIA,
+    eCpuWriteRarely    = VK_IMAGE_CONSTRAINTS_INFO_CPU_WRITE_RARELY_FUCHSIA,
+    eCpuWriteOften     = VK_IMAGE_CONSTRAINTS_INFO_CPU_WRITE_OFTEN_FUCHSIA,
+    eProtectedOptional = VK_IMAGE_CONSTRAINTS_INFO_PROTECTED_OPTIONAL_FUCHSIA
+  };
+
+  VULKAN_HPP_INLINE std::string to_string( ImageConstraintsInfoFlagBitsFUCHSIA value )
+  {
+    switch ( value )
+    {
+      case ImageConstraintsInfoFlagBitsFUCHSIA::eCpuReadRarely: return "CpuReadRarely";
+      case ImageConstraintsInfoFlagBitsFUCHSIA::eCpuReadOften: return "CpuReadOften";
+      case ImageConstraintsInfoFlagBitsFUCHSIA::eCpuWriteRarely: return "CpuWriteRarely";
+      case ImageConstraintsInfoFlagBitsFUCHSIA::eCpuWriteOften: return "CpuWriteOften";
+      case ImageConstraintsInfoFlagBitsFUCHSIA::eProtectedOptional: return "ProtectedOptional";
+      default: return "invalid ( " + VULKAN_HPP_NAMESPACE::toHexString( static_cast<uint32_t>( value ) ) + " )";
+    }
+  }
+#endif /*VK_USE_PLATFORM_FUCHSIA*/
+
 #if defined( VK_USE_PLATFORM_SCREEN_QNX )
   //=== VK_QNX_screen_surface ===
 
@@ -7949,8 +8045,8 @@ namespace VULKAN_HPP_NAMESPACE
     return FormatFeatureFlags( bit0 ) | bit1;
   }
 
-  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR FormatFeatureFlags operator&(FormatFeatureFlagBits bit0,
-                                                                      FormatFeatureFlagBits bit1)VULKAN_HPP_NOEXCEPT
+  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR FormatFeatureFlags operator&( FormatFeatureFlagBits bit0,
+                                                                       FormatFeatureFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return FormatFeatureFlags( bit0 ) & bit1;
   }
@@ -8038,6 +8134,7 @@ namespace VULKAN_HPP_NAMESPACE
     if ( value & FormatFeatureFlagBits::eVideoEncodeDpbKHR )
       result += "VideoEncodeDpbKHR | ";
 #endif /*VK_ENABLE_BETA_EXTENSIONS*/
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -8067,8 +8164,8 @@ namespace VULKAN_HPP_NAMESPACE
     return ImageCreateFlags( bit0 ) | bit1;
   }
 
-  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR ImageCreateFlags operator&(ImageCreateFlagBits bit0,
-                                                                    ImageCreateFlagBits bit1)VULKAN_HPP_NOEXCEPT
+  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR ImageCreateFlags operator&( ImageCreateFlagBits bit0,
+                                                                     ImageCreateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return ImageCreateFlags( bit0 ) & bit1;
   }
@@ -8120,6 +8217,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "SampleLocationsCompatibleDepthEXT | ";
     if ( value & ImageCreateFlagBits::eSubsampledEXT )
       result += "SubsampledEXT | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -8155,8 +8253,8 @@ namespace VULKAN_HPP_NAMESPACE
     return ImageUsageFlags( bit0 ) | bit1;
   }
 
-  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR ImageUsageFlags operator&(ImageUsageFlagBits bit0,
-                                                                   ImageUsageFlagBits bit1)VULKAN_HPP_NOEXCEPT
+  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR ImageUsageFlags operator&( ImageUsageFlagBits bit0,
+                                                                    ImageUsageFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return ImageUsageFlags( bit0 ) & bit1;
   }
@@ -8216,6 +8314,7 @@ namespace VULKAN_HPP_NAMESPACE
 #endif /*VK_ENABLE_BETA_EXTENSIONS*/
     if ( value & ImageUsageFlagBits::eInvocationMaskHUAWEI )
       result += "InvocationMaskHUAWEI | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -8243,8 +8342,8 @@ namespace VULKAN_HPP_NAMESPACE
     return MemoryHeapFlags( bit0 ) | bit1;
   }
 
-  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR MemoryHeapFlags operator&(MemoryHeapFlagBits bit0,
-                                                                   MemoryHeapFlagBits bit1)VULKAN_HPP_NOEXCEPT
+  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR MemoryHeapFlags operator&( MemoryHeapFlagBits bit0,
+                                                                    MemoryHeapFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return MemoryHeapFlags( bit0 ) & bit1;
   }
@@ -8270,6 +8369,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "DeviceLocal | ";
     if ( value & MemoryHeapFlagBits::eMultiInstance )
       result += "MultiInstance | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -8290,19 +8390,19 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR MemoryPropertyFlags
-                                         operator|( MemoryPropertyFlagBits bit0, MemoryPropertyFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( MemoryPropertyFlagBits bit0, MemoryPropertyFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return MemoryPropertyFlags( bit0 ) | bit1;
   }
 
-  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR MemoryPropertyFlags operator&(MemoryPropertyFlagBits bit0,
-                                                                       MemoryPropertyFlagBits bit1)VULKAN_HPP_NOEXCEPT
+  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR MemoryPropertyFlags
+    operator&( MemoryPropertyFlagBits bit0, MemoryPropertyFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return MemoryPropertyFlags( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR MemoryPropertyFlags
-                                         operator^( MemoryPropertyFlagBits bit0, MemoryPropertyFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( MemoryPropertyFlagBits bit0, MemoryPropertyFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return MemoryPropertyFlags( bit0 ) ^ bit1;
   }
@@ -8337,6 +8437,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "DeviceUncachedAMD | ";
     if ( value & MemoryPropertyFlagBits::eRdmaCapableNV )
       result += "RdmaCapableNV | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -8362,7 +8463,8 @@ namespace VULKAN_HPP_NAMESPACE
     return QueueFlags( bit0 ) | bit1;
   }
 
-  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR QueueFlags operator&(QueueFlagBits bit0, QueueFlagBits bit1)VULKAN_HPP_NOEXCEPT
+  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR QueueFlags operator&( QueueFlagBits bit0,
+                                                               QueueFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return QueueFlags( bit0 ) & bit1;
   }
@@ -8400,6 +8502,7 @@ namespace VULKAN_HPP_NAMESPACE
     if ( value & QueueFlagBits::eVideoEncodeKHR )
       result += "VideoEncodeKHR | ";
 #endif /*VK_ENABLE_BETA_EXTENSIONS*/
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -8423,8 +8526,8 @@ namespace VULKAN_HPP_NAMESPACE
     return SampleCountFlags( bit0 ) | bit1;
   }
 
-  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR SampleCountFlags operator&(SampleCountFlagBits bit0,
-                                                                    SampleCountFlagBits bit1)VULKAN_HPP_NOEXCEPT
+  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR SampleCountFlags operator&( SampleCountFlagBits bit0,
+                                                                     SampleCountFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return SampleCountFlags( bit0 ) & bit1;
   }
@@ -8460,6 +8563,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "32 | ";
     if ( value & SampleCountFlagBits::e64 )
       result += "64 | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -8482,19 +8586,19 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR DeviceQueueCreateFlags
-                                         operator|( DeviceQueueCreateFlagBits bit0, DeviceQueueCreateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( DeviceQueueCreateFlagBits bit0, DeviceQueueCreateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return DeviceQueueCreateFlags( bit0 ) | bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR DeviceQueueCreateFlags
-                                         operator&(DeviceQueueCreateFlagBits bit0, DeviceQueueCreateFlagBits bit1)VULKAN_HPP_NOEXCEPT
+    operator&( DeviceQueueCreateFlagBits bit0, DeviceQueueCreateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return DeviceQueueCreateFlags( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR DeviceQueueCreateFlags
-                                         operator^( DeviceQueueCreateFlagBits bit0, DeviceQueueCreateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( DeviceQueueCreateFlagBits bit0, DeviceQueueCreateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return DeviceQueueCreateFlags( bit0 ) ^ bit1;
   }
@@ -8513,6 +8617,7 @@ namespace VULKAN_HPP_NAMESPACE
     std::string result;
     if ( value & DeviceQueueCreateFlagBits::eProtected )
       result += "Protected | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -8549,8 +8654,8 @@ namespace VULKAN_HPP_NAMESPACE
     return PipelineStageFlags( bit0 ) | bit1;
   }
 
-  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR PipelineStageFlags operator&(PipelineStageFlagBits bit0,
-                                                                      PipelineStageFlagBits bit1)VULKAN_HPP_NOEXCEPT
+  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR PipelineStageFlags operator&( PipelineStageFlagBits bit0,
+                                                                       PipelineStageFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return PipelineStageFlags( bit0 ) & bit1;
   }
@@ -8624,6 +8729,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "FragmentShadingRateAttachmentKHR | ";
     if ( value & PipelineStageFlagBits::eCommandPreprocessNV )
       result += "CommandPreprocessNV | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -8656,8 +8762,8 @@ namespace VULKAN_HPP_NAMESPACE
     return ImageAspectFlags( bit0 ) | bit1;
   }
 
-  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR ImageAspectFlags operator&(ImageAspectFlagBits bit0,
-                                                                    ImageAspectFlagBits bit1)VULKAN_HPP_NOEXCEPT
+  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR ImageAspectFlags operator&( ImageAspectFlagBits bit0,
+                                                                     ImageAspectFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return ImageAspectFlags( bit0 ) & bit1;
   }
@@ -8701,6 +8807,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "MemoryPlane2EXT | ";
     if ( value & ImageAspectFlagBits::eMemoryPlane3EXT )
       result += "MemoryPlane3EXT | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -8718,19 +8825,19 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR SparseImageFormatFlags
-                                         operator|( SparseImageFormatFlagBits bit0, SparseImageFormatFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( SparseImageFormatFlagBits bit0, SparseImageFormatFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return SparseImageFormatFlags( bit0 ) | bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR SparseImageFormatFlags
-                                         operator&(SparseImageFormatFlagBits bit0, SparseImageFormatFlagBits bit1)VULKAN_HPP_NOEXCEPT
+    operator&( SparseImageFormatFlagBits bit0, SparseImageFormatFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return SparseImageFormatFlags( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR SparseImageFormatFlags
-                                         operator^( SparseImageFormatFlagBits bit0, SparseImageFormatFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( SparseImageFormatFlagBits bit0, SparseImageFormatFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return SparseImageFormatFlags( bit0 ) ^ bit1;
   }
@@ -8753,6 +8860,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "AlignedMipSize | ";
     if ( value & SparseImageFormatFlagBits::eNonstandardBlockSize )
       result += "NonstandardBlockSize | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -8768,19 +8876,19 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR SparseMemoryBindFlags
-                                         operator|( SparseMemoryBindFlagBits bit0, SparseMemoryBindFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( SparseMemoryBindFlagBits bit0, SparseMemoryBindFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return SparseMemoryBindFlags( bit0 ) | bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR SparseMemoryBindFlags
-                                         operator&(SparseMemoryBindFlagBits bit0, SparseMemoryBindFlagBits bit1)VULKAN_HPP_NOEXCEPT
+    operator&( SparseMemoryBindFlagBits bit0, SparseMemoryBindFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return SparseMemoryBindFlags( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR SparseMemoryBindFlags
-                                         operator^( SparseMemoryBindFlagBits bit0, SparseMemoryBindFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( SparseMemoryBindFlagBits bit0, SparseMemoryBindFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return SparseMemoryBindFlags( bit0 ) ^ bit1;
   }
@@ -8799,6 +8907,7 @@ namespace VULKAN_HPP_NAMESPACE
     std::string result;
     if ( value & SparseMemoryBindFlagBits::eMetadata )
       result += "Metadata | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -8819,8 +8928,8 @@ namespace VULKAN_HPP_NAMESPACE
     return FenceCreateFlags( bit0 ) | bit1;
   }
 
-  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR FenceCreateFlags operator&(FenceCreateFlagBits bit0,
-                                                                    FenceCreateFlagBits bit1)VULKAN_HPP_NOEXCEPT
+  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR FenceCreateFlags operator&( FenceCreateFlagBits bit0,
+                                                                     FenceCreateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return FenceCreateFlags( bit0 ) & bit1;
   }
@@ -8844,6 +8953,7 @@ namespace VULKAN_HPP_NAMESPACE
     std::string result;
     if ( value & FenceCreateFlagBits::eSignaled )
       result += "Signaled | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -8871,8 +8981,8 @@ namespace VULKAN_HPP_NAMESPACE
     return EventCreateFlags( bit0 ) | bit1;
   }
 
-  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR EventCreateFlags operator&(EventCreateFlagBits bit0,
-                                                                    EventCreateFlagBits bit1)VULKAN_HPP_NOEXCEPT
+  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR EventCreateFlags operator&( EventCreateFlagBits bit0,
+                                                                     EventCreateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return EventCreateFlags( bit0 ) & bit1;
   }
@@ -8896,6 +9006,7 @@ namespace VULKAN_HPP_NAMESPACE
     std::string result;
     if ( value & EventCreateFlagBits::eDeviceOnlyKHR )
       result += "DeviceOnlyKHR | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -8921,19 +9032,19 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR QueryPipelineStatisticFlags
-                                         operator|( QueryPipelineStatisticFlagBits bit0, QueryPipelineStatisticFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( QueryPipelineStatisticFlagBits bit0, QueryPipelineStatisticFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return QueryPipelineStatisticFlags( bit0 ) | bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR QueryPipelineStatisticFlags
-                                         operator&(QueryPipelineStatisticFlagBits bit0, QueryPipelineStatisticFlagBits bit1)VULKAN_HPP_NOEXCEPT
+    operator&( QueryPipelineStatisticFlagBits bit0, QueryPipelineStatisticFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return QueryPipelineStatisticFlags( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR QueryPipelineStatisticFlags
-                                         operator^( QueryPipelineStatisticFlagBits bit0, QueryPipelineStatisticFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( QueryPipelineStatisticFlagBits bit0, QueryPipelineStatisticFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return QueryPipelineStatisticFlags( bit0 ) ^ bit1;
   }
@@ -8972,6 +9083,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "TessellationEvaluationShaderInvocations | ";
     if ( value & QueryPipelineStatisticFlagBits::eComputeShaderInvocations )
       result += "ComputeShaderInvocations | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -9003,8 +9115,8 @@ namespace VULKAN_HPP_NAMESPACE
     return QueryResultFlags( bit0 ) | bit1;
   }
 
-  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR QueryResultFlags operator&(QueryResultFlagBits bit0,
-                                                                    QueryResultFlagBits bit1)VULKAN_HPP_NOEXCEPT
+  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR QueryResultFlags operator&( QueryResultFlagBits bit0,
+                                                                     QueryResultFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return QueryResultFlags( bit0 ) & bit1;
   }
@@ -9038,6 +9150,7 @@ namespace VULKAN_HPP_NAMESPACE
     if ( value & QueryResultFlagBits::eWithStatusKHR )
       result += "WithStatusKHR | ";
 #endif /*VK_ENABLE_BETA_EXTENSIONS*/
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -9060,8 +9173,8 @@ namespace VULKAN_HPP_NAMESPACE
     return BufferCreateFlags( bit0 ) | bit1;
   }
 
-  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR BufferCreateFlags operator&(BufferCreateFlagBits bit0,
-                                                                     BufferCreateFlagBits bit1)VULKAN_HPP_NOEXCEPT
+  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR BufferCreateFlags operator&( BufferCreateFlagBits bit0,
+                                                                      BufferCreateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return BufferCreateFlags( bit0 ) & bit1;
   }
@@ -9093,6 +9206,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "Protected | ";
     if ( value & BufferCreateFlagBits::eDeviceAddressCaptureReplay )
       result += "DeviceAddressCaptureReplay | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -9130,8 +9244,8 @@ namespace VULKAN_HPP_NAMESPACE
     return BufferUsageFlags( bit0 ) | bit1;
   }
 
-  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR BufferUsageFlags operator&(BufferUsageFlagBits bit0,
-                                                                    BufferUsageFlagBits bit1)VULKAN_HPP_NOEXCEPT
+  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR BufferUsageFlags operator&( BufferUsageFlagBits bit0,
+                                                                     BufferUsageFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return BufferUsageFlags( bit0 ) & bit1;
   }
@@ -9197,6 +9311,7 @@ namespace VULKAN_HPP_NAMESPACE
     if ( value & BufferUsageFlagBits::eVideoEncodeSrcKHR )
       result += "VideoEncodeSrcKHR | ";
 #endif /*VK_ENABLE_BETA_EXTENSIONS*/
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -9220,19 +9335,19 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR ImageViewCreateFlags
-                                         operator|( ImageViewCreateFlagBits bit0, ImageViewCreateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( ImageViewCreateFlagBits bit0, ImageViewCreateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return ImageViewCreateFlags( bit0 ) | bit1;
   }
 
-  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR ImageViewCreateFlags operator&(ImageViewCreateFlagBits bit0,
-                                                                        ImageViewCreateFlagBits bit1)VULKAN_HPP_NOEXCEPT
+  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR ImageViewCreateFlags
+    operator&( ImageViewCreateFlagBits bit0, ImageViewCreateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return ImageViewCreateFlags( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR ImageViewCreateFlags
-                                         operator^( ImageViewCreateFlagBits bit0, ImageViewCreateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( ImageViewCreateFlagBits bit0, ImageViewCreateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return ImageViewCreateFlags( bit0 ) ^ bit1;
   }
@@ -9253,6 +9368,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "FragmentDensityMapDynamicEXT | ";
     if ( value & ImageViewCreateFlagBits::eFragmentDensityMapDeferredEXT )
       result += "FragmentDensityMapDeferredEXT | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -9275,19 +9391,19 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR PipelineCacheCreateFlags
-                                         operator|( PipelineCacheCreateFlagBits bit0, PipelineCacheCreateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( PipelineCacheCreateFlagBits bit0, PipelineCacheCreateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return PipelineCacheCreateFlags( bit0 ) | bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR PipelineCacheCreateFlags
-                                         operator&(PipelineCacheCreateFlagBits bit0, PipelineCacheCreateFlagBits bit1)VULKAN_HPP_NOEXCEPT
+    operator&( PipelineCacheCreateFlagBits bit0, PipelineCacheCreateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return PipelineCacheCreateFlags( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR PipelineCacheCreateFlags
-                                         operator^( PipelineCacheCreateFlagBits bit0, PipelineCacheCreateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( PipelineCacheCreateFlagBits bit0, PipelineCacheCreateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return PipelineCacheCreateFlags( bit0 ) ^ bit1;
   }
@@ -9306,6 +9422,7 @@ namespace VULKAN_HPP_NAMESPACE
     std::string result;
     if ( value & PipelineCacheCreateFlagBits::eExternallySynchronizedEXT )
       result += "ExternallySynchronizedEXT | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -9322,19 +9439,19 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR ColorComponentFlags
-                                         operator|( ColorComponentFlagBits bit0, ColorComponentFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( ColorComponentFlagBits bit0, ColorComponentFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return ColorComponentFlags( bit0 ) | bit1;
   }
 
-  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR ColorComponentFlags operator&(ColorComponentFlagBits bit0,
-                                                                       ColorComponentFlagBits bit1)VULKAN_HPP_NOEXCEPT
+  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR ColorComponentFlags
+    operator&( ColorComponentFlagBits bit0, ColorComponentFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return ColorComponentFlags( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR ColorComponentFlags
-                                         operator^( ColorComponentFlagBits bit0, ColorComponentFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( ColorComponentFlagBits bit0, ColorComponentFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return ColorComponentFlags( bit0 ) ^ bit1;
   }
@@ -9359,6 +9476,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "B | ";
     if ( value & ColorComponentFlagBits::eA )
       result += "A | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -9380,8 +9498,8 @@ namespace VULKAN_HPP_NAMESPACE
     return CullModeFlags( bit0 ) | bit1;
   }
 
-  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR CullModeFlags operator&(CullModeFlagBits bit0,
-                                                                 CullModeFlagBits bit1)VULKAN_HPP_NOEXCEPT
+  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR CullModeFlags operator&( CullModeFlagBits bit0,
+                                                                  CullModeFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return CullModeFlags( bit0 ) & bit1;
   }
@@ -9407,6 +9525,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "Front | ";
     if ( value & CullModeFlagBits::eBack )
       result += "Back | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -9445,19 +9564,19 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR PipelineCreateFlags
-                                         operator|( PipelineCreateFlagBits bit0, PipelineCreateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( PipelineCreateFlagBits bit0, PipelineCreateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return PipelineCreateFlags( bit0 ) | bit1;
   }
 
-  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR PipelineCreateFlags operator&(PipelineCreateFlagBits bit0,
-                                                                       PipelineCreateFlagBits bit1)VULKAN_HPP_NOEXCEPT
+  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR PipelineCreateFlags
+    operator&( PipelineCreateFlagBits bit0, PipelineCreateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return PipelineCreateFlags( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR PipelineCreateFlags
-                                         operator^( PipelineCreateFlagBits bit0, PipelineCreateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( PipelineCreateFlagBits bit0, PipelineCreateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return PipelineCreateFlags( bit0 ) ^ bit1;
   }
@@ -9514,6 +9633,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "EarlyReturnOnFailureEXT | ";
     if ( value & PipelineCreateFlagBits::eRayTracingAllowMotionNV )
       result += "RayTracingAllowMotionNV | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -9572,25 +9692,25 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR PipelineShaderStageCreateFlags
-                                         operator|( PipelineShaderStageCreateFlagBits bit0, PipelineShaderStageCreateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( PipelineShaderStageCreateFlagBits bit0, PipelineShaderStageCreateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return PipelineShaderStageCreateFlags( bit0 ) | bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR PipelineShaderStageCreateFlags
-                                         operator&(PipelineShaderStageCreateFlagBits bit0, PipelineShaderStageCreateFlagBits bit1)VULKAN_HPP_NOEXCEPT
+    operator&( PipelineShaderStageCreateFlagBits bit0, PipelineShaderStageCreateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return PipelineShaderStageCreateFlags( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR PipelineShaderStageCreateFlags
-                                         operator^( PipelineShaderStageCreateFlagBits bit0, PipelineShaderStageCreateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( PipelineShaderStageCreateFlagBits bit0, PipelineShaderStageCreateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return PipelineShaderStageCreateFlags( bit0 ) ^ bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR PipelineShaderStageCreateFlags
-                                         operator~( PipelineShaderStageCreateFlagBits bits ) VULKAN_HPP_NOEXCEPT
+    operator~( PipelineShaderStageCreateFlagBits bits ) VULKAN_HPP_NOEXCEPT
   {
     return ~( PipelineShaderStageCreateFlags( bits ) );
   }
@@ -9605,6 +9725,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "AllowVaryingSubgroupSizeEXT | ";
     if ( value & PipelineShaderStageCreateFlagBits::eRequireFullSubgroupsEXT )
       result += "RequireFullSubgroupsEXT | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -9654,8 +9775,8 @@ namespace VULKAN_HPP_NAMESPACE
     return ShaderStageFlags( bit0 ) | bit1;
   }
 
-  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR ShaderStageFlags operator&(ShaderStageFlagBits bit0,
-                                                                    ShaderStageFlagBits bit1)VULKAN_HPP_NOEXCEPT
+  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR ShaderStageFlags operator&( ShaderStageFlagBits bit0,
+                                                                     ShaderStageFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return ShaderStageFlags( bit0 ) & bit1;
   }
@@ -9707,6 +9828,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "MeshNV | ";
     if ( value & ShaderStageFlagBits::eSubpassShadingHUAWEI )
       result += "SubpassShadingHUAWEI | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -9728,8 +9850,8 @@ namespace VULKAN_HPP_NAMESPACE
     return SamplerCreateFlags( bit0 ) | bit1;
   }
 
-  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR SamplerCreateFlags operator&(SamplerCreateFlagBits bit0,
-                                                                      SamplerCreateFlagBits bit1)VULKAN_HPP_NOEXCEPT
+  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR SamplerCreateFlags operator&( SamplerCreateFlagBits bit0,
+                                                                       SamplerCreateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return SamplerCreateFlags( bit0 ) & bit1;
   }
@@ -9755,6 +9877,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "SubsampledEXT | ";
     if ( value & SamplerCreateFlagBits::eSubsampledCoarseReconstructionEXT )
       result += "SubsampledCoarseReconstructionEXT | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -9772,19 +9895,19 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR DescriptorPoolCreateFlags
-                                         operator|( DescriptorPoolCreateFlagBits bit0, DescriptorPoolCreateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( DescriptorPoolCreateFlagBits bit0, DescriptorPoolCreateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return DescriptorPoolCreateFlags( bit0 ) | bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR DescriptorPoolCreateFlags
-                                         operator&(DescriptorPoolCreateFlagBits bit0, DescriptorPoolCreateFlagBits bit1)VULKAN_HPP_NOEXCEPT
+    operator&( DescriptorPoolCreateFlagBits bit0, DescriptorPoolCreateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return DescriptorPoolCreateFlags( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR DescriptorPoolCreateFlags
-                                         operator^( DescriptorPoolCreateFlagBits bit0, DescriptorPoolCreateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( DescriptorPoolCreateFlagBits bit0, DescriptorPoolCreateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return DescriptorPoolCreateFlags( bit0 ) ^ bit1;
   }
@@ -9807,6 +9930,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "UpdateAfterBind | ";
     if ( value & DescriptorPoolCreateFlagBits::eHostOnlyVALVE )
       result += "HostOnlyVALVE | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -9831,25 +9955,25 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR DescriptorSetLayoutCreateFlags
-                                         operator|( DescriptorSetLayoutCreateFlagBits bit0, DescriptorSetLayoutCreateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( DescriptorSetLayoutCreateFlagBits bit0, DescriptorSetLayoutCreateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return DescriptorSetLayoutCreateFlags( bit0 ) | bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR DescriptorSetLayoutCreateFlags
-                                         operator&(DescriptorSetLayoutCreateFlagBits bit0, DescriptorSetLayoutCreateFlagBits bit1)VULKAN_HPP_NOEXCEPT
+    operator&( DescriptorSetLayoutCreateFlagBits bit0, DescriptorSetLayoutCreateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return DescriptorSetLayoutCreateFlags( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR DescriptorSetLayoutCreateFlags
-                                         operator^( DescriptorSetLayoutCreateFlagBits bit0, DescriptorSetLayoutCreateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( DescriptorSetLayoutCreateFlagBits bit0, DescriptorSetLayoutCreateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return DescriptorSetLayoutCreateFlags( bit0 ) ^ bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR DescriptorSetLayoutCreateFlags
-                                         operator~( DescriptorSetLayoutCreateFlagBits bits ) VULKAN_HPP_NOEXCEPT
+    operator~( DescriptorSetLayoutCreateFlagBits bits ) VULKAN_HPP_NOEXCEPT
   {
     return ~( DescriptorSetLayoutCreateFlags( bits ) );
   }
@@ -9866,6 +9990,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "PushDescriptorKHR | ";
     if ( value & DescriptorSetLayoutCreateFlagBits::eHostOnlyPoolVALVE )
       result += "HostOnlyPoolVALVE | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -9905,8 +10030,8 @@ namespace VULKAN_HPP_NAMESPACE
     return AccessFlags( bit0 ) | bit1;
   }
 
-  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR AccessFlags operator&(AccessFlagBits bit0,
-                                                               AccessFlagBits bit1)VULKAN_HPP_NOEXCEPT
+  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR AccessFlags operator&( AccessFlagBits bit0,
+                                                                AccessFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return AccessFlags( bit0 ) & bit1;
   }
@@ -9984,6 +10109,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "CommandPreprocessReadNV | ";
     if ( value & AccessFlagBits::eCommandPreprocessWriteNV )
       result += "CommandPreprocessWriteNV | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -9999,19 +10125,19 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR AttachmentDescriptionFlags
-                                         operator|( AttachmentDescriptionFlagBits bit0, AttachmentDescriptionFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( AttachmentDescriptionFlagBits bit0, AttachmentDescriptionFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return AttachmentDescriptionFlags( bit0 ) | bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR AttachmentDescriptionFlags
-                                         operator&(AttachmentDescriptionFlagBits bit0, AttachmentDescriptionFlagBits bit1)VULKAN_HPP_NOEXCEPT
+    operator&( AttachmentDescriptionFlagBits bit0, AttachmentDescriptionFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return AttachmentDescriptionFlags( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR AttachmentDescriptionFlags
-                                         operator^( AttachmentDescriptionFlagBits bit0, AttachmentDescriptionFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( AttachmentDescriptionFlagBits bit0, AttachmentDescriptionFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return AttachmentDescriptionFlags( bit0 ) ^ bit1;
   }
@@ -10030,6 +10156,7 @@ namespace VULKAN_HPP_NAMESPACE
     std::string result;
     if ( value & AttachmentDescriptionFlagBits::eMayAlias )
       result += "MayAlias | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -10051,8 +10178,8 @@ namespace VULKAN_HPP_NAMESPACE
     return DependencyFlags( bit0 ) | bit1;
   }
 
-  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR DependencyFlags operator&(DependencyFlagBits bit0,
-                                                                   DependencyFlagBits bit1)VULKAN_HPP_NOEXCEPT
+  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR DependencyFlags operator&( DependencyFlagBits bit0,
+                                                                    DependencyFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return DependencyFlags( bit0 ) & bit1;
   }
@@ -10080,6 +10207,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "DeviceGroup | ";
     if ( value & DependencyFlagBits::eViewLocal )
       result += "ViewLocal | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -10095,19 +10223,19 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR FramebufferCreateFlags
-                                         operator|( FramebufferCreateFlagBits bit0, FramebufferCreateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( FramebufferCreateFlagBits bit0, FramebufferCreateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return FramebufferCreateFlags( bit0 ) | bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR FramebufferCreateFlags
-                                         operator&(FramebufferCreateFlagBits bit0, FramebufferCreateFlagBits bit1)VULKAN_HPP_NOEXCEPT
+    operator&( FramebufferCreateFlagBits bit0, FramebufferCreateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return FramebufferCreateFlags( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR FramebufferCreateFlags
-                                         operator^( FramebufferCreateFlagBits bit0, FramebufferCreateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( FramebufferCreateFlagBits bit0, FramebufferCreateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return FramebufferCreateFlags( bit0 ) ^ bit1;
   }
@@ -10126,6 +10254,7 @@ namespace VULKAN_HPP_NAMESPACE
     std::string result;
     if ( value & FramebufferCreateFlagBits::eImageless )
       result += "Imageless | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -10141,19 +10270,19 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR RenderPassCreateFlags
-                                         operator|( RenderPassCreateFlagBits bit0, RenderPassCreateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( RenderPassCreateFlagBits bit0, RenderPassCreateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return RenderPassCreateFlags( bit0 ) | bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR RenderPassCreateFlags
-                                         operator&(RenderPassCreateFlagBits bit0, RenderPassCreateFlagBits bit1)VULKAN_HPP_NOEXCEPT
+    operator&( RenderPassCreateFlagBits bit0, RenderPassCreateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return RenderPassCreateFlags( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR RenderPassCreateFlags
-                                         operator^( RenderPassCreateFlagBits bit0, RenderPassCreateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( RenderPassCreateFlagBits bit0, RenderPassCreateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return RenderPassCreateFlags( bit0 ) ^ bit1;
   }
@@ -10172,6 +10301,7 @@ namespace VULKAN_HPP_NAMESPACE
     std::string result;
     if ( value & RenderPassCreateFlagBits::eTransformQCOM )
       result += "TransformQCOM | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -10190,19 +10320,19 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR SubpassDescriptionFlags
-                                         operator|( SubpassDescriptionFlagBits bit0, SubpassDescriptionFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( SubpassDescriptionFlagBits bit0, SubpassDescriptionFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return SubpassDescriptionFlags( bit0 ) | bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR SubpassDescriptionFlags
-                                         operator&(SubpassDescriptionFlagBits bit0, SubpassDescriptionFlagBits bit1)VULKAN_HPP_NOEXCEPT
+    operator&( SubpassDescriptionFlagBits bit0, SubpassDescriptionFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return SubpassDescriptionFlags( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR SubpassDescriptionFlags
-                                         operator^( SubpassDescriptionFlagBits bit0, SubpassDescriptionFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( SubpassDescriptionFlagBits bit0, SubpassDescriptionFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return SubpassDescriptionFlags( bit0 ) ^ bit1;
   }
@@ -10227,6 +10357,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "FragmentRegionQCOM | ";
     if ( value & SubpassDescriptionFlagBits::eShaderResolveQCOM )
       result += "ShaderResolveQCOM | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -10244,19 +10375,19 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR CommandPoolCreateFlags
-                                         operator|( CommandPoolCreateFlagBits bit0, CommandPoolCreateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( CommandPoolCreateFlagBits bit0, CommandPoolCreateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return CommandPoolCreateFlags( bit0 ) | bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR CommandPoolCreateFlags
-                                         operator&(CommandPoolCreateFlagBits bit0, CommandPoolCreateFlagBits bit1)VULKAN_HPP_NOEXCEPT
+    operator&( CommandPoolCreateFlagBits bit0, CommandPoolCreateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return CommandPoolCreateFlags( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR CommandPoolCreateFlags
-                                         operator^( CommandPoolCreateFlagBits bit0, CommandPoolCreateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( CommandPoolCreateFlagBits bit0, CommandPoolCreateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return CommandPoolCreateFlags( bit0 ) ^ bit1;
   }
@@ -10279,6 +10410,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "ResetCommandBuffer | ";
     if ( value & CommandPoolCreateFlagBits::eProtected )
       result += "Protected | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -10294,19 +10426,19 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR CommandPoolResetFlags
-                                         operator|( CommandPoolResetFlagBits bit0, CommandPoolResetFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( CommandPoolResetFlagBits bit0, CommandPoolResetFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return CommandPoolResetFlags( bit0 ) | bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR CommandPoolResetFlags
-                                         operator&(CommandPoolResetFlagBits bit0, CommandPoolResetFlagBits bit1)VULKAN_HPP_NOEXCEPT
+    operator&( CommandPoolResetFlagBits bit0, CommandPoolResetFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return CommandPoolResetFlags( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR CommandPoolResetFlags
-                                         operator^( CommandPoolResetFlagBits bit0, CommandPoolResetFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( CommandPoolResetFlagBits bit0, CommandPoolResetFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return CommandPoolResetFlags( bit0 ) ^ bit1;
   }
@@ -10325,6 +10457,7 @@ namespace VULKAN_HPP_NAMESPACE
     std::string result;
     if ( value & CommandPoolResetFlagBits::eReleaseResources )
       result += "ReleaseResources | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -10340,19 +10473,19 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR CommandBufferResetFlags
-                                         operator|( CommandBufferResetFlagBits bit0, CommandBufferResetFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( CommandBufferResetFlagBits bit0, CommandBufferResetFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return CommandBufferResetFlags( bit0 ) | bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR CommandBufferResetFlags
-                                         operator&(CommandBufferResetFlagBits bit0, CommandBufferResetFlagBits bit1)VULKAN_HPP_NOEXCEPT
+    operator&( CommandBufferResetFlagBits bit0, CommandBufferResetFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return CommandBufferResetFlags( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR CommandBufferResetFlags
-                                         operator^( CommandBufferResetFlagBits bit0, CommandBufferResetFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( CommandBufferResetFlagBits bit0, CommandBufferResetFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return CommandBufferResetFlags( bit0 ) ^ bit1;
   }
@@ -10371,6 +10504,7 @@ namespace VULKAN_HPP_NAMESPACE
     std::string result;
     if ( value & CommandBufferResetFlagBits::eReleaseResources )
       result += "ReleaseResources | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -10388,19 +10522,19 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR CommandBufferUsageFlags
-                                         operator|( CommandBufferUsageFlagBits bit0, CommandBufferUsageFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( CommandBufferUsageFlagBits bit0, CommandBufferUsageFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return CommandBufferUsageFlags( bit0 ) | bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR CommandBufferUsageFlags
-                                         operator&(CommandBufferUsageFlagBits bit0, CommandBufferUsageFlagBits bit1)VULKAN_HPP_NOEXCEPT
+    operator&( CommandBufferUsageFlagBits bit0, CommandBufferUsageFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return CommandBufferUsageFlags( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR CommandBufferUsageFlags
-                                         operator^( CommandBufferUsageFlagBits bit0, CommandBufferUsageFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( CommandBufferUsageFlagBits bit0, CommandBufferUsageFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return CommandBufferUsageFlags( bit0 ) ^ bit1;
   }
@@ -10423,6 +10557,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "RenderPassContinue | ";
     if ( value & CommandBufferUsageFlagBits::eSimultaneousUse )
       result += "SimultaneousUse | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -10443,8 +10578,8 @@ namespace VULKAN_HPP_NAMESPACE
     return QueryControlFlags( bit0 ) | bit1;
   }
 
-  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR QueryControlFlags operator&(QueryControlFlagBits bit0,
-                                                                     QueryControlFlagBits bit1)VULKAN_HPP_NOEXCEPT
+  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR QueryControlFlags operator&( QueryControlFlagBits bit0,
+                                                                      QueryControlFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return QueryControlFlags( bit0 ) & bit1;
   }
@@ -10468,6 +10603,7 @@ namespace VULKAN_HPP_NAMESPACE
     std::string result;
     if ( value & QueryControlFlagBits::ePrecise )
       result += "Precise | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -10489,8 +10625,8 @@ namespace VULKAN_HPP_NAMESPACE
     return StencilFaceFlags( bit0 ) | bit1;
   }
 
-  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR StencilFaceFlags operator&(StencilFaceFlagBits bit0,
-                                                                    StencilFaceFlagBits bit1)VULKAN_HPP_NOEXCEPT
+  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR StencilFaceFlags operator&( StencilFaceFlagBits bit0,
+                                                                     StencilFaceFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return StencilFaceFlags( bit0 ) & bit1;
   }
@@ -10516,6 +10652,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "Front | ";
     if ( value & StencilFaceFlagBits::eBack )
       result += "Back | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -10537,19 +10674,19 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR SubgroupFeatureFlags
-                                         operator|( SubgroupFeatureFlagBits bit0, SubgroupFeatureFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( SubgroupFeatureFlagBits bit0, SubgroupFeatureFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return SubgroupFeatureFlags( bit0 ) | bit1;
   }
 
-  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR SubgroupFeatureFlags operator&(SubgroupFeatureFlagBits bit0,
-                                                                        SubgroupFeatureFlagBits bit1)VULKAN_HPP_NOEXCEPT
+  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR SubgroupFeatureFlags
+    operator&( SubgroupFeatureFlagBits bit0, SubgroupFeatureFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return SubgroupFeatureFlags( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR SubgroupFeatureFlags
-                                         operator^( SubgroupFeatureFlagBits bit0, SubgroupFeatureFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( SubgroupFeatureFlagBits bit0, SubgroupFeatureFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return SubgroupFeatureFlags( bit0 ) ^ bit1;
   }
@@ -10584,6 +10721,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "Quad | ";
     if ( value & SubgroupFeatureFlagBits::ePartitionedNV )
       result += "PartitionedNV | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -10600,19 +10738,19 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR PeerMemoryFeatureFlags
-                                         operator|( PeerMemoryFeatureFlagBits bit0, PeerMemoryFeatureFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( PeerMemoryFeatureFlagBits bit0, PeerMemoryFeatureFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return PeerMemoryFeatureFlags( bit0 ) | bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR PeerMemoryFeatureFlags
-                                         operator&(PeerMemoryFeatureFlagBits bit0, PeerMemoryFeatureFlagBits bit1)VULKAN_HPP_NOEXCEPT
+    operator&( PeerMemoryFeatureFlagBits bit0, PeerMemoryFeatureFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return PeerMemoryFeatureFlags( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR PeerMemoryFeatureFlags
-                                         operator^( PeerMemoryFeatureFlagBits bit0, PeerMemoryFeatureFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( PeerMemoryFeatureFlagBits bit0, PeerMemoryFeatureFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return PeerMemoryFeatureFlags( bit0 ) ^ bit1;
   }
@@ -10639,6 +10777,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "GenericSrc | ";
     if ( value & PeerMemoryFeatureFlagBits::eGenericDst )
       result += "GenericDst | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -10655,19 +10794,19 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR MemoryAllocateFlags
-                                         operator|( MemoryAllocateFlagBits bit0, MemoryAllocateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( MemoryAllocateFlagBits bit0, MemoryAllocateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return MemoryAllocateFlags( bit0 ) | bit1;
   }
 
-  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR MemoryAllocateFlags operator&(MemoryAllocateFlagBits bit0,
-                                                                       MemoryAllocateFlagBits bit1)VULKAN_HPP_NOEXCEPT
+  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR MemoryAllocateFlags
+    operator&( MemoryAllocateFlagBits bit0, MemoryAllocateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return MemoryAllocateFlags( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR MemoryAllocateFlags
-                                         operator^( MemoryAllocateFlagBits bit0, MemoryAllocateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( MemoryAllocateFlagBits bit0, MemoryAllocateFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return MemoryAllocateFlags( bit0 ) ^ bit1;
   }
@@ -10692,6 +10831,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "DeviceAddress | ";
     if ( value & MemoryAllocateFlagBits::eDeviceAddressCaptureReplay )
       result += "DeviceAddressCaptureReplay | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -10741,25 +10881,25 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR ExternalMemoryHandleTypeFlags
-                                         operator|( ExternalMemoryHandleTypeFlagBits bit0, ExternalMemoryHandleTypeFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( ExternalMemoryHandleTypeFlagBits bit0, ExternalMemoryHandleTypeFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return ExternalMemoryHandleTypeFlags( bit0 ) | bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR ExternalMemoryHandleTypeFlags
-                                         operator&(ExternalMemoryHandleTypeFlagBits bit0, ExternalMemoryHandleTypeFlagBits bit1)VULKAN_HPP_NOEXCEPT
+    operator&( ExternalMemoryHandleTypeFlagBits bit0, ExternalMemoryHandleTypeFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return ExternalMemoryHandleTypeFlags( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR ExternalMemoryHandleTypeFlags
-                                         operator^( ExternalMemoryHandleTypeFlagBits bit0, ExternalMemoryHandleTypeFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( ExternalMemoryHandleTypeFlagBits bit0, ExternalMemoryHandleTypeFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return ExternalMemoryHandleTypeFlags( bit0 ) ^ bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR ExternalMemoryHandleTypeFlags
-                                         operator~( ExternalMemoryHandleTypeFlagBits bits ) VULKAN_HPP_NOEXCEPT
+    operator~( ExternalMemoryHandleTypeFlagBits bits ) VULKAN_HPP_NOEXCEPT
   {
     return ~( ExternalMemoryHandleTypeFlags( bits ) );
   }
@@ -10802,6 +10942,7 @@ namespace VULKAN_HPP_NAMESPACE
 #endif /*VK_USE_PLATFORM_FUCHSIA*/
     if ( value & ExternalMemoryHandleTypeFlagBits::eRdmaAddressNV )
       result += "RdmaAddressNV | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -10819,19 +10960,19 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR ExternalMemoryFeatureFlags
-                                         operator|( ExternalMemoryFeatureFlagBits bit0, ExternalMemoryFeatureFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( ExternalMemoryFeatureFlagBits bit0, ExternalMemoryFeatureFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return ExternalMemoryFeatureFlags( bit0 ) | bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR ExternalMemoryFeatureFlags
-                                         operator&(ExternalMemoryFeatureFlagBits bit0, ExternalMemoryFeatureFlagBits bit1)VULKAN_HPP_NOEXCEPT
+    operator&( ExternalMemoryFeatureFlagBits bit0, ExternalMemoryFeatureFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return ExternalMemoryFeatureFlags( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR ExternalMemoryFeatureFlags
-                                         operator^( ExternalMemoryFeatureFlagBits bit0, ExternalMemoryFeatureFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( ExternalMemoryFeatureFlagBits bit0, ExternalMemoryFeatureFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return ExternalMemoryFeatureFlags( bit0 ) ^ bit1;
   }
@@ -10856,6 +10997,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "Exportable | ";
     if ( value & ExternalMemoryFeatureFlagBits::eImportable )
       result += "Importable | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -10874,19 +11016,19 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR ExternalFenceHandleTypeFlags
-                                         operator|( ExternalFenceHandleTypeFlagBits bit0, ExternalFenceHandleTypeFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( ExternalFenceHandleTypeFlagBits bit0, ExternalFenceHandleTypeFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return ExternalFenceHandleTypeFlags( bit0 ) | bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR ExternalFenceHandleTypeFlags
-                                         operator&(ExternalFenceHandleTypeFlagBits bit0, ExternalFenceHandleTypeFlagBits bit1)VULKAN_HPP_NOEXCEPT
+    operator&( ExternalFenceHandleTypeFlagBits bit0, ExternalFenceHandleTypeFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return ExternalFenceHandleTypeFlags( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR ExternalFenceHandleTypeFlags
-                                         operator^( ExternalFenceHandleTypeFlagBits bit0, ExternalFenceHandleTypeFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( ExternalFenceHandleTypeFlagBits bit0, ExternalFenceHandleTypeFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return ExternalFenceHandleTypeFlags( bit0 ) ^ bit1;
   }
@@ -10913,6 +11055,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "OpaqueWin32Kmt | ";
     if ( value & ExternalFenceHandleTypeFlagBits::eSyncFd )
       result += "SyncFd | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -10929,19 +11072,19 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR ExternalFenceFeatureFlags
-                                         operator|( ExternalFenceFeatureFlagBits bit0, ExternalFenceFeatureFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( ExternalFenceFeatureFlagBits bit0, ExternalFenceFeatureFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return ExternalFenceFeatureFlags( bit0 ) | bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR ExternalFenceFeatureFlags
-                                         operator&(ExternalFenceFeatureFlagBits bit0, ExternalFenceFeatureFlagBits bit1)VULKAN_HPP_NOEXCEPT
+    operator&( ExternalFenceFeatureFlagBits bit0, ExternalFenceFeatureFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return ExternalFenceFeatureFlags( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR ExternalFenceFeatureFlags
-                                         operator^( ExternalFenceFeatureFlagBits bit0, ExternalFenceFeatureFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( ExternalFenceFeatureFlagBits bit0, ExternalFenceFeatureFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return ExternalFenceFeatureFlags( bit0 ) ^ bit1;
   }
@@ -10964,6 +11107,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "Exportable | ";
     if ( value & ExternalFenceFeatureFlagBits::eImportable )
       result += "Importable | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -10984,8 +11128,8 @@ namespace VULKAN_HPP_NAMESPACE
     return FenceImportFlags( bit0 ) | bit1;
   }
 
-  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR FenceImportFlags operator&(FenceImportFlagBits bit0,
-                                                                    FenceImportFlagBits bit1)VULKAN_HPP_NOEXCEPT
+  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR FenceImportFlags operator&( FenceImportFlagBits bit0,
+                                                                     FenceImportFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return FenceImportFlags( bit0 ) & bit1;
   }
@@ -11011,6 +11155,7 @@ namespace VULKAN_HPP_NAMESPACE
     std::string result;
     if ( value & FenceImportFlagBits::eTemporary )
       result += "Temporary | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -11026,19 +11171,19 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR SemaphoreImportFlags
-                                         operator|( SemaphoreImportFlagBits bit0, SemaphoreImportFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( SemaphoreImportFlagBits bit0, SemaphoreImportFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return SemaphoreImportFlags( bit0 ) | bit1;
   }
 
-  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR SemaphoreImportFlags operator&(SemaphoreImportFlagBits bit0,
-                                                                        SemaphoreImportFlagBits bit1)VULKAN_HPP_NOEXCEPT
+  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR SemaphoreImportFlags
+    operator&( SemaphoreImportFlagBits bit0, SemaphoreImportFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return SemaphoreImportFlags( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR SemaphoreImportFlags
-                                         operator^( SemaphoreImportFlagBits bit0, SemaphoreImportFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( SemaphoreImportFlagBits bit0, SemaphoreImportFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return SemaphoreImportFlags( bit0 ) ^ bit1;
   }
@@ -11059,6 +11204,7 @@ namespace VULKAN_HPP_NAMESPACE
     std::string result;
     if ( value & SemaphoreImportFlagBits::eTemporary )
       result += "Temporary | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -11081,25 +11227,25 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR ExternalSemaphoreHandleTypeFlags
-                                         operator|( ExternalSemaphoreHandleTypeFlagBits bit0, ExternalSemaphoreHandleTypeFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( ExternalSemaphoreHandleTypeFlagBits bit0, ExternalSemaphoreHandleTypeFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return ExternalSemaphoreHandleTypeFlags( bit0 ) | bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR ExternalSemaphoreHandleTypeFlags
-                                         operator&(ExternalSemaphoreHandleTypeFlagBits bit0, ExternalSemaphoreHandleTypeFlagBits bit1)VULKAN_HPP_NOEXCEPT
+    operator&( ExternalSemaphoreHandleTypeFlagBits bit0, ExternalSemaphoreHandleTypeFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return ExternalSemaphoreHandleTypeFlags( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR ExternalSemaphoreHandleTypeFlags
-                                         operator^( ExternalSemaphoreHandleTypeFlagBits bit0, ExternalSemaphoreHandleTypeFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( ExternalSemaphoreHandleTypeFlagBits bit0, ExternalSemaphoreHandleTypeFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return ExternalSemaphoreHandleTypeFlags( bit0 ) ^ bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR ExternalSemaphoreHandleTypeFlags
-                                         operator~( ExternalSemaphoreHandleTypeFlagBits bits ) VULKAN_HPP_NOEXCEPT
+    operator~( ExternalSemaphoreHandleTypeFlagBits bits ) VULKAN_HPP_NOEXCEPT
   {
     return ~( ExternalSemaphoreHandleTypeFlags( bits ) );
   }
@@ -11126,6 +11272,7 @@ namespace VULKAN_HPP_NAMESPACE
     if ( value & ExternalSemaphoreHandleTypeFlagBits::eZirconEventFUCHSIA )
       result += "ZirconEventFUCHSIA | ";
 #endif /*VK_USE_PLATFORM_FUCHSIA*/
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -11142,25 +11289,25 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR ExternalSemaphoreFeatureFlags
-                                         operator|( ExternalSemaphoreFeatureFlagBits bit0, ExternalSemaphoreFeatureFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( ExternalSemaphoreFeatureFlagBits bit0, ExternalSemaphoreFeatureFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return ExternalSemaphoreFeatureFlags( bit0 ) | bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR ExternalSemaphoreFeatureFlags
-                                         operator&(ExternalSemaphoreFeatureFlagBits bit0, ExternalSemaphoreFeatureFlagBits bit1)VULKAN_HPP_NOEXCEPT
+    operator&( ExternalSemaphoreFeatureFlagBits bit0, ExternalSemaphoreFeatureFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return ExternalSemaphoreFeatureFlags( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR ExternalSemaphoreFeatureFlags
-                                         operator^( ExternalSemaphoreFeatureFlagBits bit0, ExternalSemaphoreFeatureFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( ExternalSemaphoreFeatureFlagBits bit0, ExternalSemaphoreFeatureFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return ExternalSemaphoreFeatureFlags( bit0 ) ^ bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR ExternalSemaphoreFeatureFlags
-                                         operator~( ExternalSemaphoreFeatureFlagBits bits ) VULKAN_HPP_NOEXCEPT
+    operator~( ExternalSemaphoreFeatureFlagBits bits ) VULKAN_HPP_NOEXCEPT
   {
     return ~( ExternalSemaphoreFeatureFlags( bits ) );
   }
@@ -11177,6 +11324,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "Exportable | ";
     if ( value & ExternalSemaphoreFeatureFlagBits::eImportable )
       result += "Importable | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -11197,19 +11345,19 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR DescriptorBindingFlags
-                                         operator|( DescriptorBindingFlagBits bit0, DescriptorBindingFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( DescriptorBindingFlagBits bit0, DescriptorBindingFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return DescriptorBindingFlags( bit0 ) | bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR DescriptorBindingFlags
-                                         operator&(DescriptorBindingFlagBits bit0, DescriptorBindingFlagBits bit1)VULKAN_HPP_NOEXCEPT
+    operator&( DescriptorBindingFlagBits bit0, DescriptorBindingFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return DescriptorBindingFlags( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR DescriptorBindingFlags
-                                         operator^( DescriptorBindingFlagBits bit0, DescriptorBindingFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( DescriptorBindingFlagBits bit0, DescriptorBindingFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return DescriptorBindingFlags( bit0 ) ^ bit1;
   }
@@ -11236,6 +11384,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "PartiallyBound | ";
     if ( value & DescriptorBindingFlagBits::eVariableDescriptorCount )
       result += "VariableDescriptorCount | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -11258,8 +11407,8 @@ namespace VULKAN_HPP_NAMESPACE
     return ResolveModeFlags( bit0 ) | bit1;
   }
 
-  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR ResolveModeFlags operator&(ResolveModeFlagBits bit0,
-                                                                    ResolveModeFlagBits bit1)VULKAN_HPP_NOEXCEPT
+  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR ResolveModeFlags operator&( ResolveModeFlagBits bit0,
+                                                                     ResolveModeFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return ResolveModeFlags( bit0 ) & bit1;
   }
@@ -11291,6 +11440,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "Min | ";
     if ( value & ResolveModeFlagBits::eMax )
       result += "Max | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -11311,8 +11461,8 @@ namespace VULKAN_HPP_NAMESPACE
     return SemaphoreWaitFlags( bit0 ) | bit1;
   }
 
-  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR SemaphoreWaitFlags operator&(SemaphoreWaitFlagBits bit0,
-                                                                      SemaphoreWaitFlagBits bit1)VULKAN_HPP_NOEXCEPT
+  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR SemaphoreWaitFlags operator&( SemaphoreWaitFlagBits bit0,
+                                                                       SemaphoreWaitFlagBits bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return SemaphoreWaitFlags( bit0 ) & bit1;
   }
@@ -11338,6 +11488,7 @@ namespace VULKAN_HPP_NAMESPACE
     std::string result;
     if ( value & SemaphoreWaitFlagBits::eAny )
       result += "Any | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -11356,19 +11507,19 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR CompositeAlphaFlagsKHR
-                                         operator|( CompositeAlphaFlagBitsKHR bit0, CompositeAlphaFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( CompositeAlphaFlagBitsKHR bit0, CompositeAlphaFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return CompositeAlphaFlagsKHR( bit0 ) | bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR CompositeAlphaFlagsKHR
-                                         operator&(CompositeAlphaFlagBitsKHR bit0, CompositeAlphaFlagBitsKHR bit1)VULKAN_HPP_NOEXCEPT
+    operator&( CompositeAlphaFlagBitsKHR bit0, CompositeAlphaFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return CompositeAlphaFlagsKHR( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR CompositeAlphaFlagsKHR
-                                         operator^( CompositeAlphaFlagBitsKHR bit0, CompositeAlphaFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( CompositeAlphaFlagBitsKHR bit0, CompositeAlphaFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return CompositeAlphaFlagsKHR( bit0 ) ^ bit1;
   }
@@ -11393,6 +11544,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "PostMultiplied | ";
     if ( value & CompositeAlphaFlagBitsKHR::eInherit )
       result += "Inherit | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -11412,19 +11564,19 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR SwapchainCreateFlagsKHR
-                                         operator|( SwapchainCreateFlagBitsKHR bit0, SwapchainCreateFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( SwapchainCreateFlagBitsKHR bit0, SwapchainCreateFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return SwapchainCreateFlagsKHR( bit0 ) | bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR SwapchainCreateFlagsKHR
-                                         operator&(SwapchainCreateFlagBitsKHR bit0, SwapchainCreateFlagBitsKHR bit1)VULKAN_HPP_NOEXCEPT
+    operator&( SwapchainCreateFlagBitsKHR bit0, SwapchainCreateFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return SwapchainCreateFlagsKHR( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR SwapchainCreateFlagsKHR
-                                         operator^( SwapchainCreateFlagBitsKHR bit0, SwapchainCreateFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( SwapchainCreateFlagBitsKHR bit0, SwapchainCreateFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return SwapchainCreateFlagsKHR( bit0 ) ^ bit1;
   }
@@ -11447,6 +11599,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "Protected | ";
     if ( value & SwapchainCreateFlagBitsKHR::eMutableFormat )
       result += "MutableFormat | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -11465,25 +11618,25 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR DeviceGroupPresentModeFlagsKHR
-                                         operator|( DeviceGroupPresentModeFlagBitsKHR bit0, DeviceGroupPresentModeFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( DeviceGroupPresentModeFlagBitsKHR bit0, DeviceGroupPresentModeFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return DeviceGroupPresentModeFlagsKHR( bit0 ) | bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR DeviceGroupPresentModeFlagsKHR
-                                         operator&(DeviceGroupPresentModeFlagBitsKHR bit0, DeviceGroupPresentModeFlagBitsKHR bit1)VULKAN_HPP_NOEXCEPT
+    operator&( DeviceGroupPresentModeFlagBitsKHR bit0, DeviceGroupPresentModeFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return DeviceGroupPresentModeFlagsKHR( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR DeviceGroupPresentModeFlagsKHR
-                                         operator^( DeviceGroupPresentModeFlagBitsKHR bit0, DeviceGroupPresentModeFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( DeviceGroupPresentModeFlagBitsKHR bit0, DeviceGroupPresentModeFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return DeviceGroupPresentModeFlagsKHR( bit0 ) ^ bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR DeviceGroupPresentModeFlagsKHR
-                                         operator~( DeviceGroupPresentModeFlagBitsKHR bits ) VULKAN_HPP_NOEXCEPT
+    operator~( DeviceGroupPresentModeFlagBitsKHR bits ) VULKAN_HPP_NOEXCEPT
   {
     return ~( DeviceGroupPresentModeFlagsKHR( bits ) );
   }
@@ -11502,6 +11655,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "Sum | ";
     if ( value & DeviceGroupPresentModeFlagBitsKHR::eLocalMultiDevice )
       result += "LocalMultiDevice | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -11528,19 +11682,19 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR DisplayPlaneAlphaFlagsKHR
-                                         operator|( DisplayPlaneAlphaFlagBitsKHR bit0, DisplayPlaneAlphaFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( DisplayPlaneAlphaFlagBitsKHR bit0, DisplayPlaneAlphaFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return DisplayPlaneAlphaFlagsKHR( bit0 ) | bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR DisplayPlaneAlphaFlagsKHR
-                                         operator&(DisplayPlaneAlphaFlagBitsKHR bit0, DisplayPlaneAlphaFlagBitsKHR bit1)VULKAN_HPP_NOEXCEPT
+    operator&( DisplayPlaneAlphaFlagBitsKHR bit0, DisplayPlaneAlphaFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return DisplayPlaneAlphaFlagsKHR( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR DisplayPlaneAlphaFlagsKHR
-                                         operator^( DisplayPlaneAlphaFlagBitsKHR bit0, DisplayPlaneAlphaFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( DisplayPlaneAlphaFlagBitsKHR bit0, DisplayPlaneAlphaFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return DisplayPlaneAlphaFlagsKHR( bit0 ) ^ bit1;
   }
@@ -11565,6 +11719,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "PerPixel | ";
     if ( value & DisplayPlaneAlphaFlagBitsKHR::ePerPixelPremultiplied )
       result += "PerPixelPremultiplied | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -11594,19 +11749,19 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR SurfaceTransformFlagsKHR
-                                         operator|( SurfaceTransformFlagBitsKHR bit0, SurfaceTransformFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( SurfaceTransformFlagBitsKHR bit0, SurfaceTransformFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return SurfaceTransformFlagsKHR( bit0 ) | bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR SurfaceTransformFlagsKHR
-                                         operator&(SurfaceTransformFlagBitsKHR bit0, SurfaceTransformFlagBitsKHR bit1)VULKAN_HPP_NOEXCEPT
+    operator&( SurfaceTransformFlagBitsKHR bit0, SurfaceTransformFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return SurfaceTransformFlagsKHR( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR SurfaceTransformFlagsKHR
-                                         operator^( SurfaceTransformFlagBitsKHR bit0, SurfaceTransformFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( SurfaceTransformFlagBitsKHR bit0, SurfaceTransformFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return SurfaceTransformFlagsKHR( bit0 ) ^ bit1;
   }
@@ -11641,6 +11796,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "HorizontalMirrorRotate270 | ";
     if ( value & SurfaceTransformFlagBitsKHR::eInherit )
       result += "Inherit | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -11715,19 +11871,19 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR DebugReportFlagsEXT
-                                         operator|( DebugReportFlagBitsEXT bit0, DebugReportFlagBitsEXT bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( DebugReportFlagBitsEXT bit0, DebugReportFlagBitsEXT bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return DebugReportFlagsEXT( bit0 ) | bit1;
   }
 
-  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR DebugReportFlagsEXT operator&(DebugReportFlagBitsEXT bit0,
-                                                                       DebugReportFlagBitsEXT bit1)VULKAN_HPP_NOEXCEPT
+  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR DebugReportFlagsEXT
+    operator&( DebugReportFlagBitsEXT bit0, DebugReportFlagBitsEXT bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return DebugReportFlagsEXT( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR DebugReportFlagsEXT
-                                         operator^( DebugReportFlagBitsEXT bit0, DebugReportFlagBitsEXT bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( DebugReportFlagBitsEXT bit0, DebugReportFlagBitsEXT bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return DebugReportFlagsEXT( bit0 ) ^ bit1;
   }
@@ -11754,6 +11910,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "Error | ";
     if ( value & DebugReportFlagBitsEXT::eDebug )
       result += "Debug | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -11777,19 +11934,19 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR VideoCodecOperationFlagsKHR
-                                         operator|( VideoCodecOperationFlagBitsKHR bit0, VideoCodecOperationFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( VideoCodecOperationFlagBitsKHR bit0, VideoCodecOperationFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return VideoCodecOperationFlagsKHR( bit0 ) | bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR VideoCodecOperationFlagsKHR
-                                         operator&(VideoCodecOperationFlagBitsKHR bit0, VideoCodecOperationFlagBitsKHR bit1)VULKAN_HPP_NOEXCEPT
+    operator&( VideoCodecOperationFlagBitsKHR bit0, VideoCodecOperationFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return VideoCodecOperationFlagsKHR( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR VideoCodecOperationFlagsKHR
-                                         operator^( VideoCodecOperationFlagBitsKHR bit0, VideoCodecOperationFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( VideoCodecOperationFlagBitsKHR bit0, VideoCodecOperationFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return VideoCodecOperationFlagsKHR( bit0 ) ^ bit1;
   }
@@ -11814,6 +11971,7 @@ namespace VULKAN_HPP_NAMESPACE
     if ( value & VideoCodecOperationFlagBitsKHR::eDecodeH265EXT )
       result += "DecodeH265EXT | ";
 #  endif /*VK_ENABLE_BETA_EXTENSIONS*/
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -11832,25 +11990,25 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR VideoChromaSubsamplingFlagsKHR
-                                         operator|( VideoChromaSubsamplingFlagBitsKHR bit0, VideoChromaSubsamplingFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( VideoChromaSubsamplingFlagBitsKHR bit0, VideoChromaSubsamplingFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return VideoChromaSubsamplingFlagsKHR( bit0 ) | bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR VideoChromaSubsamplingFlagsKHR
-                                         operator&(VideoChromaSubsamplingFlagBitsKHR bit0, VideoChromaSubsamplingFlagBitsKHR bit1)VULKAN_HPP_NOEXCEPT
+    operator&( VideoChromaSubsamplingFlagBitsKHR bit0, VideoChromaSubsamplingFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return VideoChromaSubsamplingFlagsKHR( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR VideoChromaSubsamplingFlagsKHR
-                                         operator^( VideoChromaSubsamplingFlagBitsKHR bit0, VideoChromaSubsamplingFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( VideoChromaSubsamplingFlagBitsKHR bit0, VideoChromaSubsamplingFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return VideoChromaSubsamplingFlagsKHR( bit0 ) ^ bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR VideoChromaSubsamplingFlagsKHR
-                                         operator~( VideoChromaSubsamplingFlagBitsKHR bits ) VULKAN_HPP_NOEXCEPT
+    operator~( VideoChromaSubsamplingFlagBitsKHR bits ) VULKAN_HPP_NOEXCEPT
   {
     return ~( VideoChromaSubsamplingFlagsKHR( bits ) );
   }
@@ -11869,6 +12027,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "422 | ";
     if ( value & VideoChromaSubsamplingFlagBitsKHR::e444 )
       result += "444 | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -11886,25 +12045,25 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR VideoComponentBitDepthFlagsKHR
-                                         operator|( VideoComponentBitDepthFlagBitsKHR bit0, VideoComponentBitDepthFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( VideoComponentBitDepthFlagBitsKHR bit0, VideoComponentBitDepthFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return VideoComponentBitDepthFlagsKHR( bit0 ) | bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR VideoComponentBitDepthFlagsKHR
-                                         operator&(VideoComponentBitDepthFlagBitsKHR bit0, VideoComponentBitDepthFlagBitsKHR bit1)VULKAN_HPP_NOEXCEPT
+    operator&( VideoComponentBitDepthFlagBitsKHR bit0, VideoComponentBitDepthFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return VideoComponentBitDepthFlagsKHR( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR VideoComponentBitDepthFlagsKHR
-                                         operator^( VideoComponentBitDepthFlagBitsKHR bit0, VideoComponentBitDepthFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( VideoComponentBitDepthFlagBitsKHR bit0, VideoComponentBitDepthFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return VideoComponentBitDepthFlagsKHR( bit0 ) ^ bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR VideoComponentBitDepthFlagsKHR
-                                         operator~( VideoComponentBitDepthFlagBitsKHR bits ) VULKAN_HPP_NOEXCEPT
+    operator~( VideoComponentBitDepthFlagBitsKHR bits ) VULKAN_HPP_NOEXCEPT
   {
     return ~( VideoComponentBitDepthFlagsKHR( bits ) );
   }
@@ -11921,6 +12080,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "10 | ";
     if ( value & VideoComponentBitDepthFlagBitsKHR::e12 )
       result += "12 | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -11937,19 +12097,19 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR VideoCapabilityFlagsKHR
-                                         operator|( VideoCapabilityFlagBitsKHR bit0, VideoCapabilityFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( VideoCapabilityFlagBitsKHR bit0, VideoCapabilityFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return VideoCapabilityFlagsKHR( bit0 ) | bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR VideoCapabilityFlagsKHR
-                                         operator&(VideoCapabilityFlagBitsKHR bit0, VideoCapabilityFlagBitsKHR bit1)VULKAN_HPP_NOEXCEPT
+    operator&( VideoCapabilityFlagBitsKHR bit0, VideoCapabilityFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return VideoCapabilityFlagsKHR( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR VideoCapabilityFlagsKHR
-                                         operator^( VideoCapabilityFlagBitsKHR bit0, VideoCapabilityFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( VideoCapabilityFlagBitsKHR bit0, VideoCapabilityFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return VideoCapabilityFlagsKHR( bit0 ) ^ bit1;
   }
@@ -11970,6 +12130,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "ProtectedContent | ";
     if ( value & VideoCapabilityFlagBitsKHR::eSeparateReferenceImages )
       result += "SeparateReferenceImages | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -11986,19 +12147,19 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR VideoSessionCreateFlagsKHR
-                                         operator|( VideoSessionCreateFlagBitsKHR bit0, VideoSessionCreateFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( VideoSessionCreateFlagBitsKHR bit0, VideoSessionCreateFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return VideoSessionCreateFlagsKHR( bit0 ) | bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR VideoSessionCreateFlagsKHR
-                                         operator&(VideoSessionCreateFlagBitsKHR bit0, VideoSessionCreateFlagBitsKHR bit1)VULKAN_HPP_NOEXCEPT
+    operator&( VideoSessionCreateFlagBitsKHR bit0, VideoSessionCreateFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return VideoSessionCreateFlagsKHR( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR VideoSessionCreateFlagsKHR
-                                         operator^( VideoSessionCreateFlagBitsKHR bit0, VideoSessionCreateFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( VideoSessionCreateFlagBitsKHR bit0, VideoSessionCreateFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return VideoSessionCreateFlagsKHR( bit0 ) ^ bit1;
   }
@@ -12017,6 +12178,7 @@ namespace VULKAN_HPP_NAMESPACE
     std::string result;
     if ( value & VideoSessionCreateFlagBitsKHR::eProtectedContent )
       result += "ProtectedContent | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -12046,19 +12208,19 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR VideoCodingControlFlagsKHR
-                                         operator|( VideoCodingControlFlagBitsKHR bit0, VideoCodingControlFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( VideoCodingControlFlagBitsKHR bit0, VideoCodingControlFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return VideoCodingControlFlagsKHR( bit0 ) | bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR VideoCodingControlFlagsKHR
-                                         operator&(VideoCodingControlFlagBitsKHR bit0, VideoCodingControlFlagBitsKHR bit1)VULKAN_HPP_NOEXCEPT
+    operator&( VideoCodingControlFlagBitsKHR bit0, VideoCodingControlFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return VideoCodingControlFlagsKHR( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR VideoCodingControlFlagsKHR
-                                         operator^( VideoCodingControlFlagBitsKHR bit0, VideoCodingControlFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( VideoCodingControlFlagBitsKHR bit0, VideoCodingControlFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return VideoCodingControlFlagsKHR( bit0 ) ^ bit1;
   }
@@ -12077,6 +12239,7 @@ namespace VULKAN_HPP_NAMESPACE
     std::string result;
     if ( value & VideoCodingControlFlagBitsKHR::eReset )
       result += "Reset | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -12087,33 +12250,32 @@ namespace VULKAN_HPP_NAMESPACE
   {
     enum : VkFlags
     {
-      allFlags = VkFlags( VideoCodingQualityPresetFlagBitsKHR::eDefault ) |
-                 VkFlags( VideoCodingQualityPresetFlagBitsKHR::eNormal ) |
+      allFlags = VkFlags( VideoCodingQualityPresetFlagBitsKHR::eNormal ) |
                  VkFlags( VideoCodingQualityPresetFlagBitsKHR::ePower ) |
                  VkFlags( VideoCodingQualityPresetFlagBitsKHR::eQuality )
     };
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR VideoCodingQualityPresetFlagsKHR
-                                         operator|( VideoCodingQualityPresetFlagBitsKHR bit0, VideoCodingQualityPresetFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( VideoCodingQualityPresetFlagBitsKHR bit0, VideoCodingQualityPresetFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return VideoCodingQualityPresetFlagsKHR( bit0 ) | bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR VideoCodingQualityPresetFlagsKHR
-                                         operator&(VideoCodingQualityPresetFlagBitsKHR bit0, VideoCodingQualityPresetFlagBitsKHR bit1)VULKAN_HPP_NOEXCEPT
+    operator&( VideoCodingQualityPresetFlagBitsKHR bit0, VideoCodingQualityPresetFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return VideoCodingQualityPresetFlagsKHR( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR VideoCodingQualityPresetFlagsKHR
-                                         operator^( VideoCodingQualityPresetFlagBitsKHR bit0, VideoCodingQualityPresetFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( VideoCodingQualityPresetFlagBitsKHR bit0, VideoCodingQualityPresetFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return VideoCodingQualityPresetFlagsKHR( bit0 ) ^ bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR VideoCodingQualityPresetFlagsKHR
-                                         operator~( VideoCodingQualityPresetFlagBitsKHR bits ) VULKAN_HPP_NOEXCEPT
+    operator~( VideoCodingQualityPresetFlagBitsKHR bits ) VULKAN_HPP_NOEXCEPT
   {
     return ~( VideoCodingQualityPresetFlagsKHR( bits ) );
   }
@@ -12130,6 +12292,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "Power | ";
     if ( value & VideoCodingQualityPresetFlagBitsKHR::eQuality )
       result += "Quality | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 #endif /*VK_ENABLE_BETA_EXTENSIONS*/
@@ -12149,19 +12312,19 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR VideoDecodeFlagsKHR
-                                         operator|( VideoDecodeFlagBitsKHR bit0, VideoDecodeFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( VideoDecodeFlagBitsKHR bit0, VideoDecodeFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return VideoDecodeFlagsKHR( bit0 ) | bit1;
   }
 
-  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR VideoDecodeFlagsKHR operator&(VideoDecodeFlagBitsKHR bit0,
-                                                                       VideoDecodeFlagBitsKHR bit1)VULKAN_HPP_NOEXCEPT
+  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR VideoDecodeFlagsKHR
+    operator&( VideoDecodeFlagBitsKHR bit0, VideoDecodeFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return VideoDecodeFlagsKHR( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR VideoDecodeFlagsKHR
-                                         operator^( VideoDecodeFlagBitsKHR bit0, VideoDecodeFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( VideoDecodeFlagBitsKHR bit0, VideoDecodeFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return VideoDecodeFlagsKHR( bit0 ) ^ bit1;
   }
@@ -12180,6 +12343,7 @@ namespace VULKAN_HPP_NAMESPACE
     std::string result;
     if ( value & VideoDecodeFlagBitsKHR::eReserved0 )
       result += "Reserved0 | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 #endif /*VK_ENABLE_BETA_EXTENSIONS*/
@@ -12223,8 +12387,8 @@ namespace VULKAN_HPP_NAMESPACE
     return VideoEncodeH264CapabilityFlagsEXT( bit0 ) | bit1;
   }
 
-  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR VideoEncodeH264CapabilityFlagsEXT
-                                         operator&(VideoEncodeH264CapabilityFlagBitsEXT bit0, VideoEncodeH264CapabilityFlagBitsEXT bit1)VULKAN_HPP_NOEXCEPT
+  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR VideoEncodeH264CapabilityFlagsEXT operator&(
+    VideoEncodeH264CapabilityFlagBitsEXT bit0, VideoEncodeH264CapabilityFlagBitsEXT bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return VideoEncodeH264CapabilityFlagsEXT( bit0 ) & bit1;
   }
@@ -12236,7 +12400,7 @@ namespace VULKAN_HPP_NAMESPACE
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR VideoEncodeH264CapabilityFlagsEXT
-                                         operator~( VideoEncodeH264CapabilityFlagBitsEXT bits ) VULKAN_HPP_NOEXCEPT
+    operator~( VideoEncodeH264CapabilityFlagBitsEXT bits ) VULKAN_HPP_NOEXCEPT
   {
     return ~( VideoEncodeH264CapabilityFlagsEXT( bits ) );
   }
@@ -12269,6 +12433,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "MultipleSlicePerFrame | ";
     if ( value & VideoEncodeH264CapabilityFlagBitsEXT::eEvenlyDistributedSliceSize )
       result += "EvenlyDistributedSliceSize | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -12286,25 +12451,25 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR VideoEncodeH264InputModeFlagsEXT
-                                         operator|( VideoEncodeH264InputModeFlagBitsEXT bit0, VideoEncodeH264InputModeFlagBitsEXT bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( VideoEncodeH264InputModeFlagBitsEXT bit0, VideoEncodeH264InputModeFlagBitsEXT bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return VideoEncodeH264InputModeFlagsEXT( bit0 ) | bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR VideoEncodeH264InputModeFlagsEXT
-                                         operator&(VideoEncodeH264InputModeFlagBitsEXT bit0, VideoEncodeH264InputModeFlagBitsEXT bit1)VULKAN_HPP_NOEXCEPT
+    operator&( VideoEncodeH264InputModeFlagBitsEXT bit0, VideoEncodeH264InputModeFlagBitsEXT bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return VideoEncodeH264InputModeFlagsEXT( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR VideoEncodeH264InputModeFlagsEXT
-                                         operator^( VideoEncodeH264InputModeFlagBitsEXT bit0, VideoEncodeH264InputModeFlagBitsEXT bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( VideoEncodeH264InputModeFlagBitsEXT bit0, VideoEncodeH264InputModeFlagBitsEXT bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return VideoEncodeH264InputModeFlagsEXT( bit0 ) ^ bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR VideoEncodeH264InputModeFlagsEXT
-                                         operator~( VideoEncodeH264InputModeFlagBitsEXT bits ) VULKAN_HPP_NOEXCEPT
+    operator~( VideoEncodeH264InputModeFlagBitsEXT bits ) VULKAN_HPP_NOEXCEPT
   {
     return ~( VideoEncodeH264InputModeFlagsEXT( bits ) );
   }
@@ -12321,6 +12486,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "Slice | ";
     if ( value & VideoEncodeH264InputModeFlagBitsEXT::eNonVcl )
       result += "NonVcl | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -12343,8 +12509,8 @@ namespace VULKAN_HPP_NAMESPACE
     return VideoEncodeH264OutputModeFlagsEXT( bit0 ) | bit1;
   }
 
-  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR VideoEncodeH264OutputModeFlagsEXT
-                                         operator&(VideoEncodeH264OutputModeFlagBitsEXT bit0, VideoEncodeH264OutputModeFlagBitsEXT bit1)VULKAN_HPP_NOEXCEPT
+  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR VideoEncodeH264OutputModeFlagsEXT operator&(
+    VideoEncodeH264OutputModeFlagBitsEXT bit0, VideoEncodeH264OutputModeFlagBitsEXT bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return VideoEncodeH264OutputModeFlagsEXT( bit0 ) & bit1;
   }
@@ -12356,7 +12522,7 @@ namespace VULKAN_HPP_NAMESPACE
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR VideoEncodeH264OutputModeFlagsEXT
-                                         operator~( VideoEncodeH264OutputModeFlagBitsEXT bits ) VULKAN_HPP_NOEXCEPT
+    operator~( VideoEncodeH264OutputModeFlagBitsEXT bits ) VULKAN_HPP_NOEXCEPT
   {
     return ~( VideoEncodeH264OutputModeFlagsEXT( bits ) );
   }
@@ -12373,6 +12539,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "Slice | ";
     if ( value & VideoEncodeH264OutputModeFlagBitsEXT::eNonVcl )
       result += "NonVcl | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -12389,25 +12556,25 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR VideoEncodeH264CreateFlagsEXT
-                                         operator|( VideoEncodeH264CreateFlagBitsEXT bit0, VideoEncodeH264CreateFlagBitsEXT bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( VideoEncodeH264CreateFlagBitsEXT bit0, VideoEncodeH264CreateFlagBitsEXT bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return VideoEncodeH264CreateFlagsEXT( bit0 ) | bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR VideoEncodeH264CreateFlagsEXT
-                                         operator&(VideoEncodeH264CreateFlagBitsEXT bit0, VideoEncodeH264CreateFlagBitsEXT bit1)VULKAN_HPP_NOEXCEPT
+    operator&( VideoEncodeH264CreateFlagBitsEXT bit0, VideoEncodeH264CreateFlagBitsEXT bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return VideoEncodeH264CreateFlagsEXT( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR VideoEncodeH264CreateFlagsEXT
-                                         operator^( VideoEncodeH264CreateFlagBitsEXT bit0, VideoEncodeH264CreateFlagBitsEXT bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( VideoEncodeH264CreateFlagBitsEXT bit0, VideoEncodeH264CreateFlagBitsEXT bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return VideoEncodeH264CreateFlagsEXT( bit0 ) ^ bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR VideoEncodeH264CreateFlagsEXT
-                                         operator~( VideoEncodeH264CreateFlagBitsEXT bits ) VULKAN_HPP_NOEXCEPT
+    operator~( VideoEncodeH264CreateFlagBitsEXT bits ) VULKAN_HPP_NOEXCEPT
   {
     return ~( VideoEncodeH264CreateFlagsEXT( bits ) );
   }
@@ -12420,6 +12587,7 @@ namespace VULKAN_HPP_NAMESPACE
     std::string result;
     if ( value & VideoEncodeH264CreateFlagBitsEXT::eReserved0 )
       result += "Reserved0 | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 #endif /*VK_ENABLE_BETA_EXTENSIONS*/
@@ -12447,7 +12615,7 @@ namespace VULKAN_HPP_NAMESPACE
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR VideoDecodeH264PictureLayoutFlagsEXT operator&(
-    VideoDecodeH264PictureLayoutFlagBitsEXT bit0, VideoDecodeH264PictureLayoutFlagBitsEXT bit1)VULKAN_HPP_NOEXCEPT
+    VideoDecodeH264PictureLayoutFlagBitsEXT bit0, VideoDecodeH264PictureLayoutFlagBitsEXT bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return VideoDecodeH264PictureLayoutFlagsEXT( bit0 ) & bit1;
   }
@@ -12459,7 +12627,7 @@ namespace VULKAN_HPP_NAMESPACE
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR VideoDecodeH264PictureLayoutFlagsEXT
-                                         operator~( VideoDecodeH264PictureLayoutFlagBitsEXT bits ) VULKAN_HPP_NOEXCEPT
+    operator~( VideoDecodeH264PictureLayoutFlagBitsEXT bits ) VULKAN_HPP_NOEXCEPT
   {
     return ~( VideoDecodeH264PictureLayoutFlagsEXT( bits ) );
   }
@@ -12474,6 +12642,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "InterlacedInterleavedLines | ";
     if ( value & VideoDecodeH264PictureLayoutFlagBitsEXT::eInterlacedSeparatePlanes )
       result += "InterlacedSeparatePlanes | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -12513,25 +12682,25 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR ExternalMemoryHandleTypeFlagsNV
-                                         operator|( ExternalMemoryHandleTypeFlagBitsNV bit0, ExternalMemoryHandleTypeFlagBitsNV bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( ExternalMemoryHandleTypeFlagBitsNV bit0, ExternalMemoryHandleTypeFlagBitsNV bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return ExternalMemoryHandleTypeFlagsNV( bit0 ) | bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR ExternalMemoryHandleTypeFlagsNV
-                                         operator&(ExternalMemoryHandleTypeFlagBitsNV bit0, ExternalMemoryHandleTypeFlagBitsNV bit1)VULKAN_HPP_NOEXCEPT
+    operator&( ExternalMemoryHandleTypeFlagBitsNV bit0, ExternalMemoryHandleTypeFlagBitsNV bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return ExternalMemoryHandleTypeFlagsNV( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR ExternalMemoryHandleTypeFlagsNV
-                                         operator^( ExternalMemoryHandleTypeFlagBitsNV bit0, ExternalMemoryHandleTypeFlagBitsNV bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( ExternalMemoryHandleTypeFlagBitsNV bit0, ExternalMemoryHandleTypeFlagBitsNV bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return ExternalMemoryHandleTypeFlagsNV( bit0 ) ^ bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR ExternalMemoryHandleTypeFlagsNV
-                                         operator~( ExternalMemoryHandleTypeFlagBitsNV bits ) VULKAN_HPP_NOEXCEPT
+    operator~( ExternalMemoryHandleTypeFlagBitsNV bits ) VULKAN_HPP_NOEXCEPT
   {
     return ~( ExternalMemoryHandleTypeFlagsNV( bits ) );
   }
@@ -12550,6 +12719,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "D3D11Image | ";
     if ( value & ExternalMemoryHandleTypeFlagBitsNV::eD3D11ImageKmt )
       result += "D3D11ImageKmt | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -12567,19 +12737,19 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR ExternalMemoryFeatureFlagsNV
-                                         operator|( ExternalMemoryFeatureFlagBitsNV bit0, ExternalMemoryFeatureFlagBitsNV bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( ExternalMemoryFeatureFlagBitsNV bit0, ExternalMemoryFeatureFlagBitsNV bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return ExternalMemoryFeatureFlagsNV( bit0 ) | bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR ExternalMemoryFeatureFlagsNV
-                                         operator&(ExternalMemoryFeatureFlagBitsNV bit0, ExternalMemoryFeatureFlagBitsNV bit1)VULKAN_HPP_NOEXCEPT
+    operator&( ExternalMemoryFeatureFlagBitsNV bit0, ExternalMemoryFeatureFlagBitsNV bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return ExternalMemoryFeatureFlagsNV( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR ExternalMemoryFeatureFlagsNV
-                                         operator^( ExternalMemoryFeatureFlagBitsNV bit0, ExternalMemoryFeatureFlagBitsNV bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( ExternalMemoryFeatureFlagBitsNV bit0, ExternalMemoryFeatureFlagBitsNV bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return ExternalMemoryFeatureFlagsNV( bit0 ) ^ bit1;
   }
@@ -12602,6 +12772,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "Exportable | ";
     if ( value & ExternalMemoryFeatureFlagBitsNV::eImportable )
       result += "Importable | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -12630,19 +12801,19 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR ConditionalRenderingFlagsEXT
-                                         operator|( ConditionalRenderingFlagBitsEXT bit0, ConditionalRenderingFlagBitsEXT bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( ConditionalRenderingFlagBitsEXT bit0, ConditionalRenderingFlagBitsEXT bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return ConditionalRenderingFlagsEXT( bit0 ) | bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR ConditionalRenderingFlagsEXT
-                                         operator&(ConditionalRenderingFlagBitsEXT bit0, ConditionalRenderingFlagBitsEXT bit1)VULKAN_HPP_NOEXCEPT
+    operator&( ConditionalRenderingFlagBitsEXT bit0, ConditionalRenderingFlagBitsEXT bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return ConditionalRenderingFlagsEXT( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR ConditionalRenderingFlagsEXT
-                                         operator^( ConditionalRenderingFlagBitsEXT bit0, ConditionalRenderingFlagBitsEXT bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( ConditionalRenderingFlagBitsEXT bit0, ConditionalRenderingFlagBitsEXT bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return ConditionalRenderingFlagsEXT( bit0 ) ^ bit1;
   }
@@ -12661,6 +12832,7 @@ namespace VULKAN_HPP_NAMESPACE
     std::string result;
     if ( value & ConditionalRenderingFlagBitsEXT::eInverted )
       result += "Inverted | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -12678,19 +12850,19 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR SurfaceCounterFlagsEXT
-                                         operator|( SurfaceCounterFlagBitsEXT bit0, SurfaceCounterFlagBitsEXT bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( SurfaceCounterFlagBitsEXT bit0, SurfaceCounterFlagBitsEXT bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return SurfaceCounterFlagsEXT( bit0 ) | bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR SurfaceCounterFlagsEXT
-                                         operator&(SurfaceCounterFlagBitsEXT bit0, SurfaceCounterFlagBitsEXT bit1)VULKAN_HPP_NOEXCEPT
+    operator&( SurfaceCounterFlagBitsEXT bit0, SurfaceCounterFlagBitsEXT bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return SurfaceCounterFlagsEXT( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR SurfaceCounterFlagsEXT
-                                         operator^( SurfaceCounterFlagBitsEXT bit0, SurfaceCounterFlagBitsEXT bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( SurfaceCounterFlagBitsEXT bit0, SurfaceCounterFlagBitsEXT bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return SurfaceCounterFlagsEXT( bit0 ) ^ bit1;
   }
@@ -12709,6 +12881,7 @@ namespace VULKAN_HPP_NAMESPACE
     std::string result;
     if ( value & SurfaceCounterFlagBitsEXT::eVblank )
       result += "Vblank | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -12770,7 +12943,7 @@ namespace VULKAN_HPP_NAMESPACE
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR PerformanceCounterDescriptionFlagsKHR operator&(
-    PerformanceCounterDescriptionFlagBitsKHR bit0, PerformanceCounterDescriptionFlagBitsKHR bit1)VULKAN_HPP_NOEXCEPT
+    PerformanceCounterDescriptionFlagBitsKHR bit0, PerformanceCounterDescriptionFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return PerformanceCounterDescriptionFlagsKHR( bit0 ) & bit1;
   }
@@ -12782,7 +12955,7 @@ namespace VULKAN_HPP_NAMESPACE
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR PerformanceCounterDescriptionFlagsKHR
-                                         operator~( PerformanceCounterDescriptionFlagBitsKHR bits ) VULKAN_HPP_NOEXCEPT
+    operator~( PerformanceCounterDescriptionFlagBitsKHR bits ) VULKAN_HPP_NOEXCEPT
   {
     return ~( PerformanceCounterDescriptionFlagsKHR( bits ) );
   }
@@ -12797,6 +12970,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "PerformanceImpacting | ";
     if ( value & PerformanceCounterDescriptionFlagBitsKHR::eConcurrentlyImpacted )
       result += "ConcurrentlyImpacted | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -12851,8 +13025,8 @@ namespace VULKAN_HPP_NAMESPACE
     return DebugUtilsMessageSeverityFlagsEXT( bit0 ) | bit1;
   }
 
-  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR DebugUtilsMessageSeverityFlagsEXT
-                                         operator&(DebugUtilsMessageSeverityFlagBitsEXT bit0, DebugUtilsMessageSeverityFlagBitsEXT bit1)VULKAN_HPP_NOEXCEPT
+  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR DebugUtilsMessageSeverityFlagsEXT operator&(
+    DebugUtilsMessageSeverityFlagBitsEXT bit0, DebugUtilsMessageSeverityFlagBitsEXT bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return DebugUtilsMessageSeverityFlagsEXT( bit0 ) & bit1;
   }
@@ -12864,7 +13038,7 @@ namespace VULKAN_HPP_NAMESPACE
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR DebugUtilsMessageSeverityFlagsEXT
-                                         operator~( DebugUtilsMessageSeverityFlagBitsEXT bits ) VULKAN_HPP_NOEXCEPT
+    operator~( DebugUtilsMessageSeverityFlagBitsEXT bits ) VULKAN_HPP_NOEXCEPT
   {
     return ~( DebugUtilsMessageSeverityFlagsEXT( bits ) );
   }
@@ -12883,6 +13057,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "Warning | ";
     if ( value & DebugUtilsMessageSeverityFlagBitsEXT::eError )
       result += "Error | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -12900,25 +13075,25 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR DebugUtilsMessageTypeFlagsEXT
-                                         operator|( DebugUtilsMessageTypeFlagBitsEXT bit0, DebugUtilsMessageTypeFlagBitsEXT bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( DebugUtilsMessageTypeFlagBitsEXT bit0, DebugUtilsMessageTypeFlagBitsEXT bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return DebugUtilsMessageTypeFlagsEXT( bit0 ) | bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR DebugUtilsMessageTypeFlagsEXT
-                                         operator&(DebugUtilsMessageTypeFlagBitsEXT bit0, DebugUtilsMessageTypeFlagBitsEXT bit1)VULKAN_HPP_NOEXCEPT
+    operator&( DebugUtilsMessageTypeFlagBitsEXT bit0, DebugUtilsMessageTypeFlagBitsEXT bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return DebugUtilsMessageTypeFlagsEXT( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR DebugUtilsMessageTypeFlagsEXT
-                                         operator^( DebugUtilsMessageTypeFlagBitsEXT bit0, DebugUtilsMessageTypeFlagBitsEXT bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( DebugUtilsMessageTypeFlagBitsEXT bit0, DebugUtilsMessageTypeFlagBitsEXT bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return DebugUtilsMessageTypeFlagsEXT( bit0 ) ^ bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR DebugUtilsMessageTypeFlagsEXT
-                                         operator~( DebugUtilsMessageTypeFlagBitsEXT bits ) VULKAN_HPP_NOEXCEPT
+    operator~( DebugUtilsMessageTypeFlagBitsEXT bits ) VULKAN_HPP_NOEXCEPT
   {
     return ~( DebugUtilsMessageTypeFlagsEXT( bits ) );
   }
@@ -12935,6 +13110,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "Validation | ";
     if ( value & DebugUtilsMessageTypeFlagBitsEXT::ePerformance )
       result += "Performance | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -12980,8 +13156,8 @@ namespace VULKAN_HPP_NAMESPACE
     return GeometryFlagsKHR( bit0 ) | bit1;
   }
 
-  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR GeometryFlagsKHR operator&(GeometryFlagBitsKHR bit0,
-                                                                    GeometryFlagBitsKHR bit1)VULKAN_HPP_NOEXCEPT
+  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR GeometryFlagsKHR operator&( GeometryFlagBitsKHR bit0,
+                                                                     GeometryFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return GeometryFlagsKHR( bit0 ) & bit1;
   }
@@ -13009,6 +13185,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "Opaque | ";
     if ( value & GeometryFlagBitsKHR::eNoDuplicateAnyHitInvocation )
       result += "NoDuplicateAnyHitInvocation | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -13020,26 +13197,26 @@ namespace VULKAN_HPP_NAMESPACE
     enum : VkFlags
     {
       allFlags = VkFlags( GeometryInstanceFlagBitsKHR::eTriangleFacingCullDisable ) |
-                 VkFlags( GeometryInstanceFlagBitsKHR::eTriangleFrontCounterclockwise ) |
+                 VkFlags( GeometryInstanceFlagBitsKHR::eTriangleFlipFacing ) |
                  VkFlags( GeometryInstanceFlagBitsKHR::eForceOpaque ) |
                  VkFlags( GeometryInstanceFlagBitsKHR::eForceNoOpaque )
     };
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR GeometryInstanceFlagsKHR
-                                         operator|( GeometryInstanceFlagBitsKHR bit0, GeometryInstanceFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( GeometryInstanceFlagBitsKHR bit0, GeometryInstanceFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return GeometryInstanceFlagsKHR( bit0 ) | bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR GeometryInstanceFlagsKHR
-                                         operator&(GeometryInstanceFlagBitsKHR bit0, GeometryInstanceFlagBitsKHR bit1)VULKAN_HPP_NOEXCEPT
+    operator&( GeometryInstanceFlagBitsKHR bit0, GeometryInstanceFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return GeometryInstanceFlagsKHR( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR GeometryInstanceFlagsKHR
-                                         operator^( GeometryInstanceFlagBitsKHR bit0, GeometryInstanceFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( GeometryInstanceFlagBitsKHR bit0, GeometryInstanceFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return GeometryInstanceFlagsKHR( bit0 ) ^ bit1;
   }
@@ -13060,12 +13237,13 @@ namespace VULKAN_HPP_NAMESPACE
     std::string result;
     if ( value & GeometryInstanceFlagBitsKHR::eTriangleFacingCullDisable )
       result += "TriangleFacingCullDisable | ";
-    if ( value & GeometryInstanceFlagBitsKHR::eTriangleFrontCounterclockwise )
-      result += "TriangleFrontCounterclockwise | ";
+    if ( value & GeometryInstanceFlagBitsKHR::eTriangleFlipFacing )
+      result += "TriangleFlipFacing | ";
     if ( value & GeometryInstanceFlagBitsKHR::eForceOpaque )
       result += "ForceOpaque | ";
     if ( value & GeometryInstanceFlagBitsKHR::eForceNoOpaque )
       result += "ForceNoOpaque | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -13091,8 +13269,8 @@ namespace VULKAN_HPP_NAMESPACE
     return BuildAccelerationStructureFlagsKHR( bit0 ) | bit1;
   }
 
-  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR BuildAccelerationStructureFlagsKHR
-                                         operator&(BuildAccelerationStructureFlagBitsKHR bit0, BuildAccelerationStructureFlagBitsKHR bit1)VULKAN_HPP_NOEXCEPT
+  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR BuildAccelerationStructureFlagsKHR operator&(
+    BuildAccelerationStructureFlagBitsKHR bit0, BuildAccelerationStructureFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return BuildAccelerationStructureFlagsKHR( bit0 ) & bit1;
   }
@@ -13104,7 +13282,7 @@ namespace VULKAN_HPP_NAMESPACE
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR BuildAccelerationStructureFlagsKHR
-                                         operator~( BuildAccelerationStructureFlagBitsKHR bits ) VULKAN_HPP_NOEXCEPT
+    operator~( BuildAccelerationStructureFlagBitsKHR bits ) VULKAN_HPP_NOEXCEPT
   {
     return ~( BuildAccelerationStructureFlagsKHR( bits ) );
   }
@@ -13129,6 +13307,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "LowMemory | ";
     if ( value & BuildAccelerationStructureFlagBitsKHR::eMotionNV )
       result += "MotionNV | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -13151,7 +13330,7 @@ namespace VULKAN_HPP_NAMESPACE
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR AccelerationStructureCreateFlagsKHR operator&(
-    AccelerationStructureCreateFlagBitsKHR bit0, AccelerationStructureCreateFlagBitsKHR bit1)VULKAN_HPP_NOEXCEPT
+    AccelerationStructureCreateFlagBitsKHR bit0, AccelerationStructureCreateFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return AccelerationStructureCreateFlagsKHR( bit0 ) & bit1;
   }
@@ -13163,7 +13342,7 @@ namespace VULKAN_HPP_NAMESPACE
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR AccelerationStructureCreateFlagsKHR
-                                         operator~( AccelerationStructureCreateFlagBitsKHR bits ) VULKAN_HPP_NOEXCEPT
+    operator~( AccelerationStructureCreateFlagBitsKHR bits ) VULKAN_HPP_NOEXCEPT
   {
     return ~( AccelerationStructureCreateFlagsKHR( bits ) );
   }
@@ -13178,6 +13357,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "DeviceAddressCaptureReplay | ";
     if ( value & AccelerationStructureCreateFlagBitsKHR::eMotionNV )
       result += "MotionNV | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -13235,25 +13415,25 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR PipelineCreationFeedbackFlagsEXT
-                                         operator|( PipelineCreationFeedbackFlagBitsEXT bit0, PipelineCreationFeedbackFlagBitsEXT bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( PipelineCreationFeedbackFlagBitsEXT bit0, PipelineCreationFeedbackFlagBitsEXT bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return PipelineCreationFeedbackFlagsEXT( bit0 ) | bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR PipelineCreationFeedbackFlagsEXT
-                                         operator&(PipelineCreationFeedbackFlagBitsEXT bit0, PipelineCreationFeedbackFlagBitsEXT bit1)VULKAN_HPP_NOEXCEPT
+    operator&( PipelineCreationFeedbackFlagBitsEXT bit0, PipelineCreationFeedbackFlagBitsEXT bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return PipelineCreationFeedbackFlagsEXT( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR PipelineCreationFeedbackFlagsEXT
-                                         operator^( PipelineCreationFeedbackFlagBitsEXT bit0, PipelineCreationFeedbackFlagBitsEXT bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( PipelineCreationFeedbackFlagBitsEXT bit0, PipelineCreationFeedbackFlagBitsEXT bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return PipelineCreationFeedbackFlagsEXT( bit0 ) ^ bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR PipelineCreationFeedbackFlagsEXT
-                                         operator~( PipelineCreationFeedbackFlagBitsEXT bits ) VULKAN_HPP_NOEXCEPT
+    operator~( PipelineCreationFeedbackFlagBitsEXT bits ) VULKAN_HPP_NOEXCEPT
   {
     return ~( PipelineCreationFeedbackFlagsEXT( bits ) );
   }
@@ -13270,6 +13450,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "ApplicationPipelineCacheHit | ";
     if ( value & PipelineCreationFeedbackFlagBitsEXT::eBasePipelineAcceleration )
       result += "BasePipelineAcceleration | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -13321,19 +13502,19 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR ToolPurposeFlagsEXT
-                                         operator|( ToolPurposeFlagBitsEXT bit0, ToolPurposeFlagBitsEXT bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( ToolPurposeFlagBitsEXT bit0, ToolPurposeFlagBitsEXT bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return ToolPurposeFlagsEXT( bit0 ) | bit1;
   }
 
-  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR ToolPurposeFlagsEXT operator&(ToolPurposeFlagBitsEXT bit0,
-                                                                       ToolPurposeFlagBitsEXT bit1)VULKAN_HPP_NOEXCEPT
+  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR ToolPurposeFlagsEXT
+    operator&( ToolPurposeFlagBitsEXT bit0, ToolPurposeFlagBitsEXT bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return ToolPurposeFlagsEXT( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR ToolPurposeFlagsEXT
-                                         operator^( ToolPurposeFlagBitsEXT bit0, ToolPurposeFlagBitsEXT bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( ToolPurposeFlagBitsEXT bit0, ToolPurposeFlagBitsEXT bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return ToolPurposeFlagsEXT( bit0 ) ^ bit1;
   }
@@ -13364,6 +13545,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "DebugReporting | ";
     if ( value & ToolPurposeFlagBitsEXT::eDebugMarkers )
       result += "DebugMarkers | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -13399,19 +13581,19 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR IndirectStateFlagsNV
-                                         operator|( IndirectStateFlagBitsNV bit0, IndirectStateFlagBitsNV bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( IndirectStateFlagBitsNV bit0, IndirectStateFlagBitsNV bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return IndirectStateFlagsNV( bit0 ) | bit1;
   }
 
-  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR IndirectStateFlagsNV operator&(IndirectStateFlagBitsNV bit0,
-                                                                        IndirectStateFlagBitsNV bit1)VULKAN_HPP_NOEXCEPT
+  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR IndirectStateFlagsNV
+    operator&( IndirectStateFlagBitsNV bit0, IndirectStateFlagBitsNV bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return IndirectStateFlagsNV( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR IndirectStateFlagsNV
-                                         operator^( IndirectStateFlagBitsNV bit0, IndirectStateFlagBitsNV bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( IndirectStateFlagBitsNV bit0, IndirectStateFlagBitsNV bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return IndirectStateFlagsNV( bit0 ) ^ bit1;
   }
@@ -13430,6 +13612,7 @@ namespace VULKAN_HPP_NAMESPACE
     std::string result;
     if ( value & IndirectStateFlagBitsNV::eFlagFrontface )
       result += "FlagFrontface | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -13452,8 +13635,8 @@ namespace VULKAN_HPP_NAMESPACE
     return IndirectCommandsLayoutUsageFlagsNV( bit0 ) | bit1;
   }
 
-  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR IndirectCommandsLayoutUsageFlagsNV
-                                         operator&(IndirectCommandsLayoutUsageFlagBitsNV bit0, IndirectCommandsLayoutUsageFlagBitsNV bit1)VULKAN_HPP_NOEXCEPT
+  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR IndirectCommandsLayoutUsageFlagsNV operator&(
+    IndirectCommandsLayoutUsageFlagBitsNV bit0, IndirectCommandsLayoutUsageFlagBitsNV bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return IndirectCommandsLayoutUsageFlagsNV( bit0 ) & bit1;
   }
@@ -13465,7 +13648,7 @@ namespace VULKAN_HPP_NAMESPACE
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR IndirectCommandsLayoutUsageFlagsNV
-                                         operator~( IndirectCommandsLayoutUsageFlagBitsNV bits ) VULKAN_HPP_NOEXCEPT
+    operator~( IndirectCommandsLayoutUsageFlagBitsNV bits ) VULKAN_HPP_NOEXCEPT
   {
     return ~( IndirectCommandsLayoutUsageFlagsNV( bits ) );
   }
@@ -13482,6 +13665,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "IndexedSequences | ";
     if ( value & IndirectCommandsLayoutUsageFlagBitsNV::eUnorderedSequences )
       result += "UnorderedSequences | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -13518,19 +13702,19 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR VideoEncodeFlagsKHR
-                                         operator|( VideoEncodeFlagBitsKHR bit0, VideoEncodeFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( VideoEncodeFlagBitsKHR bit0, VideoEncodeFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return VideoEncodeFlagsKHR( bit0 ) | bit1;
   }
 
-  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR VideoEncodeFlagsKHR operator&(VideoEncodeFlagBitsKHR bit0,
-                                                                       VideoEncodeFlagBitsKHR bit1)VULKAN_HPP_NOEXCEPT
+  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR VideoEncodeFlagsKHR
+    operator&( VideoEncodeFlagBitsKHR bit0, VideoEncodeFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return VideoEncodeFlagsKHR( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR VideoEncodeFlagsKHR
-                                         operator^( VideoEncodeFlagBitsKHR bit0, VideoEncodeFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( VideoEncodeFlagBitsKHR bit0, VideoEncodeFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return VideoEncodeFlagsKHR( bit0 ) ^ bit1;
   }
@@ -13549,6 +13733,7 @@ namespace VULKAN_HPP_NAMESPACE
     std::string result;
     if ( value & VideoEncodeFlagBitsKHR::eReserved0 )
       result += "Reserved0 | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -13565,25 +13750,25 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR VideoEncodeRateControlFlagsKHR
-                                         operator|( VideoEncodeRateControlFlagBitsKHR bit0, VideoEncodeRateControlFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( VideoEncodeRateControlFlagBitsKHR bit0, VideoEncodeRateControlFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return VideoEncodeRateControlFlagsKHR( bit0 ) | bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR VideoEncodeRateControlFlagsKHR
-                                         operator&(VideoEncodeRateControlFlagBitsKHR bit0, VideoEncodeRateControlFlagBitsKHR bit1)VULKAN_HPP_NOEXCEPT
+    operator&( VideoEncodeRateControlFlagBitsKHR bit0, VideoEncodeRateControlFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return VideoEncodeRateControlFlagsKHR( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR VideoEncodeRateControlFlagsKHR
-                                         operator^( VideoEncodeRateControlFlagBitsKHR bit0, VideoEncodeRateControlFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( VideoEncodeRateControlFlagBitsKHR bit0, VideoEncodeRateControlFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return VideoEncodeRateControlFlagsKHR( bit0 ) ^ bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR VideoEncodeRateControlFlagsKHR
-                                         operator~( VideoEncodeRateControlFlagBitsKHR bits ) VULKAN_HPP_NOEXCEPT
+    operator~( VideoEncodeRateControlFlagBitsKHR bits ) VULKAN_HPP_NOEXCEPT
   {
     return ~( VideoEncodeRateControlFlagsKHR( bits ) );
   }
@@ -13596,6 +13781,7 @@ namespace VULKAN_HPP_NAMESPACE
     std::string result;
     if ( value & VideoEncodeRateControlFlagBitsKHR::eReset )
       result += "Reset | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -13618,8 +13804,8 @@ namespace VULKAN_HPP_NAMESPACE
     return VideoEncodeRateControlModeFlagsKHR( bit0 ) | bit1;
   }
 
-  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR VideoEncodeRateControlModeFlagsKHR
-                                         operator&(VideoEncodeRateControlModeFlagBitsKHR bit0, VideoEncodeRateControlModeFlagBitsKHR bit1)VULKAN_HPP_NOEXCEPT
+  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR VideoEncodeRateControlModeFlagsKHR operator&(
+    VideoEncodeRateControlModeFlagBitsKHR bit0, VideoEncodeRateControlModeFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return VideoEncodeRateControlModeFlagsKHR( bit0 ) & bit1;
   }
@@ -13631,7 +13817,7 @@ namespace VULKAN_HPP_NAMESPACE
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR VideoEncodeRateControlModeFlagsKHR
-                                         operator~( VideoEncodeRateControlModeFlagBitsKHR bits ) VULKAN_HPP_NOEXCEPT
+    operator~( VideoEncodeRateControlModeFlagBitsKHR bits ) VULKAN_HPP_NOEXCEPT
   {
     return ~( VideoEncodeRateControlModeFlagsKHR( bits ) );
   }
@@ -13642,6 +13828,7 @@ namespace VULKAN_HPP_NAMESPACE
       return "{}";
 
     std::string result;
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 #endif /*VK_ENABLE_BETA_EXTENSIONS*/
@@ -13662,25 +13849,25 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR DeviceDiagnosticsConfigFlagsNV
-                                         operator|( DeviceDiagnosticsConfigFlagBitsNV bit0, DeviceDiagnosticsConfigFlagBitsNV bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( DeviceDiagnosticsConfigFlagBitsNV bit0, DeviceDiagnosticsConfigFlagBitsNV bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return DeviceDiagnosticsConfigFlagsNV( bit0 ) | bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR DeviceDiagnosticsConfigFlagsNV
-                                         operator&(DeviceDiagnosticsConfigFlagBitsNV bit0, DeviceDiagnosticsConfigFlagBitsNV bit1)VULKAN_HPP_NOEXCEPT
+    operator&( DeviceDiagnosticsConfigFlagBitsNV bit0, DeviceDiagnosticsConfigFlagBitsNV bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return DeviceDiagnosticsConfigFlagsNV( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR DeviceDiagnosticsConfigFlagsNV
-                                         operator^( DeviceDiagnosticsConfigFlagBitsNV bit0, DeviceDiagnosticsConfigFlagBitsNV bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( DeviceDiagnosticsConfigFlagBitsNV bit0, DeviceDiagnosticsConfigFlagBitsNV bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return DeviceDiagnosticsConfigFlagsNV( bit0 ) ^ bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR DeviceDiagnosticsConfigFlagsNV
-                                         operator~( DeviceDiagnosticsConfigFlagBitsNV bits ) VULKAN_HPP_NOEXCEPT
+    operator~( DeviceDiagnosticsConfigFlagBitsNV bits ) VULKAN_HPP_NOEXCEPT
   {
     return ~( DeviceDiagnosticsConfigFlagsNV( bits ) );
   }
@@ -13697,6 +13884,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "EnableResourceTracking | ";
     if ( value & DeviceDiagnosticsConfigFlagBitsNV::eEnableAutomaticCheckpoints )
       result += "EnableAutomaticCheckpoints | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -13745,19 +13933,19 @@ namespace VULKAN_HPP_NAMESPACE
   };
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR PipelineStageFlags2KHR
-                                         operator|( PipelineStageFlagBits2KHR bit0, PipelineStageFlagBits2KHR bit1 ) VULKAN_HPP_NOEXCEPT
+    operator|( PipelineStageFlagBits2KHR bit0, PipelineStageFlagBits2KHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return PipelineStageFlags2KHR( bit0 ) | bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR PipelineStageFlags2KHR
-                                         operator&(PipelineStageFlagBits2KHR bit0, PipelineStageFlagBits2KHR bit1)VULKAN_HPP_NOEXCEPT
+    operator&( PipelineStageFlagBits2KHR bit0, PipelineStageFlagBits2KHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return PipelineStageFlags2KHR( bit0 ) & bit1;
   }
 
   VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR PipelineStageFlags2KHR
-                                         operator^( PipelineStageFlagBits2KHR bit0, PipelineStageFlagBits2KHR bit1 ) VULKAN_HPP_NOEXCEPT
+    operator^( PipelineStageFlagBits2KHR bit0, PipelineStageFlagBits2KHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return PipelineStageFlags2KHR( bit0 ) ^ bit1;
   }
@@ -13850,6 +14038,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "SubpassShadingHUAWEI | ";
     if ( value & PipelineStageFlagBits2KHR::eInvocationMaskHUAWEI )
       result += "InvocationMaskHUAWEI | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -13897,8 +14086,8 @@ namespace VULKAN_HPP_NAMESPACE
     return AccessFlags2KHR( bit0 ) | bit1;
   }
 
-  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR AccessFlags2KHR operator&(AccessFlagBits2KHR bit0,
-                                                                   AccessFlagBits2KHR bit1)VULKAN_HPP_NOEXCEPT
+  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR AccessFlags2KHR operator&( AccessFlagBits2KHR bit0,
+                                                                    AccessFlagBits2KHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return AccessFlags2KHR( bit0 ) & bit1;
   }
@@ -13994,6 +14183,7 @@ namespace VULKAN_HPP_NAMESPACE
       result += "ColorAttachmentReadNoncoherentEXT | ";
     if ( value & AccessFlagBits2KHR::eInvocationMaskReadHUAWEI )
       result += "InvocationMaskReadHUAWEI | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -14014,8 +14204,8 @@ namespace VULKAN_HPP_NAMESPACE
     return SubmitFlagsKHR( bit0 ) | bit1;
   }
 
-  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR SubmitFlagsKHR operator&(SubmitFlagBitsKHR bit0,
-                                                                  SubmitFlagBitsKHR bit1)VULKAN_HPP_NOEXCEPT
+  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR SubmitFlagsKHR operator&( SubmitFlagBitsKHR bit0,
+                                                                   SubmitFlagBitsKHR bit1 ) VULKAN_HPP_NOEXCEPT
   {
     return SubmitFlagsKHR( bit0 ) & bit1;
   }
@@ -14039,6 +14229,7 @@ namespace VULKAN_HPP_NAMESPACE
     std::string result;
     if ( value & SubmitFlagBitsKHR::eProtected )
       result += "Protected | ";
+
     return "{ " + result.substr( 0, result.size() - 3 ) + " }";
   }
 
@@ -14068,6 +14259,76 @@ namespace VULKAN_HPP_NAMESPACE
     return "{}";
   }
 #endif /*VK_USE_PLATFORM_DIRECTFB_EXT*/
+
+#if defined( VK_USE_PLATFORM_FUCHSIA )
+  //=== VK_FUCHSIA_buffer_collection ===
+
+  using ImageFormatConstraintsFlagsFUCHSIA = Flags<ImageFormatConstraintsFlagBitsFUCHSIA>;
+
+  VULKAN_HPP_INLINE std::string to_string( ImageFormatConstraintsFlagsFUCHSIA )
+  {
+    return "{}";
+  }
+
+  using ImageConstraintsInfoFlagsFUCHSIA = Flags<ImageConstraintsInfoFlagBitsFUCHSIA>;
+
+  template <>
+  struct FlagTraits<ImageConstraintsInfoFlagBitsFUCHSIA>
+  {
+    enum : VkFlags
+    {
+      allFlags = VkFlags( ImageConstraintsInfoFlagBitsFUCHSIA::eCpuReadRarely ) |
+                 VkFlags( ImageConstraintsInfoFlagBitsFUCHSIA::eCpuReadOften ) |
+                 VkFlags( ImageConstraintsInfoFlagBitsFUCHSIA::eCpuWriteRarely ) |
+                 VkFlags( ImageConstraintsInfoFlagBitsFUCHSIA::eCpuWriteOften ) |
+                 VkFlags( ImageConstraintsInfoFlagBitsFUCHSIA::eProtectedOptional )
+    };
+  };
+
+  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR ImageConstraintsInfoFlagsFUCHSIA
+    operator|( ImageConstraintsInfoFlagBitsFUCHSIA bit0, ImageConstraintsInfoFlagBitsFUCHSIA bit1 ) VULKAN_HPP_NOEXCEPT
+  {
+    return ImageConstraintsInfoFlagsFUCHSIA( bit0 ) | bit1;
+  }
+
+  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR ImageConstraintsInfoFlagsFUCHSIA
+    operator&( ImageConstraintsInfoFlagBitsFUCHSIA bit0, ImageConstraintsInfoFlagBitsFUCHSIA bit1 ) VULKAN_HPP_NOEXCEPT
+  {
+    return ImageConstraintsInfoFlagsFUCHSIA( bit0 ) & bit1;
+  }
+
+  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR ImageConstraintsInfoFlagsFUCHSIA
+    operator^( ImageConstraintsInfoFlagBitsFUCHSIA bit0, ImageConstraintsInfoFlagBitsFUCHSIA bit1 ) VULKAN_HPP_NOEXCEPT
+  {
+    return ImageConstraintsInfoFlagsFUCHSIA( bit0 ) ^ bit1;
+  }
+
+  VULKAN_HPP_INLINE VULKAN_HPP_CONSTEXPR ImageConstraintsInfoFlagsFUCHSIA
+    operator~( ImageConstraintsInfoFlagBitsFUCHSIA bits ) VULKAN_HPP_NOEXCEPT
+  {
+    return ~( ImageConstraintsInfoFlagsFUCHSIA( bits ) );
+  }
+
+  VULKAN_HPP_INLINE std::string to_string( ImageConstraintsInfoFlagsFUCHSIA value )
+  {
+    if ( !value )
+      return "{}";
+
+    std::string result;
+    if ( value & ImageConstraintsInfoFlagBitsFUCHSIA::eCpuReadRarely )
+      result += "CpuReadRarely | ";
+    if ( value & ImageConstraintsInfoFlagBitsFUCHSIA::eCpuReadOften )
+      result += "CpuReadOften | ";
+    if ( value & ImageConstraintsInfoFlagBitsFUCHSIA::eCpuWriteRarely )
+      result += "CpuWriteRarely | ";
+    if ( value & ImageConstraintsInfoFlagBitsFUCHSIA::eCpuWriteOften )
+      result += "CpuWriteOften | ";
+    if ( value & ImageConstraintsInfoFlagBitsFUCHSIA::eProtectedOptional )
+      result += "ProtectedOptional | ";
+
+    return "{ " + result.substr( 0, result.size() - 3 ) + " }";
+  }
+#endif /*VK_USE_PLATFORM_FUCHSIA*/
 
 #if defined( VK_USE_PLATFORM_SCREEN_QNX )
   //=== VK_QNX_screen_surface ===

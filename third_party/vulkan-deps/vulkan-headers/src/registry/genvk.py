@@ -317,7 +317,8 @@ def makeGenOpts(args):
                                                                   ], commonSuppressExtensions ],
         [ 'vulkan_fuchsia.h',     [ 'VK_FUCHSIA_imagepipe_surface',
                                     'VK_FUCHSIA_external_memory',
-                                    'VK_FUCHSIA_external_semaphore' ], commonSuppressExtensions ],
+                                    'VK_FUCHSIA_external_semaphore',
+                                    'VK_FUCHSIA_buffer_collection' ], commonSuppressExtensions ],
         [ 'vulkan_ggp.h',         [ 'VK_GGP_stream_descriptor_surface',
                                     'VK_GGP_frame_token'          ], commonSuppressExtensions ],
         [ 'vulkan_ios.h',         [ 'VK_MVK_ios_surface'          ], commonSuppressExtensions ],
@@ -601,7 +602,7 @@ if __name__ == '__main__':
     parser.add_argument('-time', action='store_true',
                         help='Enable timing')
     parser.add_argument('-validate', action='store_true',
-                        help='Enable XML group validation')
+                        help='Validate the registry properties and exit')
     parser.add_argument('-genpath', action='store', default='gen',
                         help='Path to generated files')
     parser.add_argument('-o', action='store', dest='directory',
@@ -635,8 +636,10 @@ if __name__ == '__main__':
     else:
         diag = None
 
-    # Create the API generator & generator options
-    (gen, options) = genTarget(args)
+    (gen, options) = (None, None)
+    if not args.validate:
+      # Create the API generator & generator options
+      (gen, options) = genTarget(args)
 
     # Create the registry object with the specified generator and generator
     # options. The options are set before XML loading as they may affect it.
@@ -653,7 +656,8 @@ if __name__ == '__main__':
     endTimer(args.time, '* Time to parse ElementTree =')
 
     if args.validate:
-        reg.validateGroups()
+        success = reg.validateRegistry()
+        sys.exit(0 if success else 1)
 
     if args.dump:
         logDiag('* Dumping registry to regdump.txt')

@@ -218,6 +218,7 @@ void DisplayNULL::generateExtensions(egl::DisplayExtensions *outExtensions) cons
     outExtensions->glRenderbufferImage                = true;
     outExtensions->getAllProcAddresses                = true;
     outExtensions->flexibleSurfaceCompatibility       = true;
+    outExtensions->noConfigContext                    = true;
     outExtensions->directComposition                  = true;
     outExtensions->createContextNoError               = true;
     outExtensions->createContextWebGLCompatibility    = true;
@@ -228,8 +229,8 @@ void DisplayNULL::generateExtensions(egl::DisplayExtensions *outExtensions) cons
     outExtensions->displayTextureShareGroup           = true;
     outExtensions->displaySemaphoreShareGroup         = true;
     outExtensions->createContextClientArrays          = true;
-    outExtensions->programCacheControl                = true;
-    outExtensions->robustResourceInitialization       = true;
+    outExtensions->programCacheControlANGLE           = true;
+    outExtensions->robustResourceInitializationANGLE  = true;
 }
 
 void DisplayNULL::generateCaps(egl::Caps *outCaps) const

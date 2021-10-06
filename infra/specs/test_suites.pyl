@@ -742,6 +742,8 @@
         'android_args': [
           '--shard-timeout=180',
           '-v',
+          # We use this argument to save test artifacts.
+          '--render-test-output-dir=${ISOLATED_OUTDIR}',
         ],
         'android_swarming': {
           'shards': 4,
@@ -810,10 +812,10 @@
           'script': '//scripts/process_angle_perf_results.py',
         },
         'android_swarming': {
-          'shards': 20,
+          'shards': 30,
         },
         'swarming': {
-          'shards': 10,
+          'shards': 20,
         },
       },
     },

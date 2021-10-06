@@ -21,6 +21,14 @@
 #include "libANGLE/renderer/metal/RenderTargetMtl.h"
 #include "libANGLE/renderer/metal/mtl_render_utils.h"
 
+// Compiler can turn on programmatical frame capture in release build by defining
+// ANGLE_METAL_FRAME_CAPTURE flag.
+#if defined(NDEBUG) && !defined(ANGLE_METAL_FRAME_CAPTURE)
+#    define ANGLE_METAL_FRAME_CAPTURE_ENABLED 0
+#else
+#    define ANGLE_METAL_FRAME_CAPTURE_ENABLED ANGLE_WITH_MODERN_METAL_API
+#endif
+
 namespace rx
 {
 
@@ -276,6 +284,11 @@ angle::Result InitializeTextureContents(const gl::Context *context,
 
     const gl::InternalFormat &intendedInternalFormat = textureObjFormat.intendedInternalFormat();
 
+    bool forceGPUInitialization = false;
+#if TARGET_OS_SIMULATOR
+    forceGPUInitialization = true;
+#endif  // TARGET_OS_SIMULATOR
+
     // This function is called in many places to initialize the content of a texture.
     // So it's better we do the initial check here instead of let the callers do it themselves:
     if (!textureObjFormat.valid() || intendedInternalFormat.compressed)
@@ -290,7 +303,7 @@ angle::Result InitializeTextureContents(const gl::Context *context,
     GetSliceAndDepth(index, &layer, &startDepth);
 
     if (texture->isCPUAccessible() && index.getType() != gl::TextureType::_2DMultisample &&
-        index.getType() != gl::TextureType::_2DMultisampleArray)
+        index.getType() != gl::TextureType::_2DMultisampleArray && !forceGPUInitialization)
     {
         const angle::Format &dstFormat = angle::Format::Get(textureObjFormat.actualFormatId);
         const size_t dstRowPitch       = dstFormat.pixelBytes * size.width;
@@ -447,26 +460,18 @@ angle::Result InitializeDepthStencilTextureContentsGPU(const gl::Context *contex
     uint32_t layer = index.hasLayer() ? index.getLayerIndex() : 0;
     rtMTL.set(texture, level, layer, textureObjFormat);
     mtl::RenderPassDesc rpDesc;
-    // For formats such as MTLPixelFormatStencil8/GL_STENCIL_INDEX8 we only want to set the stencil
-    // attachment.
-    if (angleFormat.stencilBits && !angleFormat.depthBits)
-    {
-        rtMTL.toRenderPassAttachmentDesc(&rpDesc.stencilAttachment);
-    }
-    else
-    {
-        rtMTL.toRenderPassAttachmentDesc(&rpDesc.depthAttachment);
-    }
-    rpDesc.sampleCount = texture->samples();
     if (angleFormat.depthBits)
     {
+        rtMTL.toRenderPassAttachmentDesc(&rpDesc.depthAttachment);
         rpDesc.depthAttachment.loadAction = MTLLoadActionClear;
         rpDesc.depthAttachment.clearDepth = 1.0;
     }
     if (angleFormat.stencilBits)
     {
+        rtMTL.toRenderPassAttachmentDesc(&rpDesc.stencilAttachment);
         rpDesc.stencilAttachment.loadAction = MTLLoadActionClear;
     }
+    rpDesc.sampleCount = texture->samples();
 
     // End current render pass
     contextMtl->endEncoding(true);
@@ -736,13 +741,7 @@ AutoObjCPtr<id<MTLLibrary>> CreateShaderLibrary(
         // No preserveInvariance available compiling from source, so just disable fastmath.
         options.fastMathEnabled = false;
 #endif
-        options.languageVersion = GetUserSetOrHighestMSLVersion(options.languageVersion);
-        // TODO(jcunningham): workaround for intel driver not preserving invariance on all shaders
-        const uint32_t vendor_id = GetDeviceVendorId(metalDevice);
-        if (vendor_id == angle::kVendorID_Intel)
-        {
-            options.fastMathEnabled = false;
-        }
+        options.languageVersion    = GetUserSetOrHighestMSLVersion(options.languageVersion);
         options.preprocessorMacros = substitutionMacros;
         auto library = [metalDevice newLibraryWithSource:nsSource options:options error:&nsError];
         if (angle::GetEnvironmentVar(kANGLEPrintMSLEnv)[0] == '1')
@@ -750,7 +749,6 @@ AutoObjCPtr<id<MTLLibrary>> CreateShaderLibrary(
             NSLog(@"%@\n", nsSource);
         }
         [nsSource ANGLE_MTL_AUTORELEASE];
-
         *errorOut = std::move(nsError);
 
         return [library ANGLE_MTL_AUTORELEASE];
@@ -1444,5 +1442,51 @@ angle::Result GetTriangleFanIndicesCount(ContextMtl *context,
     return angle::Result::Continue;
 }
 
+angle::Result CreateMslShader(mtl::Context *context,
+                              id<MTLLibrary> shaderLib,
+                              NSString *shaderName,
+                              MTLFunctionConstantValues *funcConstants,
+                              id<MTLFunction> *shaderOut)
+{
+    NSError *nsErr = nil;
+
+    id<MTLFunction> mtlShader;
+    if (funcConstants)
+    {
+        mtlShader = [shaderLib newFunctionWithName:shaderName
+                                    constantValues:funcConstants
+                                             error:&nsErr];
+    }
+    else
+    {
+        mtlShader = [shaderLib newFunctionWithName:shaderName];
+    }
+
+    [mtlShader ANGLE_MTL_AUTORELEASE];
+    if (nsErr && !mtlShader)
+    {
+        std::ostringstream ss;
+        ss << "Internal error compiling Metal shader:\n"
+           << nsErr.localizedDescription.UTF8String << "\n";
+
+        ERR() << ss.str();
+
+        ANGLE_MTL_CHECK(context, false, GL_INVALID_OPERATION);
+    }
+    *shaderOut = mtlShader;
+    return angle::Result::Continue;
+}
+
+angle::Result CreateMslShader(Context *context,
+                              id<MTLLibrary> shaderLib,
+                              NSString *shaderName,
+                              MTLFunctionConstantValues *funcConstants,
+                              AutoObjCPtr<id<MTLFunction>> *shaderOut)
+{
+    id<MTLFunction> outFunction;
+    ANGLE_TRY(CreateMslShader(context, shaderLib, shaderName, funcConstants, &outFunction));
+    shaderOut->retainAssign(outFunction);
+    return angle::Result::Continue;
+}
 }  // namespace mtl
 }  // namespace rx

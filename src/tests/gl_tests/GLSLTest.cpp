@@ -7,6 +7,7 @@
 #include "test_utils/ANGLETest.h"
 
 #include "test_utils/gl_raii.h"
+#include "util/shader_utils.h"
 
 using namespace angle;
 
@@ -515,6 +516,10 @@ class GLSLTest_ES3 : public GLSLTest
 class GLSLTest_ES31 : public GLSLTest
 {};
 
+// Tests the "init output variables" ANGLE shader translator option.
+class GLSLTest_ES31_InitShaderVariables : public GLSLTest
+{};
+
 std::string BuildBigInitialStackShader(int length)
 {
     std::string result;
@@ -546,6 +551,258 @@ void main()
 })";
 
     ANGLE_GL_PROGRAM(program, essl1_shaders::vs::Simple(), kFS);
+}
+
+TEST_P(GLSLTest_ES3, CompareEqualityOfArrayOfVectors)
+{
+    constexpr char kFS[] = R"(#version 300 es
+precision mediump float;
+out vec4 fragColor;
+uniform vec3 a[3];
+uniform vec3 b[3];
+void main() {
+  bool same = a == b;
+  fragColor = vec4(0);
+  if (same) {
+    fragColor = vec4(1);
+  }
+}
+)";
+
+    ANGLE_GL_PROGRAM(program, essl3_shaders::vs::Simple(), kFS);
+    glUseProgram(program);
+
+    GLint aLocation = glGetUniformLocation(program, "a");
+    GLint bLocation = glGetUniformLocation(program, "b");
+    EXPECT_NE(aLocation, -1);
+    EXPECT_NE(bLocation, -1);
+
+    drawQuad(program, essl3_shaders::PositionAttrib(), 0.5f, 1.0f, true);
+    EXPECT_PIXEL_COLOR_EQ(0, 0, GLColor::white);
+
+    static float almostZeros[] = {0, 0, 0, 0, 0, 0, 0, 1, 0};
+    glUniform3fv(bLocation, 9, almostZeros);
+
+    drawQuad(program, essl3_shaders::PositionAttrib(), 0.5f, 1.0f, true);
+    EXPECT_PIXEL_COLOR_EQ(0, 0, GLColor::transparentBlack);
+
+    glUniform3fv(aLocation, 9, almostZeros);
+    drawQuad(program, essl3_shaders::PositionAttrib(), 0.5f, 1.0f, true);
+    EXPECT_PIXEL_COLOR_EQ(0, 0, GLColor::white);
+
+    ASSERT_GL_NO_ERROR();
+}
+
+TEST_P(GLSLTest_ES3, CompareEqualityOfArrayOfMatrices)
+{
+    constexpr char kFS[] = R"(#version 300 es
+precision mediump float;
+out vec4 fragColor;
+uniform mat3 a[3];
+uniform mat3 b[3];
+void main() {
+  bool same = a == b;
+  fragColor = vec4(0);
+  if (same) {
+    fragColor = vec4(1);
+  }
+}
+)";
+
+    ANGLE_GL_PROGRAM(program, essl3_shaders::vs::Simple(), kFS);
+    glUseProgram(program);
+
+    GLint aLocation = glGetUniformLocation(program, "a");
+    GLint bLocation = glGetUniformLocation(program, "b");
+    EXPECT_NE(aLocation, -1);
+    EXPECT_NE(bLocation, -1);
+
+    drawQuad(program, essl3_shaders::PositionAttrib(), 0.5f, 1.0f, true);
+    EXPECT_PIXEL_COLOR_EQ(0, 0, GLColor::white);
+
+    static float almostZeros[] = {
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
+    };
+    glUniformMatrix3fv(bLocation, 27, false, almostZeros);
+
+    drawQuad(program, essl3_shaders::PositionAttrib(), 0.5f, 1.0f, true);
+    EXPECT_PIXEL_COLOR_EQ(0, 0, GLColor::transparentBlack);
+
+    glUniformMatrix3fv(aLocation, 27, false, almostZeros);
+    drawQuad(program, essl3_shaders::PositionAttrib(), 0.5f, 1.0f, true);
+    EXPECT_PIXEL_COLOR_EQ(0, 0, GLColor::white);
+
+    ASSERT_GL_NO_ERROR();
+}
+
+TEST_P(GLSLTest_ES3, CompareEqualityOfArrayOfFloats)
+{
+    constexpr char kFS[] = R"(#version 300 es
+precision mediump float;
+out vec4 fragColor;
+uniform float a[3];
+uniform float b[3];
+void main() {
+  bool same = a == b;
+  fragColor = vec4(0);
+  if (same) {
+    fragColor = vec4(1);
+  }
+}
+)";
+
+    ANGLE_GL_PROGRAM(program, essl3_shaders::vs::Simple(), kFS);
+    glUseProgram(program);
+
+    GLint aLocation = glGetUniformLocation(program, "a");
+    GLint bLocation = glGetUniformLocation(program, "b");
+    EXPECT_NE(aLocation, -1);
+    EXPECT_NE(bLocation, -1);
+
+    drawQuad(program, essl3_shaders::PositionAttrib(), 0.5f, 1.0f, true);
+    EXPECT_PIXEL_COLOR_EQ(0, 0, GLColor::white);
+
+    static float almostZeros[] = {
+        0,
+        0,
+        1,
+    };
+    glUniform1fv(bLocation, 3, almostZeros);
+
+    drawQuad(program, essl3_shaders::PositionAttrib(), 0.5f, 1.0f, true);
+    EXPECT_PIXEL_COLOR_EQ(0, 0, GLColor::transparentBlack);
+
+    glUniform1fv(aLocation, 3, almostZeros);
+    drawQuad(program, essl3_shaders::PositionAttrib(), 0.5f, 1.0f, true);
+    EXPECT_PIXEL_COLOR_EQ(0, 0, GLColor::white);
+
+    ASSERT_GL_NO_ERROR();
+}
+
+TEST_P(GLSLTest_ES3, CompareInequalityOfArrayOfVectors)
+{
+    constexpr char kFS[] = R"(#version 300 es
+precision mediump float;
+out vec4 fragColor;
+uniform vec3 a[3];
+uniform vec3 b[3];
+void main() {
+  bool notSame = a != b;
+  fragColor = vec4(0);
+  if (notSame) {
+    fragColor = vec4(1);
+  }
+}
+)";
+
+    ANGLE_GL_PROGRAM(program, essl3_shaders::vs::Simple(), kFS);
+    glUseProgram(program);
+
+    GLint aLocation = glGetUniformLocation(program, "a");
+    GLint bLocation = glGetUniformLocation(program, "b");
+    EXPECT_NE(aLocation, -1);
+    EXPECT_NE(bLocation, -1);
+
+    drawQuad(program, essl3_shaders::PositionAttrib(), 0.5f, 1.0f, true);
+    EXPECT_PIXEL_COLOR_EQ(0, 0, GLColor::transparentBlack);
+
+    static float almostZeros[] = {0, 0, 0, 0, 0, 0, 0, 1, 0};
+    glUniform3fv(bLocation, 9, almostZeros);
+
+    drawQuad(program, essl3_shaders::PositionAttrib(), 0.5f, 1.0f, true);
+    EXPECT_PIXEL_COLOR_EQ(0, 0, GLColor::white);
+
+    glUniform3fv(aLocation, 9, almostZeros);
+    drawQuad(program, essl3_shaders::PositionAttrib(), 0.5f, 1.0f, true);
+    EXPECT_PIXEL_COLOR_EQ(0, 0, GLColor::transparentBlack);
+
+    ASSERT_GL_NO_ERROR();
+}
+
+TEST_P(GLSLTest_ES3, CompareInequalityOfArrayOfMatrices)
+{
+    constexpr char kFS[] = R"(#version 300 es
+precision mediump float;
+out vec4 fragColor;
+uniform mat3 a[3];
+uniform mat3 b[3];
+void main() {
+  bool notSame = a != b;
+  fragColor = vec4(0);
+  if (notSame) {
+    fragColor = vec4(1);
+  }
+}
+)";
+
+    ANGLE_GL_PROGRAM(program, essl3_shaders::vs::Simple(), kFS);
+    glUseProgram(program);
+
+    GLint aLocation = glGetUniformLocation(program, "a");
+    GLint bLocation = glGetUniformLocation(program, "b");
+    EXPECT_NE(aLocation, -1);
+    EXPECT_NE(bLocation, -1);
+
+    drawQuad(program, essl3_shaders::PositionAttrib(), 0.5f, 1.0f, true);
+    EXPECT_PIXEL_COLOR_EQ(0, 0, GLColor::transparentBlack);
+
+    static float almostZeros[] = {
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
+    };
+    glUniformMatrix3fv(bLocation, 27, false, almostZeros);
+
+    drawQuad(program, essl3_shaders::PositionAttrib(), 0.5f, 1.0f, true);
+    EXPECT_PIXEL_COLOR_EQ(0, 0, GLColor::white);
+
+    glUniformMatrix3fv(aLocation, 27, false, almostZeros);
+    drawQuad(program, essl3_shaders::PositionAttrib(), 0.5f, 1.0f, true);
+    EXPECT_PIXEL_COLOR_EQ(0, 0, GLColor::transparentBlack);
+
+    ASSERT_GL_NO_ERROR();
+}
+
+TEST_P(GLSLTest_ES3, CompareInequalityOfArrayOfFloats)
+{
+    constexpr char kFS[] = R"(#version 300 es
+precision mediump float;
+out vec4 fragColor;
+uniform float a[3];
+uniform float b[3];
+void main() {
+  bool notSame = a != b;
+  fragColor = vec4(0);
+  if (notSame) {
+    fragColor = vec4(1);
+  }
+}
+)";
+
+    ANGLE_GL_PROGRAM(program, essl3_shaders::vs::Simple(), kFS);
+    glUseProgram(program);
+
+    GLint aLocation = glGetUniformLocation(program, "a");
+    GLint bLocation = glGetUniformLocation(program, "b");
+    EXPECT_NE(aLocation, -1);
+    EXPECT_NE(bLocation, -1);
+
+    drawQuad(program, essl3_shaders::PositionAttrib(), 0.5f, 1.0f, true);
+    EXPECT_PIXEL_COLOR_EQ(0, 0, GLColor::transparentBlack);
+
+    static float almostZeros[] = {
+        0,
+        0,
+        1,
+    };
+    glUniform1fv(bLocation, 3, almostZeros);
+
+    drawQuad(program, essl3_shaders::PositionAttrib(), 0.5f, 1.0f, true);
+    EXPECT_PIXEL_COLOR_EQ(0, 0, GLColor::white);
+
+    glUniform1fv(aLocation, 3, almostZeros);
+    drawQuad(program, essl3_shaders::PositionAttrib(), 0.5f, 1.0f, true);
+    EXPECT_PIXEL_COLOR_EQ(0, 0, GLColor::transparentBlack);
+
+    ASSERT_GL_NO_ERROR();
 }
 
 // Test that array of fragment shader outputs is processed properly and draws
@@ -942,21 +1199,12 @@ void GLVertexIDIntegerTextureDrawArrays_helper(int first, int count, GLenum err)
 // https://github.com/KhronosGroup/WebGL/blob/master/sdk/tests/conformance2/rendering/vertex-id.html
 TEST_P(GLSLTest_ES3, GLVertexIDIntegerTextureDrawArrays)
 {
-    // http://anglebug.com/4092
-    ANGLE_SKIP_TEST_IF(isSwiftshader());
-    // http://anglebug.com/5232
-    ANGLE_SKIP_TEST_IF(IsMetal());
-    // TODO(anglebug.com/5360): Failing on ARM-based Apple DTKs.
-    ANGLE_SKIP_TEST_IF(IsOSX() && IsARM64() && IsDesktopOpenGL());
-    // TODO(anglebug.com/5491): Failing on iOS, probably related to the ARM Mac failure above.
-    ANGLE_SKIP_TEST_IF(IsIOS() && IsOpenGLES());
-    // Have to set a large point size because the window size is much larger than the texture
     constexpr char kVS[] = R"(#version 300 es
 flat out highp int vVertexID;
 void main() {
     vVertexID = gl_VertexID;
     gl_Position = vec4(0,0,0,1);
-    gl_PointSize = 1000.0;
+    gl_PointSize = 1.0;
 })";
 
     constexpr char kFS[] = R"(#version 300 es
@@ -968,6 +1216,7 @@ void main() {
 
     ANGLE_GL_PROGRAM(program, kVS, kFS);
     glUseProgram(program);
+    glViewport(0, 0, 1, 1);
 
     GLTexture texture;
     glBindTexture(GL_TEXTURE_2D, texture);
@@ -8617,6 +8866,21 @@ foo
     ANGLE_GL_PROGRAM(program, kVS, kFS);
 }
 
+// Test that inactive output variables compile ok in combination with SH_INIT_OUTPUT_VARIABLES
+// (which is enabled on WebGL).
+TEST_P(WebGL2GLSLTest, InactiveOutput)
+{
+    constexpr char kFS[] = R"(#version 300 es
+precision highp float;
+out vec4 _cassgl_2_;
+void main()
+{
+})";
+
+    GLuint shader = CompileShader(GL_FRAGMENT_SHADER, kFS);
+    EXPECT_NE(shader, 0u);
+}
+
 // Test that clamp applied on non-literal indices is correct on es 100 shaders.
 TEST_P(GLSLTest, ValidIndexClampES100)
 {
@@ -9195,6 +9459,213 @@ void main()
 }
 
 // Test that array UBOs are transformed correctly.
+TEST_P(GLSLTest_ES3, RowMajorMatrix_ReadMat4Test)
+{
+    constexpr char kFS[] = R"(#version 300 es
+precision highp float;
+out vec4 outColor;
+
+layout(std140, row_major) uniform Ubo
+{
+    mat4 m1;
+};
+
+void main()
+{
+    outColor = m1[3] / 255.0;
+})";
+
+    ANGLE_GL_PROGRAM(program, essl3_shaders::vs::Simple(), kFS);
+    EXPECT_GL_NO_ERROR();
+
+    constexpr size_t kMatrixCount                                     = 1;
+    constexpr std::pair<uint32_t, uint32_t> kMatrixDims[kMatrixCount] = {
+        {4, 4},
+    };
+    constexpr bool kMatrixIsColMajor[kMatrixCount] = {
+        false,
+    };
+
+    float data[kMatrixCount * 4 * 4] = {};
+
+    const uint32_t size =
+        FillBuffer(kMatrixDims, kMatrixIsColMajor, kMatrixCount, data, false, false);
+
+    GLBuffer ubos;
+
+    InitBuffer(program, "Ubo", ubos, 0, data, size, true);
+
+    EXPECT_GL_NO_ERROR();
+
+    drawQuad(program, essl31_shaders::PositionAttrib(), 0.5f, 1.0f, true);
+    EXPECT_PIXEL_NEAR(0, 0, 12, 13, 14, 15, 0);
+}
+
+// Test that array UBOs are transformed correctly.
+TEST_P(GLSLTest_ES3, RowMajorMatrix_ReadMat2x3Test)
+{
+    constexpr char kFS[] = R"(#version 300 es
+precision highp float;
+out vec4 outColor;
+
+layout(std140, row_major) uniform Ubo
+{
+    mat2x3 m1;
+};
+
+void main()
+{
+    outColor = vec4(m1[1], 0) / 255.0;
+})";
+
+    ANGLE_GL_PROGRAM(program, essl3_shaders::vs::Simple(), kFS);
+    EXPECT_GL_NO_ERROR();
+
+    constexpr size_t kMatrixCount                                     = 1;
+    constexpr std::pair<uint32_t, uint32_t> kMatrixDims[kMatrixCount] = {
+        {2, 3},
+    };
+    constexpr bool kMatrixIsColMajor[kMatrixCount] = {
+        false,
+    };
+
+    float data[kMatrixCount * 3 * 4] = {};
+
+    const uint32_t size =
+        FillBuffer(kMatrixDims, kMatrixIsColMajor, kMatrixCount, data, false, false);
+
+    GLBuffer ubos;
+
+    InitBuffer(program, "Ubo", ubos, 0, data, size, true);
+
+    EXPECT_GL_NO_ERROR();
+
+    drawQuad(program, essl31_shaders::PositionAttrib(), 0.5f, 1.0f, true);
+    EXPECT_PIXEL_NEAR(0, 0, 4, 5, 6, 0, 0);
+}
+
+TEST_P(GLSLTest_ES3, RowMajorMatrix_ReadMat3x2Test)
+{
+    constexpr char kFS[] = R"(#version 300 es
+precision highp float;
+out vec4 outColor;
+
+layout(std140, row_major) uniform Ubo
+{
+    mat3x2 m1;
+};
+
+void main()
+{
+    outColor = vec4(m1[2], 0, 0) / 255.0;
+})";
+
+    ANGLE_GL_PROGRAM(program, essl3_shaders::vs::Simple(), kFS);
+    EXPECT_GL_NO_ERROR();
+
+    constexpr size_t kMatrixCount                                     = 1;
+    constexpr std::pair<uint32_t, uint32_t> kMatrixDims[kMatrixCount] = {
+        {3, 2},
+    };
+    constexpr bool kMatrixIsColMajor[kMatrixCount] = {
+        false,
+    };
+
+    float data[kMatrixCount * 2 * 4] = {};
+
+    const uint32_t size =
+        FillBuffer(kMatrixDims, kMatrixIsColMajor, kMatrixCount, data, false, false);
+
+    GLBuffer ubos;
+
+    InitBuffer(program, "Ubo", ubos, 0, data, size, true);
+
+    EXPECT_GL_NO_ERROR();
+
+    drawQuad(program, essl31_shaders::PositionAttrib(), 0.5f, 1.0f, true);
+    EXPECT_PIXEL_NEAR(0, 0, 8, 9, 0, 0, 0);
+}
+
+TEST_P(GLSLTest_ES3, RowMajorMatrix_NestedExpression)
+{
+    // Many OpenGL drivers seem to fail this
+    ANGLE_SKIP_TEST_IF((IsLinux() || IsOSX()) && IsOpenGL());
+
+    constexpr char kFS[] = R"(#version 300 es
+precision mediump float;
+
+uniform Ubo {
+  layout(row_major) mat4 u_mat[3];
+  layout(row_major) mat4 u_ndx[3];
+} stuff;
+
+precision highp float;
+out vec4 outColor;
+
+void main() {
+  outColor = stuff.u_mat[int(stuff.u_ndx[1][1][3])][2] / 255.0;
+}
+)";
+
+    ANGLE_GL_PROGRAM(program, essl3_shaders::vs::Simple(), kFS);
+    EXPECT_GL_NO_ERROR();
+
+    typedef float vec4[4];
+    typedef vec4 mat4[4];
+
+    constexpr size_t kMatrixCount = 6;
+    mat4 data[]                   = {
+        {
+            {0, 1, 2, 3},      //
+            {4, 5, 6, 7},      //
+            {8, 9, 10, 11},    //
+            {12, 13, 14, 15},  //
+        },
+        {
+            //     +-- we should be looking up this column
+            //     V
+            {0, 4, 8, 12},   //
+            {1, 5, 9, 13},   //
+            {2, 6, 10, 14},  //
+            {3, 7, 11, 15},  //
+        },
+        {
+            {0, 2, 4, 6},      //
+            {8, 10, 12, 14},   //
+            {16, 18, 20, 22},  //
+            {24, 26, 28, 30},  //
+        },
+        {
+            {0, 0, 0, 0},  //
+            {0, 0, 0, 0},  //
+            {0, 0, 0, 0},  //
+            {0, 0, 0, 0},  //
+        },
+        {
+            {0, 0, 0, 0},  //
+            {0, 0, 0, 2},  //
+            {0, 0, 0, 0},  //
+            {0, 1, 0, 0},
+            //  ^
+            //  +-- we should be using this element
+        },
+        {
+            {0, 0, 0, 0},  //
+            {0, 0, 0, 0},  //
+            {0, 0, 0, 0},  //
+            {0, 0, 0, 0},  //
+        },
+    };
+
+    GLBuffer ubos;
+    InitBuffer(program, "Ubo", ubos, 0, data, kMatrixCount, true);
+    EXPECT_GL_NO_ERROR();
+
+    drawQuad(program, essl31_shaders::PositionAttrib(), 0.5f, 1.0f, true);
+    EXPECT_PIXEL_NEAR(0, 0, 8, 9, 10, 11, 0);
+}
+
+// Test that array UBOs are transformed correctly.
 TEST_P(GLSLTest_ES3, MixedRowAndColumnMajorMatrices_ArrayBufferDeclaration)
 {
     // Fails to compile the shader on Android: http://anglebug.com/3839
@@ -9409,6 +9880,118 @@ void main()
         result = false;
     }
 
+    outColor = result ? vec4(0, 1, 0, 1) : vec4(1, 0, 0, 1);
+})";
+
+    ANGLE_GL_PROGRAM(program, essl3_shaders::vs::Simple(), kFS);
+    EXPECT_GL_NO_ERROR();
+
+    constexpr size_t kMatrixCount                                     = 3;
+    constexpr std::pair<uint32_t, uint32_t> kMatrixDims[kMatrixCount] = {
+        {4, 4},
+        {4, 4},
+        {4, 4},
+    };
+    constexpr bool kMatrixIsColMajor[kMatrixCount] = {true, false, false};
+
+    float data[kMatrixCount * 4 * 4] = {};
+
+    const uint32_t size =
+        FillBuffer(kMatrixDims, kMatrixIsColMajor, kMatrixCount, data, false, false);
+
+    GLBuffer ubo;
+    InitBuffer(program, "Ubo", ubo, 0, data, size, true);
+
+    EXPECT_GL_NO_ERROR();
+
+    drawQuad(program, essl31_shaders::PositionAttrib(), 0.5f, 1.0f, true);
+    EXPECT_PIXEL_COLOR_EQ(0, 0, GLColor::green);
+}
+
+TEST_P(GLSLTest_ES3, MixedRowAndColumnMajorMatrices_ReadSideEffectOrderSurroundedByLoop)
+{
+    // http://anglebug.com/3837
+    ANGLE_SKIP_TEST_IF(IsLinux() && IsIntel() && IsOpenGL());
+
+    // IntermTraverser::insertStatementsInParentBlock that's used to move side effects does not
+    // respect the order of evaluation of logical expressions.  http://anglebug.com/3829.
+    ANGLE_SKIP_TEST_IF(IsOSX() && IsOpenGL());
+
+    constexpr char kFS[] = R"(#version 300 es
+precision highp float;
+out vec4 outColor;
+
+layout(std140, column_major) uniform Ubo
+{
+    mat4 m1;
+    layout(row_major) mat4 m2[2];
+} ubo;
+
+void main()
+{
+    bool result = false;
+
+    for(int x = 0; x < 1; ++x)
+    {
+        if (x == 0 && ubo.m2[x = 1][1][1] == 5.0) {
+          result = true;
+        }
+    }
+    outColor = result ? vec4(0, 1, 0, 1) : vec4(1, 0, 0, 1);
+})";
+
+    ANGLE_GL_PROGRAM(program, essl3_shaders::vs::Simple(), kFS);
+    EXPECT_GL_NO_ERROR();
+
+    constexpr size_t kMatrixCount                                     = 3;
+    constexpr std::pair<uint32_t, uint32_t> kMatrixDims[kMatrixCount] = {
+        {4, 4},
+        {4, 4},
+        {4, 4},
+    };
+    constexpr bool kMatrixIsColMajor[kMatrixCount] = {true, false, false};
+
+    float data[kMatrixCount * 4 * 4] = {};
+
+    const uint32_t size =
+        FillBuffer(kMatrixDims, kMatrixIsColMajor, kMatrixCount, data, false, false);
+
+    GLBuffer ubo;
+    InitBuffer(program, "Ubo", ubo, 0, data, size, true);
+
+    EXPECT_GL_NO_ERROR();
+
+    drawQuad(program, essl31_shaders::PositionAttrib(), 0.5f, 1.0f, true);
+    EXPECT_PIXEL_COLOR_EQ(0, 0, GLColor::green);
+}
+
+TEST_P(GLSLTest_ES3, MixedRowAndColumnMajorMatrices_ReadSideEffectOrderInALoop)
+{
+    // http://anglebug.com/3837
+    ANGLE_SKIP_TEST_IF(IsLinux() && IsIntel() && IsOpenGL());
+
+    // IntermTraverser::insertStatementsInParentBlock that's used to move side effects does not
+    // respect the order of evaluation of logical expressions.  http://anglebug.com/3829.
+    ANGLE_SKIP_TEST_IF(IsOSX() && IsOpenGL());
+
+    constexpr char kFS[] = R"(#version 300 es
+precision highp float;
+out vec4 outColor;
+
+layout(std140, column_major) uniform Ubo
+{
+    mat4 m1;
+    layout(row_major) mat4 m2[2];
+} ubo;
+
+void main()
+{
+    bool result = false;
+
+    for(int x = 0; x == 0 && ubo.m2[x = 1][1][1] == 5.0;)
+    {
+        result = true;
+    }
     outColor = result ? vec4(0, 1, 0, 1) : vec4(1, 0, 0, 1);
 })";
 
@@ -12085,6 +12668,111 @@ void main()
     EXPECT_EQ(0u, program);
 }
 
+// Test that separating declarators works with structs that have been separately defined.
+TEST_P(GLSLTest_ES31, SeparateDeclaratorsOfStructType)
+{
+    constexpr char kVS[] = R"(#version 310 es
+precision highp float;
+
+struct S
+{
+    mat4 a;
+    mat4 b;
+};
+
+S s1 = S(mat4(1), mat4(2)), s2[2][3], s3[2] = S[2](S(mat4(0), mat4(3)), S(mat4(4), mat4(5)));
+
+void main() {
+    S s4[2][3] = s2, s5 = s3[0], s6[2] = S[2](s1, s5), s7 = s5;
+
+    gl_Position = vec4(s3[1].a[0].x, s2[0][2].b[1].y, s4[1][0].a[2].z, s6[0].b[3].w);
+})";
+
+    GLuint shader = glCreateShader(GL_VERTEX_SHADER);
+
+    const char *sourceArray[1] = {kVS};
+    GLint lengths[1]           = {static_cast<GLint>(sizeof(kVS) - 1)};
+    glShaderSource(shader, 1, sourceArray, lengths);
+    glCompileShader(shader);
+
+    GLint compileResult;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &compileResult);
+    EXPECT_NE(compileResult, 0);
+}
+
+// Test that separating declarators works with structs that are simultaneously defined.
+TEST_P(GLSLTest_ES31, SeparateDeclaratorsOfStructTypeBeingSpecified)
+{
+    constexpr char kVS[] = R"(#version 310 es
+precision highp float;
+
+struct S
+{
+    mat4 a;
+    mat4 b;
+} s1 = S(mat4(1), mat4(2)), s2[2][3], s3[2] = S[2](S(mat4(0), mat4(3)), S(mat4(4), mat4(5)));
+
+void main() {
+    struct T
+    {
+        mat4 a;
+        mat4 b;
+    } s4[2][3], s5 = T(s3[0].a, s3[0].b), s6[2] = T[2](T(s1.a, s1.b), s5), s7 = s5;
+
+    float f1 = s3[1].a[0].x, f2 = s2[0][2].b[1].y;
+
+    gl_Position = vec4(f1, f2, s4[1][0].a[2].z, s6[0].b[3].w);
+})";
+
+    GLuint shader = glCreateShader(GL_VERTEX_SHADER);
+
+    const char *sourceArray[1] = {kVS};
+    GLint lengths[1]           = {static_cast<GLint>(sizeof(kVS) - 1)};
+    glShaderSource(shader, 1, sourceArray, lengths);
+    glCompileShader(shader);
+
+    GLint compileResult;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &compileResult);
+    EXPECT_NE(compileResult, 0);
+}
+
+// Test that separating declarators works with structs that are simultaneously defined and that are
+// nameless.
+TEST_P(GLSLTest_ES31, SeparateDeclaratorsOfNamelessStructType)
+{
+    constexpr char kVS[] = R"(#version 310 es
+precision highp float;
+
+struct
+{
+    mat4 a;
+    mat4 b;
+} s1, s2[2][3], s3[2];
+
+void main() {
+    struct
+    {
+        mat4 a;
+        mat4 b;
+    } s4[2][3], s5, s6[2], s7 = s5;
+
+    float f1 = s1.a[0].x + s3[1].a[0].x, f2 = s2[0][2].b[1].y + s7.b[1].z;
+
+    gl_Position = vec4(f1, f2, s4[1][0].a[2].z, s6[0].b[3].w);
+})";
+
+    GLuint shader = glCreateShader(GL_VERTEX_SHADER);
+
+    const char *sourceArray[1] = {kVS};
+    GLint lengths[1]           = {static_cast<GLint>(sizeof(kVS) - 1)};
+    glShaderSource(shader, 1, sourceArray, lengths);
+    glCompileShader(shader);
+
+    GLint compileResult;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &compileResult);
+    EXPECT_NE(compileResult, 0);
+}
+
 // Regression test for transformation bug which separates struct declarations from uniform
 // declarations.  The bug was that the uniform variable usage in the initializer of a new
 // declaration (y below) was not being processed.
@@ -12144,6 +12832,60 @@ void main() {
     GLint compileResult;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &compileResult);
     EXPECT_NE(compileResult, 0);
+}
+
+// Regression test based on fuzzer issue resulting in an AST validation failure.  Struct definition
+// was not found in the tree.  Tests that struct declaration in function return value is visible to
+// instantiations later on.
+TEST_P(GLSLTest, MissingStructDeclarationBug)
+{
+    constexpr char kVS[] = R"(
+struct S
+{
+    vec4 i;
+} p();
+void main()
+{
+    S s;
+})";
+
+    GLuint shader = CompileShader(GL_VERTEX_SHADER, kVS);
+    EXPECT_NE(0u, shader);
+    glDeleteShader(shader);
+}
+
+// Regression test based on fuzzer issue resulting in an AST validation failure.  Struct definition
+// was not found in the tree.  Tests that struct declaration in function return value is visible to
+// other struct declarations.
+TEST_P(GLSLTest, MissingStructDeclarationBug2)
+{
+    constexpr char kVS[] = R"(
+struct T
+{
+    vec4 I;
+} p();
+struct
+{
+    T c;
+};
+void main()
+{
+})";
+
+    GLuint shader = CompileShader(GL_VERTEX_SHADER, kVS);
+    EXPECT_NE(0u, shader);
+    glDeleteShader(shader);
+}
+
+// Regression test for bug in HLSL code generation where the for loop init expression was expected
+// to always have an initializer.
+TEST_P(GLSLTest, HandleExcessiveLoopBug)
+{
+    constexpr char kVS[] = R"(void main(){for(int i;i>6;);})";
+
+    GLuint shader = CompileShader(GL_VERTEX_SHADER, kVS);
+    EXPECT_NE(0u, shader);
+    glDeleteShader(shader);
 }
 
 // Test that providing more components to a matrix constructor than necessary works.  Based on a
@@ -13102,6 +13844,322 @@ void main()
     runTest(kFS);
 }
 
+// Test that precision is retained for constants (which are constant folded).  Adapted from a WebGL
+// test.
+TEST_P(GLSLTest, ConstantFoldedConstantsRetainPrecision)
+{
+    constexpr char kFS[] = R"(
+// It is assumed that uTest is set to 0. It's here to make the expression not constant.
+uniform mediump float uTest;
+void main() {
+    // exact representation of 4096.5 requires 13 bits of relative precision.
+    const highp float c = 4096.5;
+    mediump float a = 0.0;
+    // Below, addition should be evaluated at highp, since one of the operands has the highp qualifier.
+    // Thus fract should also be evaluated at highp.
+    // See OpenGL ES Shading Language spec section 4.5.2.
+    // This should make the result 0.5, since highp provides at least 16 bits of relative precision.
+    // (exceptions for operation precision are allowed for a small number of computationally
+    // intensive built-in functions, but it is reasonable to think that fract is not one of those).
+    // However, if fract() is incorrectly evaluated at minimum precision fulfilling mediump criteria,
+    // or at IEEE half float precision, the result is 0.0.
+    a = fract(c + uTest);
+    // Multiply by 2.0 to make the color green.
+    gl_FragColor = vec4(0.0, 2.0 * a, 0.0, 1.0);
+})";
+
+    ANGLE_GL_PROGRAM(program, essl1_shaders::vs::Simple(), kFS);
+
+    drawQuad(program, essl1_shaders::PositionAttrib(), 0.5f);
+    EXPECT_GL_NO_ERROR();
+
+    EXPECT_PIXEL_COLOR_EQ(0, 0, GLColor::green);
+}
+
+TEST_P(GLSLTest, VectorAndMatrixScalarizationDoesNotAffectRendering)
+{
+    ANGLE_SKIP_TEST_IF(IsWindows() && IsNVIDIA() && (IsOpenGL() || IsOpenGLES()));
+
+    constexpr char kFS[] = R"(
+precision mediump float;
+
+varying vec2 v_texCoord;
+
+float a = 0.;
+#define A 0.
+
+#define r(a)    mat2( cos( a + vec4(0,-1.5708,1.5708,0) ) )
+vec2 c;
+#define f(U,a)  ( c = (U) * r(a) , sin(10.*c.x) )
+
+void main() {
+    vec2 U = v_texCoord;
+
+    gl_FragColor = U.y > .5
+        ? vec4( f(U,a) , f(U*4.,a) , 0,1.0)   // top
+        : vec4( f(U,A) , f(U*4.,A) , 0,1.0);  // bottom
+}
+
+)";
+
+    ANGLE_GL_PROGRAM(program, essl1_shaders::vs::Texture2D(), kFS);
+    drawQuad(program, essl1_shaders::PositionAttrib(), 0.5f);
+
+    // Make sure we rendered something.
+    EXPECT_PIXEL_NE(0, 0, 0, 0, 0, 0);
+
+    // Comapare one line in top half to one line in bottom half.
+    int compareWidth  = getWindowWidth();
+    int compareHeight = getWindowHeight() / 4;
+
+    ASSERT_GE(compareWidth, 2);
+    ASSERT_GE(compareHeight, 2);
+
+    GLubyte pixelValue[4];
+    constexpr int tolerance = 12;
+
+    for (int x = 0; x < compareWidth; ++x)
+    {
+        glReadPixels(x, compareHeight, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixelValue);
+        EXPECT_PIXEL_NEAR(x, getWindowHeight() - compareHeight, pixelValue[0], pixelValue[1],
+                          pixelValue[2], pixelValue[3], tolerance);
+    }
+    EXPECT_GL_NO_ERROR();
+}
+
+// Tests initializing a shader IO block using the shader translator option.
+TEST_P(GLSLTest_ES31_InitShaderVariables, InitIOBlock)
+{
+    ANGLE_SKIP_TEST_IF(!IsGLExtensionEnabled("GL_EXT_shader_io_blocks"));
+
+    const char kVS[] = R"(#version 310 es
+#extension GL_EXT_shader_io_blocks : require
+in vec4 position;
+out BlockType {
+    vec4 blockMember;
+} BlockTypeOut;
+
+void main()
+{
+    gl_Position = position;
+})";
+
+    const char kFS[] = R"(#version 310 es
+#extension GL_EXT_shader_io_blocks : require
+precision mediump float;
+out vec4 colorOut;
+in BlockType {
+    vec4 blockMember;
+} BlockTypeOut;
+
+void main()
+{
+    if (BlockTypeOut.blockMember == vec4(0)) {
+        colorOut = vec4(0, 1, 0, 1);
+    } else {
+        colorOut = vec4(1, 0, 0, 1);
+    }
+})";
+
+    ANGLE_GL_PROGRAM(testProgram, kVS, kFS);
+    drawQuad(testProgram, "position", 0.5f, 1.0f, true);
+    ASSERT_GL_NO_ERROR();
+    EXPECT_PIXEL_COLOR_EQ(0, 0, GLColor::green);
+}
+
+// Tests initializing a shader IO block with an array using the shader translator option.
+TEST_P(GLSLTest_ES31_InitShaderVariables, InitIOBlockWithArray)
+{
+    ANGLE_SKIP_TEST_IF(!IsGLExtensionEnabled("GL_EXT_shader_io_blocks"));
+
+    const char kVS[] = R"(#version 310 es
+#extension GL_EXT_shader_io_blocks : require
+in vec4 position;
+out BlockType {
+    vec4 blockMember[2];
+} BlockTypeOut;
+
+void main()
+{
+    gl_Position = position;
+})";
+
+    const char kFS[] = R"(#version 310 es
+#extension GL_EXT_shader_io_blocks : require
+precision mediump float;
+out vec4 colorOut;
+in BlockType {
+    vec4 blockMember[2];
+} BlockTypeOut;
+
+void main()
+{
+    if (BlockTypeOut.blockMember[0] == vec4(0) &&
+        BlockTypeOut.blockMember[1] == vec4(0)) {
+        colorOut = vec4(0, 1, 0, 1);
+    } else {
+        colorOut = vec4(1, 0, 0, 1);
+    }
+})";
+
+    ANGLE_GL_PROGRAM(testProgram, kVS, kFS);
+    drawQuad(testProgram, "position", 0.5f, 1.0f, true);
+    ASSERT_GL_NO_ERROR();
+    EXPECT_PIXEL_COLOR_EQ(0, 0, GLColor::green);
+}
+
+// Tests initializing a shader IO block with a struct using the shader translator option.
+TEST_P(GLSLTest_ES31_InitShaderVariables, InitIOBlockWithStruct)
+{
+    ANGLE_SKIP_TEST_IF(!IsGLExtensionEnabled("GL_EXT_shader_io_blocks"));
+
+    const char kVS[] = R"(#version 310 es
+#extension GL_EXT_shader_io_blocks : require
+in vec4 position;
+struct s {
+    float f;
+    vec2 v;
+};
+out BlockType {
+    s blockMember;
+} BlockTypeOut;
+
+void main()
+{
+    gl_Position = position;
+})";
+
+    const char kFS[] = R"(#version 310 es
+#extension GL_EXT_shader_io_blocks : require
+precision mediump float;
+out vec4 colorOut;
+struct s {
+    float f;
+    vec2 v;
+};
+in BlockType {
+    s blockMember;
+} BlockTypeOut;
+
+void main()
+{
+    if (BlockTypeOut.blockMember.f == 0.0 &&
+        BlockTypeOut.blockMember.v == vec2(0)) {
+        colorOut = vec4(0, 1, 0, 1);
+    } else {
+        colorOut = vec4(1, 0, 0, 1);
+    }
+})";
+
+    ANGLE_GL_PROGRAM(testProgram, kVS, kFS);
+    drawQuad(testProgram, "position", 0.5f, 1.0f, true);
+    ASSERT_GL_NO_ERROR();
+    EXPECT_PIXEL_COLOR_EQ(0, 0, GLColor::green);
+}
+
+// Tests initializing an IO block with a complicated set of types, using the shader translator.
+TEST_P(GLSLTest_ES31_InitShaderVariables, InitIOBlockWithComplexTypes)
+{
+    ANGLE_SKIP_TEST_IF(!IsGLExtensionEnabled("GL_EXT_shader_io_blocks"));
+
+    const char kVS[] = R"(#version 310 es
+#extension GL_EXT_shader_io_blocks : require
+in vec4 position;
+struct s {
+    float f;
+    vec2 v;
+};
+out BlockType {
+    vec4 v;
+    s s1;
+    s s2[2];
+} BlockTypeOut;
+
+void main()
+{
+    gl_Position = position;
+})";
+
+    const char kFS[] = R"(#version 310 es
+#extension GL_EXT_shader_io_blocks : require
+precision mediump float;
+out vec4 colorOut;
+struct s {
+    float f;
+    vec2 v;
+};
+in BlockType {
+    vec4 v;
+    s s1;
+    s s2[2];
+} BlockTypeOut;
+
+void main()
+{
+    s sz = s(0.0, vec2(0));
+    if (BlockTypeOut.v == vec4(0) &&
+        BlockTypeOut.s1 == sz &&
+        BlockTypeOut.s2[0] == sz &&
+        BlockTypeOut.s2[1] == sz) {
+        colorOut = vec4(0, 1, 0, 1);
+    } else {
+        colorOut = vec4(1, 0, 0, 1);
+    }
+})";
+
+    ANGLE_GL_PROGRAM(testProgram, kVS, kFS);
+    drawQuad(testProgram, "position", 0.5f, 1.0f, true);
+    ASSERT_GL_NO_ERROR();
+    EXPECT_PIXEL_COLOR_EQ(0, 0, GLColor::green);
+}
+
+// Tests an unsuccessful re-link using glBindAttribLocation.
+TEST_P(GLSLTest_ES3, UnsuccessfulRelinkWithBindAttribLocation)
+{
+    // Make a simple program.
+    ANGLE_GL_PROGRAM(testProgram, essl1_shaders::vs::Simple(), essl1_shaders::fs::Green());
+
+    // Install the executable.
+    glUseProgram(testProgram);
+
+    // Re-link with a bad XFB varying and a bound attrib location.
+    const char *tfVaryings = "gl_FragColor";
+    glTransformFeedbackVaryings(testProgram, 1, &tfVaryings, GL_SEPARATE_ATTRIBS);
+    glBindAttribLocation(testProgram, 8, essl1_shaders::PositionAttrib());
+    glLinkProgram(testProgram);
+    GLint linkStatus = 999;
+    glGetProgramiv(testProgram, GL_LINK_STATUS, &linkStatus);
+    ASSERT_GL_NO_ERROR();
+    ASSERT_EQ(linkStatus, GL_FALSE);
+
+    // Under normal GL this is not an error.
+    glDrawArrays(GL_TRIANGLES, 79, 16);
+    EXPECT_GL_NO_ERROR();
+}
+
+// Tests an unsuccessful re-link using glBindAttribLocation under WebGL.
+TEST_P(WebGL2GLSLTest, UnsuccessfulRelinkWithBindAttribLocation)
+{
+    // Make a simple program.
+    ANGLE_GL_PROGRAM(testProgram, essl1_shaders::vs::Simple(), essl1_shaders::fs::Green());
+
+    // Install the executable.
+    glUseProgram(testProgram);
+
+    // Re-link with a bad XFB varying and a bound attrib location.
+    const char *tfVaryings = "gl_FragColor";
+    glTransformFeedbackVaryings(testProgram, 1, &tfVaryings, GL_SEPARATE_ATTRIBS);
+    glBindAttribLocation(testProgram, 8, essl1_shaders::PositionAttrib());
+    glLinkProgram(testProgram);
+    GLint linkStatus = 999;
+    glGetProgramiv(testProgram, GL_LINK_STATUS, &linkStatus);
+    ASSERT_GL_NO_ERROR();
+    ASSERT_EQ(linkStatus, GL_FALSE);
+
+    // Under WebGL this is an error.
+    glDrawArrays(GL_TRIANGLES, 79, 16);
+    EXPECT_GL_ERROR(GL_INVALID_OPERATION);
+}
 }  // anonymous namespace
 
 ANGLE_INSTANTIATE_TEST_ES2_AND_ES3_AND(GLSLTest, WithDirectSPIRVGeneration(ES2_VULKAN()));
@@ -13121,3 +14179,6 @@ ANGLE_INSTANTIATE_TEST_ES3_AND(WebGL2GLSLTest, WithDirectSPIRVGeneration(ES3_VUL
 
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(GLSLTest_ES31);
 ANGLE_INSTANTIATE_TEST_ES31_AND(GLSLTest_ES31, WithDirectSPIRVGeneration(ES31_VULKAN()));
+
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(GLSLTest_ES31_InitShaderVariables);
+ANGLE_INSTANTIATE_TEST(GLSLTest_ES31_InitShaderVariables, WithInitShaderVariables(ES31_VULKAN()));

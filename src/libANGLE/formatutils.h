@@ -66,6 +66,7 @@ ANGLE_INLINE GLenum GetNonLinearFormat(const GLenum format)
             return GL_SRGB8_ALPHA8;
         case GL_RGB8:
         case GL_BGRX8_ANGLEX:
+        case GL_RGBX8_ANGLEX:
             return GL_SRGB8;
         case GL_RGBA16F:
             return GL_RGBA16F;
@@ -390,6 +391,21 @@ ANGLE_INLINE bool IsRGTCFormat(const GLenum format)
     }
 }
 
+ANGLE_INLINE bool IsBPTCFormat(const GLenum format)
+{
+    switch (format)
+    {
+        case GL_COMPRESSED_RGBA_BPTC_UNORM_EXT:
+        case GL_COMPRESSED_SRGB_ALPHA_BPTC_UNORM_EXT:
+        case GL_COMPRESSED_RGB_BPTC_SIGNED_FLOAT_EXT:
+        case GL_COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT_EXT:
+            return true;
+
+        default:
+            return false;
+    }
+}
+
 ANGLE_INLINE bool IsASTC2DFormat(const GLenum format)
 {
     if ((format >= GL_COMPRESSED_RGBA_ASTC_4x4_KHR &&
@@ -400,6 +416,19 @@ ANGLE_INLINE bool IsASTC2DFormat(const GLenum format)
         return true;
     }
     return false;
+}
+
+ANGLE_INLINE bool IsETC1Format(const GLenum format)
+{
+    switch (format)
+    {
+        case GL_ETC1_RGB8_OES:
+        case GL_ETC1_SRGB8_NV:
+            return true;
+
+        default:
+            return false;
+    }
 }
 
 ANGLE_INLINE bool IsETC2EACFormat(const GLenum format)

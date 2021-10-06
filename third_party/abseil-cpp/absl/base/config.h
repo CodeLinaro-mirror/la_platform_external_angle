@@ -66,6 +66,35 @@
 #include "absl/base/options.h"
 #include "absl/base/policy_checks.h"
 
+// Abseil long-term support (LTS) releases will define
+// `ABSL_LTS_RELEASE_VERSION` to the integer representing the date string of the
+// LTS release version, and will define `ABSL_LTS_RELEASE_PATCH_LEVEL` to the
+// integer representing the patch-level for that release.
+//
+// For example, for LTS release version "20300401.2", this would give us
+// ABSL_LTS_RELEASE_VERSION == 20300401 && ABSL_LTS_RELEASE_PATCH_LEVEL == 2
+//
+// These symbols will not be defined in non-LTS code.
+//
+// Abseil recommends that clients live-at-head. Therefore, if you are using
+// these symbols to assert a minimum version requirement, we recommend you do it
+// as
+//
+// #if defined(ABSL_LTS_RELEASE_VERSION) && ABSL_LTS_RELEASE_VERSION < 20300401
+// #error Project foo requires Abseil LTS version >= 20300401
+// #endif
+//
+// The `defined(ABSL_LTS_RELEASE_VERSION)` part of the check excludes
+// live-at-head clients from the minimum version assertion.
+//
+// See https://abseil.io/about/releases for more information on Abseil release
+// management.
+//
+// LTS releases can be obtained from
+// https://github.com/abseil/abseil-cpp/releases.
+#undef ABSL_LTS_RELEASE_VERSION
+#undef ABSL_LTS_RELEASE_PATCH_LEVEL
+
 // Helper macro to convert a CPP variable to a string literal.
 #define ABSL_INTERNAL_DO_TOKEN_STR(x) #x
 #define ABSL_INTERNAL_TOKEN_STR(x) ABSL_INTERNAL_DO_TOKEN_STR(x)
@@ -379,10 +408,10 @@ static_assert(ABSL_INTERNAL_INLINE_NAMESPACE_STR[0] != 'h' ||
 // POSIX.1-2001.
 #ifdef ABSL_HAVE_MMAP
 #error ABSL_HAVE_MMAP cannot be directly set
-#elif defined(__linux__) || defined(__APPLE__) || defined(__FreeBSD__) ||   \
-    defined(__ros__) || defined(__native_client__) || defined(__asmjs__) || \
-    defined(__wasm__) || defined(__Fuchsia__) || defined(__sun) || \
-    defined(__ASYLO__) || defined(__myriad2__)
+#elif defined(__linux__) || defined(__APPLE__) || defined(__FreeBSD__) || \
+    defined(_AIX) || defined(__ros__) || defined(__native_client__) ||    \
+    defined(__asmjs__) || defined(__wasm__) || defined(__Fuchsia__) ||    \
+    defined(__sun) || defined(__ASYLO__) || defined(__myriad2__)
 #define ABSL_HAVE_MMAP 1
 #endif
 
@@ -393,7 +422,7 @@ static_assert(ABSL_INTERNAL_INLINE_NAMESPACE_STR[0] != 'h' ||
 #ifdef ABSL_HAVE_PTHREAD_GETSCHEDPARAM
 #error ABSL_HAVE_PTHREAD_GETSCHEDPARAM cannot be directly set
 #elif defined(__linux__) || defined(__APPLE__) || defined(__FreeBSD__) || \
-    defined(__ros__)
+    defined(_AIX) || defined(__ros__)
 #define ABSL_HAVE_PTHREAD_GETSCHEDPARAM 1
 #endif
 
