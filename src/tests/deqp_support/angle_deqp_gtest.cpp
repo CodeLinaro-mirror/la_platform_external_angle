@@ -379,13 +379,15 @@ class dEQPTest : public testing::TestWithParam<size_t>
         // crashed tests we track how many tests we "tried" to run.
         sTestCount++;
 
-        if (caseInfo.mExpectation == GPUTestExpectationsParser::kGpuTestSkip ||
-            caseInfo.mExpectation == GPUTestExpectationsParser::kGpuTestTimeout)
+        if (caseInfo.mExpectation == GPUTestExpectationsParser::kGpuTestSkip)
         {
             sSkippedTestCount++;
             std::cout << "Test skipped.\n";
             return;
         }
+
+        TestSuite *testSuite = TestSuite::GetInstance();
+        testSuite->maybeUpdateTestTimeout(caseInfo.mExpectation);
 
         gExpectError          = (caseInfo.mExpectation != GPUTestExpectationsParser::kGpuTestPass);
         dEQPTestResult result = deqp_libtester_run(caseInfo.mDEQPName.c_str());
@@ -545,7 +547,8 @@ void dEQPTest<TestModuleIndex>::SetUpTestCase()
     logNameStream << ".qpa";
 
     std::stringstream logArgStream;
-    logArgStream << "--deqp-log-filename=" << testSuite->addTestArtifact(logNameStream.str());
+    logArgStream << "--deqp-log-filename="
+                 << testSuite->reserveTestArtifactPath(logNameStream.str());
 
     std::string logNameString = logArgStream.str();
     argv.push_back(logNameString.c_str());
