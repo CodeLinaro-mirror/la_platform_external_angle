@@ -14,7 +14,11 @@
 #define ANGLE_MINOR_VERSION 1
 
 #ifndef ANGLE_REVISION
+#if defined(ANGLE_COMMIT_POSITION) && ANGLE_COMMIT_POSITION + 0 != 0
 #    define ANGLE_REVISION ANGLE_COMMIT_POSITION
+#else
+#    define ANGLE_REVISION 0
+#endif
 #endif
 
 #define ANGLE_STRINGIFY(x) #x
