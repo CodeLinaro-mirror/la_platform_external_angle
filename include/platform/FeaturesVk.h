@@ -64,15 +64,6 @@ struct FeaturesVk : FeatureSetBase
         "The depth value is not clamped to [0,1] for floating point depth buffers.", &members,
         "http://anglebug.com/3970"};
 
-    // On some android devices, the memory barrier between the compute shader that converts vertex
-    // attributes and the vertex shader that reads from it is ineffective.  Only known workaround is
-    // to perform a flush after the conversion.  http://anglebug.com/3016
-    Feature flushAfterVertexConversion = {
-        "flushAfterVertexConversion", FeatureCategory::VulkanWorkarounds,
-        "The memory barrier between the compute shader that converts vertex attributes and the "
-        "vertex shader that reads from it is ineffective",
-        &members, "http://anglebug.com/3016"};
-
     Feature supportsRenderpass2 = {"supportsRenderpass2", FeatureCategory::VulkanFeatures,
                                    "VkDevice supports the VK_KHR_create_renderpass2 extension",
                                    &members};
@@ -593,6 +584,11 @@ struct FeaturesVk : FeatureSetBase
     Feature overrideSurfaceFormatRGB8toRGBA8 = {
         "overrideSurfaceFormatRGB8toRGBA8", FeatureCategory::VulkanWorkarounds,
         "Override surface format GL_RGB8 to GL_RGBA8", &members, "http://anglebug.com/6651"};
+
+    // Whether the VkSurface supports VK_KHR_shared_presentable_images.
+    Feature supportsSharedPresentableImageExtension = {
+        "supportsSharedPresentableImageExtension", FeatureCategory::VulkanFeatures,
+        "VkSurface supports the VK_KHR_shared_presentable_images extension", &members};
 };
 
 inline FeaturesVk::FeaturesVk()  = default;
