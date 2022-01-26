@@ -175,7 +175,8 @@ class ContextMtl : public ContextImpl, public mtl::Context
     // State sync with dirty bits.
     angle::Result syncState(const gl::Context *context,
                             const gl::State::DirtyBits &dirtyBits,
-                            const gl::State::DirtyBits &bitMask) override;
+                            const gl::State::DirtyBits &bitMask,
+                            gl::Command command) override;
 
     // Disjoint timer queries
     GLint getGPUDisjoint() override;
@@ -365,6 +366,15 @@ class ContextMtl : public ContextImpl, public mtl::Context
                             gl::DrawElementsType indexTypeOrNone,
                             const void *indices,
                             bool xfbPass);
+
+    angle::Result setupDrawImpl(const gl::Context *context,
+                                gl::PrimitiveMode mode,
+                                GLint firstVertex,
+                                GLsizei vertexOrIndexCount,
+                                GLsizei instanceCount,
+                                gl::DrawElementsType indexTypeOrNone,
+                                const void *indices,
+                                bool xfbPass);
 
     angle::Result drawTriFanArrays(const gl::Context *context,
                                    GLint first,

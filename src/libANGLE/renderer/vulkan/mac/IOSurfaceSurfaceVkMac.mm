@@ -143,6 +143,22 @@ egl::Error IOSurfaceSurfaceVkMac::unMakeCurrent(const gl::Context *context)
     return angle::ToEGL(result, displayVk, EGL_BAD_SURFACE);
 }
 
+int IOSurfaceSurfaceVkMac::computeAlignment() const
+{
+    size_t rowBytes         = IOSurfaceGetBytesPerRowOfPlane(mIOSurface, mPlane);
+    size_t desiredAlignment = IOSurfaceAlignProperty(kIOSurfaceBytesPerRow, 1);
+    size_t alignment        = 1;
+    while (alignment < desiredAlignment)
+    {
+        if (rowBytes & alignment)
+        {
+            break;
+        }
+        alignment <<= 1;
+    }
+    return static_cast<int>(alignment);
+}
+
 egl::Error IOSurfaceSurfaceVkMac::bindTexImage(const gl::Context *context,
                                                gl::Texture *texture,
                                                EGLint buffer)
@@ -157,10 +173,9 @@ egl::Error IOSurfaceSurfaceVkMac::bindTexImage(const gl::Context *context,
     size_t height            = IOSurfaceGetHeightOfPlane(mIOSurface, mPlane);
     size_t rowLengthInPixels = IOSurfaceGetBytesPerRowOfPlane(mIOSurface, mPlane) /
                                IOSurfaceGetBytesPerElementOfPlane(mIOSurface, mPlane);
-    VkDeviceSize alignment = renderer->getMinImportedHostPointerAlignment();
 
     gl::PixelUnpackState pixelUnpack;
-    pixelUnpack.alignment   = static_cast<GLint>(alignment);
+    pixelUnpack.alignment   = computeAlignment();
     pixelUnpack.rowLength   = static_cast<GLint>(rowLengthInPixels);
     pixelUnpack.imageHeight = static_cast<GLint>(height);
 
@@ -197,14 +212,14 @@ egl::Error IOSurfaceSurfaceVkMac::releaseTexImage(const gl::Context *context, EG
 
     gl::Rectangle bounds(0, 0, mWidth, mHeight);
 
-    const angle::Format &destFormat = angle::Format::Get(angle::Format::InternalFormatToID(
+    const angle::Format &dstFormat = angle::Format::Get(angle::Format::InternalFormatToID(
         kIOSurfaceFormats[mFormatIndex].nativeSizedExternalFormat));
 
     IOSurfaceLock(mIOSurface, 0, nullptr);
 
     size_t outputRowPitchInBytes = IOSurfaceGetBytesPerRowOfPlane(mIOSurface, mPlane);
 
-    PackPixelsParams params(bounds, destFormat, static_cast<GLuint>(outputRowPitchInBytes),
+    PackPixelsParams params(bounds, dstFormat, static_cast<GLuint>(outputRowPitchInBytes),
                             contextVk->isViewportFlipEnabledForDrawFBO(), nullptr, 0);
 
     result = mColorAttachment.image.readPixels(

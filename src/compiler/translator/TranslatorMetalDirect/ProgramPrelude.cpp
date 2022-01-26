@@ -517,7 +517,7 @@ struct ANGLE_normalize_impl
 {
     static ANGLE_ALWAYS_INLINE T exec(T x)
     {
-        return metal::normalize(x);
+        return metal::fast::normalize(x);
     }
 };
 template <typename T>
@@ -1239,8 +1239,7 @@ struct ANGLE_SwizzleRef
 template <typename T, int N>
 ANGLE_ALWAYS_INLINE ANGLE_VectorElemRef<T, N> ANGLE_swizzle_ref(thread metal::vec<T, N> &vec, int i0)
 {
-    const int is[] = { i0 };
-    return ANGLE_VectorElemRef<T, N>(vec, is);
+    return ANGLE_VectorElemRef<T, N>(vec, i0);
 }
 template <typename T, int N>
 ANGLE_ALWAYS_INLINE ANGLE_SwizzleRef<T, N, 2> ANGLE_swizzle_ref(thread metal::vec<T, N> &vec, int i0, int i1)

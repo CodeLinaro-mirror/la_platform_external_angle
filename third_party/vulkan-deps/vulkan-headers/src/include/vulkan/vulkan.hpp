@@ -119,7 +119,7 @@ extern "C" __declspec( dllimport ) FARPROC __stdcall GetProcAddress( HINSTANCE h
 #  include <span>
 #endif
 
-static_assert( VK_HEADER_VERSION == 194, "Wrong VK_HEADER_VERSION!" );
+static_assert( VK_HEADER_VERSION == 197, "Wrong VK_HEADER_VERSION!" );
 
 // 32-bit vulkan is not typesafe for handles, so don't allow copy constructors on this platform by default.
 // To enable this feature on 32-bit platforms please define VULKAN_HPP_TYPESAFE_CONVERSION
@@ -669,7 +669,8 @@ namespace VULKAN_HPP_NAMESPACE
     VULKAN_HPP_CONSTEXPR ArrayWrapper1D( std::array<T, N> const & data ) VULKAN_HPP_NOEXCEPT : std::array<T, N>( data )
     {}
 
-#if defined( _WIN32 ) && !defined( _WIN64 )
+#if ( VK_USE_64_BIT_PTR_DEFINES == 0 )
+    // on 32 bit compiles, needs overloads on index type int to resolve ambiguities
     VULKAN_HPP_CONSTEXPR T const & operator[]( int index ) const VULKAN_HPP_NOEXCEPT
     {
       return std::array<T, N>::operator[]( index );
@@ -1384,15 +1385,24 @@ namespace VULKAN_HPP_NAMESPACE
 
   class DispatchLoaderBase
   {
-#if !defined( NDEBUG )
   public:
+    DispatchLoaderBase() = default;
+    DispatchLoaderBase( std::nullptr_t )
+#if !defined( NDEBUG )
+      : m_valid( false )
+#endif
+    {}
+
+#if !defined( NDEBUG )
     size_t getVkHeaderVersion() const
     {
+      VULKAN_HPP_ASSERT( m_valid );
       return vkHeaderVersion;
     }
 
   private:
     size_t vkHeaderVersion = VK_HEADER_VERSION;
+    bool   m_valid         = true;
 #endif
   };
 
@@ -3401,6 +3411,19 @@ namespace VULKAN_HPP_NAMESPACE
                                  void *                pInfo ) const VULKAN_HPP_NOEXCEPT
     {
       return ::vkGetShaderInfoAMD( device, pipeline, shaderStage, infoType, pInfoSize, pInfo );
+    }
+
+    //=== VK_KHR_dynamic_rendering ===
+
+    void vkCmdBeginRenderingKHR( VkCommandBuffer            commandBuffer,
+                                 const VkRenderingInfoKHR * pRenderingInfo ) const VULKAN_HPP_NOEXCEPT
+    {
+      return ::vkCmdBeginRenderingKHR( commandBuffer, pRenderingInfo );
+    }
+
+    void vkCmdEndRenderingKHR( VkCommandBuffer commandBuffer ) const VULKAN_HPP_NOEXCEPT
+    {
+      return ::vkCmdEndRenderingKHR( commandBuffer );
     }
 
 #  if defined( VK_USE_PLATFORM_GGP )
@@ -5632,6 +5655,32 @@ namespace VULKAN_HPP_NAMESPACE
     {
       return ::vkSetDeviceMemoryPriorityEXT( device, memory, priority );
     }
+
+    //=== VK_KHR_maintenance4 ===
+
+    void vkGetDeviceBufferMemoryRequirementsKHR( VkDevice                                    device,
+                                                 const VkDeviceBufferMemoryRequirementsKHR * pInfo,
+                                                 VkMemoryRequirements2 * pMemoryRequirements ) const VULKAN_HPP_NOEXCEPT
+    {
+      return ::vkGetDeviceBufferMemoryRequirementsKHR( device, pInfo, pMemoryRequirements );
+    }
+
+    void vkGetDeviceImageMemoryRequirementsKHR( VkDevice                                   device,
+                                                const VkDeviceImageMemoryRequirementsKHR * pInfo,
+                                                VkMemoryRequirements2 * pMemoryRequirements ) const VULKAN_HPP_NOEXCEPT
+    {
+      return ::vkGetDeviceImageMemoryRequirementsKHR( device, pInfo, pMemoryRequirements );
+    }
+
+    void vkGetDeviceImageSparseMemoryRequirementsKHR(
+      VkDevice                                   device,
+      const VkDeviceImageMemoryRequirementsKHR * pInfo,
+      uint32_t *                                 pSparseMemoryRequirementCount,
+      VkSparseImageMemoryRequirements2 *         pSparseMemoryRequirements ) const VULKAN_HPP_NOEXCEPT
+    {
+      return ::vkGetDeviceImageSparseMemoryRequirementsKHR(
+        device, pInfo, pSparseMemoryRequirementCount, pSparseMemoryRequirements );
+    }
   };
 #endif
 
@@ -5677,7 +5726,7 @@ namespace VULKAN_HPP_NAMESPACE
       }
   extern VULKAN_HPP_STORAGE_API DispatchLoaderDynamic defaultDispatchLoaderDynamic;
 #  else
-  static ::VULKAN_HPP_NAMESPACE::DispatchLoaderStatic & getDispatchLoaderStatic()
+  static inline ::VULKAN_HPP_NAMESPACE::DispatchLoaderStatic & getDispatchLoaderStatic()
   {
     static ::VULKAN_HPP_NAMESPACE::DispatchLoaderStatic dls;
     return dls;
@@ -6261,42 +6310,45 @@ namespace VULKAN_HPP_NAMESPACE
   };
 #  endif /*VK_USE_PLATFORM_WIN32_KHR*/
 
-  [[noreturn]] static void throwResultException( Result result, char const * message )
+  namespace
   {
-    switch ( result )
+    [[noreturn]] void throwResultException( Result result, char const * message )
     {
-      case Result::eErrorOutOfHostMemory: throw OutOfHostMemoryError( message );
-      case Result::eErrorOutOfDeviceMemory: throw OutOfDeviceMemoryError( message );
-      case Result::eErrorInitializationFailed: throw InitializationFailedError( message );
-      case Result::eErrorDeviceLost: throw DeviceLostError( message );
-      case Result::eErrorMemoryMapFailed: throw MemoryMapFailedError( message );
-      case Result::eErrorLayerNotPresent: throw LayerNotPresentError( message );
-      case Result::eErrorExtensionNotPresent: throw ExtensionNotPresentError( message );
-      case Result::eErrorFeatureNotPresent: throw FeatureNotPresentError( message );
-      case Result::eErrorIncompatibleDriver: throw IncompatibleDriverError( message );
-      case Result::eErrorTooManyObjects: throw TooManyObjectsError( message );
-      case Result::eErrorFormatNotSupported: throw FormatNotSupportedError( message );
-      case Result::eErrorFragmentedPool: throw FragmentedPoolError( message );
-      case Result::eErrorUnknown: throw UnknownError( message );
-      case Result::eErrorOutOfPoolMemory: throw OutOfPoolMemoryError( message );
-      case Result::eErrorInvalidExternalHandle: throw InvalidExternalHandleError( message );
-      case Result::eErrorFragmentation: throw FragmentationError( message );
-      case Result::eErrorInvalidOpaqueCaptureAddress: throw InvalidOpaqueCaptureAddressError( message );
-      case Result::eErrorSurfaceLostKHR: throw SurfaceLostKHRError( message );
-      case Result::eErrorNativeWindowInUseKHR: throw NativeWindowInUseKHRError( message );
-      case Result::eErrorOutOfDateKHR: throw OutOfDateKHRError( message );
-      case Result::eErrorIncompatibleDisplayKHR: throw IncompatibleDisplayKHRError( message );
-      case Result::eErrorValidationFailedEXT: throw ValidationFailedEXTError( message );
-      case Result::eErrorInvalidShaderNV: throw InvalidShaderNVError( message );
-      case Result::eErrorInvalidDrmFormatModifierPlaneLayoutEXT:
-        throw InvalidDrmFormatModifierPlaneLayoutEXTError( message );
-      case Result::eErrorNotPermittedEXT: throw NotPermittedEXTError( message );
+      switch ( result )
+      {
+        case Result::eErrorOutOfHostMemory: throw OutOfHostMemoryError( message );
+        case Result::eErrorOutOfDeviceMemory: throw OutOfDeviceMemoryError( message );
+        case Result::eErrorInitializationFailed: throw InitializationFailedError( message );
+        case Result::eErrorDeviceLost: throw DeviceLostError( message );
+        case Result::eErrorMemoryMapFailed: throw MemoryMapFailedError( message );
+        case Result::eErrorLayerNotPresent: throw LayerNotPresentError( message );
+        case Result::eErrorExtensionNotPresent: throw ExtensionNotPresentError( message );
+        case Result::eErrorFeatureNotPresent: throw FeatureNotPresentError( message );
+        case Result::eErrorIncompatibleDriver: throw IncompatibleDriverError( message );
+        case Result::eErrorTooManyObjects: throw TooManyObjectsError( message );
+        case Result::eErrorFormatNotSupported: throw FormatNotSupportedError( message );
+        case Result::eErrorFragmentedPool: throw FragmentedPoolError( message );
+        case Result::eErrorUnknown: throw UnknownError( message );
+        case Result::eErrorOutOfPoolMemory: throw OutOfPoolMemoryError( message );
+        case Result::eErrorInvalidExternalHandle: throw InvalidExternalHandleError( message );
+        case Result::eErrorFragmentation: throw FragmentationError( message );
+        case Result::eErrorInvalidOpaqueCaptureAddress: throw InvalidOpaqueCaptureAddressError( message );
+        case Result::eErrorSurfaceLostKHR: throw SurfaceLostKHRError( message );
+        case Result::eErrorNativeWindowInUseKHR: throw NativeWindowInUseKHRError( message );
+        case Result::eErrorOutOfDateKHR: throw OutOfDateKHRError( message );
+        case Result::eErrorIncompatibleDisplayKHR: throw IncompatibleDisplayKHRError( message );
+        case Result::eErrorValidationFailedEXT: throw ValidationFailedEXTError( message );
+        case Result::eErrorInvalidShaderNV: throw InvalidShaderNVError( message );
+        case Result::eErrorInvalidDrmFormatModifierPlaneLayoutEXT:
+          throw InvalidDrmFormatModifierPlaneLayoutEXTError( message );
+        case Result::eErrorNotPermittedEXT: throw NotPermittedEXTError( message );
 #  if defined( VK_USE_PLATFORM_WIN32_KHR )
-      case Result::eErrorFullScreenExclusiveModeLostEXT: throw FullScreenExclusiveModeLostEXTError( message );
+        case Result::eErrorFullScreenExclusiveModeLostEXT: throw FullScreenExclusiveModeLostEXTError( message );
 #  endif /*VK_USE_PLATFORM_WIN32_KHR*/
-      default: throw SystemError( make_error_code( result ) );
+        default: throw SystemError( make_error_code( result ) );
+      }
     }
-  }
+  }  // namespace
 #endif
 
   template <typename T>
@@ -6655,6 +6707,14 @@ namespace VULKAN_HPP_NAMESPACE
   };
   template <>
   struct StructExtends<DeviceGroupRenderPassBeginInfo, RenderPassBeginInfo>
+  {
+    enum
+    {
+      value = true
+    };
+  };
+  template <>
+  struct StructExtends<DeviceGroupRenderPassBeginInfo, RenderingInfoKHR>
   {
     enum
     {
@@ -7706,12 +7766,192 @@ namespace VULKAN_HPP_NAMESPACE
       value = true
     };
   };
+  template <>
+  struct StructExtends<VideoEncodeH264ProfileEXT, QueryPoolCreateInfo>
+  {
+    enum
+    {
+      value = true
+    };
+  };
+  template <>
+  struct StructExtends<VideoEncodeH264ProfileEXT, FormatProperties2>
+  {
+    enum
+    {
+      value = true
+    };
+  };
+  template <>
+  struct StructExtends<VideoEncodeH264ProfileEXT, ImageCreateInfo>
+  {
+    enum
+    {
+      value = true
+    };
+  };
+  template <>
+  struct StructExtends<VideoEncodeH264ProfileEXT, ImageViewCreateInfo>
+  {
+    enum
+    {
+      value = true
+    };
+  };
+  template <>
+  struct StructExtends<VideoEncodeH264ProfileEXT, BufferCreateInfo>
+  {
+    enum
+    {
+      value = true
+    };
+  };
+#endif /*VK_ENABLE_BETA_EXTENSIONS*/
+
+#if defined( VK_ENABLE_BETA_EXTENSIONS )
+  //=== VK_EXT_video_encode_h265 ===
+  template <>
+  struct StructExtends<VideoEncodeH265CapabilitiesEXT, VideoCapabilitiesKHR>
+  {
+    enum
+    {
+      value = true
+    };
+  };
+  template <>
+  struct StructExtends<VideoEncodeH265SessionCreateInfoEXT, VideoSessionCreateInfoKHR>
+  {
+    enum
+    {
+      value = true
+    };
+  };
+  template <>
+  struct StructExtends<VideoEncodeH265SessionParametersCreateInfoEXT, VideoSessionParametersCreateInfoKHR>
+  {
+    enum
+    {
+      value = true
+    };
+  };
+  template <>
+  struct StructExtends<VideoEncodeH265SessionParametersAddInfoEXT, VideoSessionParametersUpdateInfoKHR>
+  {
+    enum
+    {
+      value = true
+    };
+  };
+  template <>
+  struct StructExtends<VideoEncodeH265VclFrameInfoEXT, VideoEncodeInfoKHR>
+  {
+    enum
+    {
+      value = true
+    };
+  };
+  template <>
+  struct StructExtends<VideoEncodeH265EmitPictureParametersEXT, VideoEncodeInfoKHR>
+  {
+    enum
+    {
+      value = true
+    };
+  };
+  template <>
+  struct StructExtends<VideoEncodeH265ProfileEXT, VideoProfileKHR>
+  {
+    enum
+    {
+      value = true
+    };
+  };
+  template <>
+  struct StructExtends<VideoEncodeH265ProfileEXT, QueryPoolCreateInfo>
+  {
+    enum
+    {
+      value = true
+    };
+  };
+  template <>
+  struct StructExtends<VideoEncodeH265ProfileEXT, FormatProperties2>
+  {
+    enum
+    {
+      value = true
+    };
+  };
+  template <>
+  struct StructExtends<VideoEncodeH265ProfileEXT, ImageCreateInfo>
+  {
+    enum
+    {
+      value = true
+    };
+  };
+  template <>
+  struct StructExtends<VideoEncodeH265ProfileEXT, ImageViewCreateInfo>
+  {
+    enum
+    {
+      value = true
+    };
+  };
+  template <>
+  struct StructExtends<VideoEncodeH265ProfileEXT, BufferCreateInfo>
+  {
+    enum
+    {
+      value = true
+    };
+  };
 #endif /*VK_ENABLE_BETA_EXTENSIONS*/
 
 #if defined( VK_ENABLE_BETA_EXTENSIONS )
   //=== VK_EXT_video_decode_h264 ===
   template <>
   struct StructExtends<VideoDecodeH264ProfileEXT, VideoProfileKHR>
+  {
+    enum
+    {
+      value = true
+    };
+  };
+  template <>
+  struct StructExtends<VideoDecodeH264ProfileEXT, QueryPoolCreateInfo>
+  {
+    enum
+    {
+      value = true
+    };
+  };
+  template <>
+  struct StructExtends<VideoDecodeH264ProfileEXT, FormatProperties2>
+  {
+    enum
+    {
+      value = true
+    };
+  };
+  template <>
+  struct StructExtends<VideoDecodeH264ProfileEXT, ImageCreateInfo>
+  {
+    enum
+    {
+      value = true
+    };
+  };
+  template <>
+  struct StructExtends<VideoDecodeH264ProfileEXT, ImageViewCreateInfo>
+  {
+    enum
+    {
+      value = true
+    };
+  };
+  template <>
+  struct StructExtends<VideoDecodeH264ProfileEXT, BufferCreateInfo>
   {
     enum
     {
@@ -7779,6 +8019,96 @@ namespace VULKAN_HPP_NAMESPACE
   //=== VK_AMD_texture_gather_bias_lod ===
   template <>
   struct StructExtends<TextureLODGatherFormatPropertiesAMD, ImageFormatProperties2>
+  {
+    enum
+    {
+      value = true
+    };
+  };
+
+  //=== VK_KHR_dynamic_rendering ===
+  template <>
+  struct StructExtends<PipelineRenderingCreateInfoKHR, GraphicsPipelineCreateInfo>
+  {
+    enum
+    {
+      value = true
+    };
+  };
+  template <>
+  struct StructExtends<PhysicalDeviceDynamicRenderingFeaturesKHR, PhysicalDeviceFeatures2>
+  {
+    enum
+    {
+      value = true
+    };
+  };
+  template <>
+  struct StructExtends<PhysicalDeviceDynamicRenderingFeaturesKHR, DeviceCreateInfo>
+  {
+    enum
+    {
+      value = true
+    };
+  };
+  template <>
+  struct StructExtends<CommandBufferInheritanceRenderingInfoKHR, CommandBufferInheritanceInfo>
+  {
+    enum
+    {
+      value = true
+    };
+  };
+  template <>
+  struct StructExtends<RenderingFragmentShadingRateAttachmentInfoKHR, RenderingInfoKHR>
+  {
+    enum
+    {
+      value = true
+    };
+  };
+  template <>
+  struct StructExtends<RenderingFragmentDensityMapAttachmentInfoEXT, RenderingInfoKHR>
+  {
+    enum
+    {
+      value = true
+    };
+  };
+  template <>
+  struct StructExtends<AttachmentSampleCountInfoAMD, CommandBufferInheritanceInfo>
+  {
+    enum
+    {
+      value = true
+    };
+  };
+  template <>
+  struct StructExtends<AttachmentSampleCountInfoAMD, GraphicsPipelineCreateInfo>
+  {
+    enum
+    {
+      value = true
+    };
+  };
+  template <>
+  struct StructExtends<MultiviewPerViewAttributesInfoNVX, CommandBufferInheritanceInfo>
+  {
+    enum
+    {
+      value = true
+    };
+  };
+  template <>
+  struct StructExtends<MultiviewPerViewAttributesInfoNVX, GraphicsPipelineCreateInfo>
+  {
+    enum
+    {
+      value = true
+    };
+  };
+  template <>
+  struct StructExtends<MultiviewPerViewAttributesInfoNVX, RenderingInfoKHR>
   {
     enum
     {
@@ -8268,6 +8598,14 @@ namespace VULKAN_HPP_NAMESPACE
       value = true
     };
   };
+  template <>
+  struct StructExtends<AndroidHardwareBufferFormatProperties2ANDROID, AndroidHardwareBufferPropertiesANDROID>
+  {
+    enum
+    {
+      value = true
+    };
+  };
 #endif /*VK_USE_PLATFORM_ANDROID_KHR*/
 
   //=== VK_EXT_inline_uniform_block ===
@@ -8501,6 +8839,14 @@ namespace VULKAN_HPP_NAMESPACE
       value = true
     };
   };
+  template <>
+  struct StructExtends<DrmFormatModifierPropertiesList2EXT, FormatProperties2>
+  {
+    enum
+    {
+      value = true
+    };
+  };
 
   //=== VK_EXT_validation_cache ===
   template <>
@@ -8722,6 +9068,46 @@ namespace VULKAN_HPP_NAMESPACE
   //=== VK_EXT_video_decode_h265 ===
   template <>
   struct StructExtends<VideoDecodeH265ProfileEXT, VideoProfileKHR>
+  {
+    enum
+    {
+      value = true
+    };
+  };
+  template <>
+  struct StructExtends<VideoDecodeH265ProfileEXT, QueryPoolCreateInfo>
+  {
+    enum
+    {
+      value = true
+    };
+  };
+  template <>
+  struct StructExtends<VideoDecodeH265ProfileEXT, FormatProperties2>
+  {
+    enum
+    {
+      value = true
+    };
+  };
+  template <>
+  struct StructExtends<VideoDecodeH265ProfileEXT, ImageCreateInfo>
+  {
+    enum
+    {
+      value = true
+    };
+  };
+  template <>
+  struct StructExtends<VideoDecodeH265ProfileEXT, ImageViewCreateInfo>
+  {
+    enum
+    {
+      value = true
+    };
+  };
+  template <>
+  struct StructExtends<VideoDecodeH265ProfileEXT, BufferCreateInfo>
   {
     enum
     {
@@ -10227,6 +10613,24 @@ namespace VULKAN_HPP_NAMESPACE
     };
   };
 
+  //=== VK_EXT_rgba10x6_formats ===
+  template <>
+  struct StructExtends<PhysicalDeviceRGBA10X6FormatsFeaturesEXT, PhysicalDeviceFeatures2>
+  {
+    enum
+    {
+      value = true
+    };
+  };
+  template <>
+  struct StructExtends<PhysicalDeviceRGBA10X6FormatsFeaturesEXT, DeviceCreateInfo>
+  {
+    enum
+    {
+      value = true
+    };
+  };
+
   //=== VK_KHR_ray_tracing_pipeline ===
   template <>
   struct StructExtends<PhysicalDeviceRayTracingPipelineFeaturesKHR, PhysicalDeviceFeatures2>
@@ -10344,6 +10748,16 @@ namespace VULKAN_HPP_NAMESPACE
   };
   template <>
   struct StructExtends<PhysicalDevicePrimitiveTopologyListRestartFeaturesEXT, DeviceCreateInfo>
+  {
+    enum
+    {
+      value = true
+    };
+  };
+
+  //=== VK_KHR_format_feature_flags2 ===
+  template <>
+  struct StructExtends<FormatProperties3KHR, FormatProperties2>
   {
     enum
     {
@@ -10557,6 +10971,32 @@ namespace VULKAN_HPP_NAMESPACE
     };
   };
 
+  //=== VK_EXT_border_color_swizzle ===
+  template <>
+  struct StructExtends<PhysicalDeviceBorderColorSwizzleFeaturesEXT, PhysicalDeviceFeatures2>
+  {
+    enum
+    {
+      value = true
+    };
+  };
+  template <>
+  struct StructExtends<PhysicalDeviceBorderColorSwizzleFeaturesEXT, DeviceCreateInfo>
+  {
+    enum
+    {
+      value = true
+    };
+  };
+  template <>
+  struct StructExtends<SamplerBorderColorComponentMappingCreateInfoEXT, SamplerCreateInfo>
+  {
+    enum
+    {
+      value = true
+    };
+  };
+
   //=== VK_EXT_pageable_device_local_memory ===
   template <>
   struct StructExtends<PhysicalDevicePageableDeviceLocalMemoryFeaturesEXT, PhysicalDeviceFeatures2>
@@ -10568,6 +11008,32 @@ namespace VULKAN_HPP_NAMESPACE
   };
   template <>
   struct StructExtends<PhysicalDevicePageableDeviceLocalMemoryFeaturesEXT, DeviceCreateInfo>
+  {
+    enum
+    {
+      value = true
+    };
+  };
+
+  //=== VK_KHR_maintenance4 ===
+  template <>
+  struct StructExtends<PhysicalDeviceMaintenance4FeaturesKHR, PhysicalDeviceFeatures2>
+  {
+    enum
+    {
+      value = true
+    };
+  };
+  template <>
+  struct StructExtends<PhysicalDeviceMaintenance4FeaturesKHR, DeviceCreateInfo>
+  {
+    enum
+    {
+      value = true
+    };
+  };
+  template <>
+  struct StructExtends<PhysicalDeviceMaintenance4PropertiesKHR, PhysicalDeviceProperties2>
   {
     enum
     {
@@ -11014,6 +11480,10 @@ namespace VULKAN_HPP_NAMESPACE
 
     //=== VK_AMD_shader_info ===
     PFN_vkGetShaderInfoAMD vkGetShaderInfoAMD = 0;
+
+    //=== VK_KHR_dynamic_rendering ===
+    PFN_vkCmdBeginRenderingKHR vkCmdBeginRenderingKHR = 0;
+    PFN_vkCmdEndRenderingKHR   vkCmdEndRenderingKHR   = 0;
 
 #if defined( VK_USE_PLATFORM_GGP )
     //=== VK_GGP_stream_descriptor_surface ===
@@ -11560,6 +12030,11 @@ namespace VULKAN_HPP_NAMESPACE
     //=== VK_EXT_pageable_device_local_memory ===
     PFN_vkSetDeviceMemoryPriorityEXT vkSetDeviceMemoryPriorityEXT = 0;
 
+    //=== VK_KHR_maintenance4 ===
+    PFN_vkGetDeviceBufferMemoryRequirementsKHR      vkGetDeviceBufferMemoryRequirementsKHR      = 0;
+    PFN_vkGetDeviceImageMemoryRequirementsKHR       vkGetDeviceImageMemoryRequirementsKHR       = 0;
+    PFN_vkGetDeviceImageSparseMemoryRequirementsKHR vkGetDeviceImageSparseMemoryRequirementsKHR = 0;
+
   public:
     DispatchLoaderDynamic() VULKAN_HPP_NOEXCEPT                                    = default;
     DispatchLoaderDynamic( DispatchLoaderDynamic const & rhs ) VULKAN_HPP_NOEXCEPT = default;
@@ -11664,10 +12139,9 @@ namespace VULKAN_HPP_NAMESPACE
         vkGetInstanceProcAddr( instance, "vkGetPhysicalDeviceQueueFamilyProperties" ) );
       vkGetPhysicalDeviceMemoryProperties = PFN_vkGetPhysicalDeviceMemoryProperties(
         vkGetInstanceProcAddr( instance, "vkGetPhysicalDeviceMemoryProperties" ) );
-      vkGetInstanceProcAddr = PFN_vkGetInstanceProcAddr( vkGetInstanceProcAddr( instance, "vkGetInstanceProcAddr" ) );
-      vkGetDeviceProcAddr   = PFN_vkGetDeviceProcAddr( vkGetInstanceProcAddr( instance, "vkGetDeviceProcAddr" ) );
-      vkCreateDevice        = PFN_vkCreateDevice( vkGetInstanceProcAddr( instance, "vkCreateDevice" ) );
-      vkDestroyDevice       = PFN_vkDestroyDevice( vkGetInstanceProcAddr( instance, "vkDestroyDevice" ) );
+      vkGetDeviceProcAddr = PFN_vkGetDeviceProcAddr( vkGetInstanceProcAddr( instance, "vkGetDeviceProcAddr" ) );
+      vkCreateDevice      = PFN_vkCreateDevice( vkGetInstanceProcAddr( instance, "vkCreateDevice" ) );
+      vkDestroyDevice     = PFN_vkDestroyDevice( vkGetInstanceProcAddr( instance, "vkDestroyDevice" ) );
       vkEnumerateDeviceExtensionProperties = PFN_vkEnumerateDeviceExtensionProperties(
         vkGetInstanceProcAddr( instance, "vkEnumerateDeviceExtensionProperties" ) );
       vkEnumerateDeviceLayerProperties =
@@ -12075,6 +12549,11 @@ namespace VULKAN_HPP_NAMESPACE
 
       //=== VK_AMD_shader_info ===
       vkGetShaderInfoAMD = PFN_vkGetShaderInfoAMD( vkGetInstanceProcAddr( instance, "vkGetShaderInfoAMD" ) );
+
+      //=== VK_KHR_dynamic_rendering ===
+      vkCmdBeginRenderingKHR =
+        PFN_vkCmdBeginRenderingKHR( vkGetInstanceProcAddr( instance, "vkCmdBeginRenderingKHR" ) );
+      vkCmdEndRenderingKHR = PFN_vkCmdEndRenderingKHR( vkGetInstanceProcAddr( instance, "vkCmdEndRenderingKHR" ) );
 
 #if defined( VK_USE_PLATFORM_GGP )
       //=== VK_GGP_stream_descriptor_surface ===
@@ -12859,6 +13338,14 @@ namespace VULKAN_HPP_NAMESPACE
       //=== VK_EXT_pageable_device_local_memory ===
       vkSetDeviceMemoryPriorityEXT =
         PFN_vkSetDeviceMemoryPriorityEXT( vkGetInstanceProcAddr( instance, "vkSetDeviceMemoryPriorityEXT" ) );
+
+      //=== VK_KHR_maintenance4 ===
+      vkGetDeviceBufferMemoryRequirementsKHR = PFN_vkGetDeviceBufferMemoryRequirementsKHR(
+        vkGetInstanceProcAddr( instance, "vkGetDeviceBufferMemoryRequirementsKHR" ) );
+      vkGetDeviceImageMemoryRequirementsKHR = PFN_vkGetDeviceImageMemoryRequirementsKHR(
+        vkGetInstanceProcAddr( instance, "vkGetDeviceImageMemoryRequirementsKHR" ) );
+      vkGetDeviceImageSparseMemoryRequirementsKHR = PFN_vkGetDeviceImageSparseMemoryRequirementsKHR(
+        vkGetInstanceProcAddr( instance, "vkGetDeviceImageSparseMemoryRequirementsKHR" ) );
     }
 
     void init( VULKAN_HPP_NAMESPACE::Device deviceCpp ) VULKAN_HPP_NOEXCEPT
@@ -13147,6 +13634,10 @@ namespace VULKAN_HPP_NAMESPACE
 
       //=== VK_AMD_shader_info ===
       vkGetShaderInfoAMD = PFN_vkGetShaderInfoAMD( vkGetDeviceProcAddr( device, "vkGetShaderInfoAMD" ) );
+
+      //=== VK_KHR_dynamic_rendering ===
+      vkCmdBeginRenderingKHR = PFN_vkCmdBeginRenderingKHR( vkGetDeviceProcAddr( device, "vkCmdBeginRenderingKHR" ) );
+      vkCmdEndRenderingKHR   = PFN_vkCmdEndRenderingKHR( vkGetDeviceProcAddr( device, "vkCmdEndRenderingKHR" ) );
 
 #if defined( VK_USE_PLATFORM_WIN32_KHR )
       //=== VK_NV_external_memory_win32 ===
@@ -13735,6 +14226,14 @@ namespace VULKAN_HPP_NAMESPACE
       //=== VK_EXT_pageable_device_local_memory ===
       vkSetDeviceMemoryPriorityEXT =
         PFN_vkSetDeviceMemoryPriorityEXT( vkGetDeviceProcAddr( device, "vkSetDeviceMemoryPriorityEXT" ) );
+
+      //=== VK_KHR_maintenance4 ===
+      vkGetDeviceBufferMemoryRequirementsKHR = PFN_vkGetDeviceBufferMemoryRequirementsKHR(
+        vkGetDeviceProcAddr( device, "vkGetDeviceBufferMemoryRequirementsKHR" ) );
+      vkGetDeviceImageMemoryRequirementsKHR = PFN_vkGetDeviceImageMemoryRequirementsKHR(
+        vkGetDeviceProcAddr( device, "vkGetDeviceImageMemoryRequirementsKHR" ) );
+      vkGetDeviceImageSparseMemoryRequirementsKHR = PFN_vkGetDeviceImageSparseMemoryRequirementsKHR(
+        vkGetDeviceProcAddr( device, "vkGetDeviceImageSparseMemoryRequirementsKHR" ) );
     }
   };
 }  // namespace VULKAN_HPP_NAMESPACE

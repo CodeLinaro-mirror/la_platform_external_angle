@@ -207,6 +207,7 @@ ProgramMtl::DefaultUniformBlock::~DefaultUniformBlock() = default;
 
 ProgramMtl::ProgramMtl(const gl::ProgramState &state)
     : ProgramImpl(state),
+      mProgramHasFlatAttributes(false),
       mShadowCompareModes(),
       mMetalRenderPipelineCache(this),
       mAuxBufferPool(nullptr)
@@ -228,6 +229,8 @@ void ProgramMtl::destroy(const gl::Context *context)
 
 void ProgramMtl::reset(ContextMtl *context)
 {
+    mProgramHasFlatAttributes = false;
+
     for (auto &block : mDefaultUniformBlocks)
     {
         block.uniformLayout.clear();
@@ -397,23 +400,30 @@ angle::Result ProgramMtl::linkImplDirect(const gl::Context *glContext,
     return angle::Result::Continue;
 }
 
-bool ProgramMtl::programHasFlatAttributes() const
+void ProgramMtl::linkUpdateHasFlatAttributes()
 {
+    mProgramHasFlatAttributes = false;
+
     const auto &programInputs = mState.getProgramInputs();
     for (auto &attribute : programInputs)
     {
         if (attribute.interpolation == sh::INTERPOLATION_FLAT)
-            return true;
+        {
+            mProgramHasFlatAttributes = true;
+            return;
+        }
     }
+
     const auto &flatVaryings =
         mState.getAttachedShader(gl::ShaderType::Vertex)->getOutputVaryings();
     for (auto &attribute : flatVaryings)
     {
         if (attribute.interpolation == sh::INTERPOLATION_FLAT)
-            return true;
+        {
+            mProgramHasFlatAttributes = true;
+            return;
+        }
     }
-
-    return false;
 }
 
 angle::Result ProgramMtl::linkImpl(const gl::Context *glContext,
@@ -433,6 +443,7 @@ angle::Result ProgramMtl::linkImpl(const gl::Context *glContext,
 #else
     ANGLE_TRY(linkImplDirect(glContext, resources, infoLog));
 #endif
+    linkUpdateHasFlatAttributes();
     return angle::Result::Continue;
 }
 
@@ -728,8 +739,11 @@ angle::Result ProgramMtl::createMslShaderLib(
 
         // Convert to actual binary shader
         mtl::AutoObjCPtr<NSError *> err = nil;
-        translatedMslInfo->metalLibrary = mtl::CreateShaderLibrary(
-            mtlDevice, translatedMslInfo->metalShaderSource, substitutionMacros, &err);
+        bool disableFastMath = (context->getDisplay()->getFeatures().intelDisableFastMath.enabled &&
+                                translatedMslInfo->hasInvariantOrAtan);
+        translatedMslInfo->metalLibrary =
+            mtl::CreateShaderLibrary(mtlDevice, translatedMslInfo->metalShaderSource,
+                                     substitutionMacros, !disableFastMath, &err);
         if (err && !translatedMslInfo->metalLibrary)
         {
             std::ostringstream ss;
@@ -818,6 +832,7 @@ void ProgramMtl::saveShaderInternalInfo(gl::BinaryOutputStream *stream)
         {
             stream->writeInt<uint32_t>(uboBinding);
         }
+        stream->writeBool(mMslShaderTranslateInfo[shaderType].hasInvariantOrAtan);
     }
     for (size_t xfbBindIndex = 0; xfbBindIndex < mtl::kMaxShaderXFBs; xfbBindIndex++)
     {
@@ -843,6 +858,8 @@ void ProgramMtl::saveShaderInternalInfo(gl::BinaryOutputStream *stream)
             stream->writeInt(mMslXfbOnlyVertexShaderInfo.actualXFBBindings[xfbBindIndex]);
         }
     }
+
+    stream->writeBool(mProgramHasFlatAttributes);
 }
 
 void ProgramMtl::loadShaderInternalInfo(gl::BinaryInputStream *stream)
@@ -861,7 +878,9 @@ void ProgramMtl::loadShaderInternalInfo(gl::BinaryInputStream *stream)
         {
             uboBinding = stream->readInt<uint32_t>();
         }
+        mMslShaderTranslateInfo[shaderType].hasInvariantOrAtan = stream->readBool();
     }
+
     for (size_t xfbBindIndex = 0; xfbBindIndex < mtl::kMaxShaderXFBs; xfbBindIndex++)
     {
         stream->readInt(
@@ -886,6 +905,8 @@ void ProgramMtl::loadShaderInternalInfo(gl::BinaryInputStream *stream)
         }
         mMslXfbOnlyVertexShaderInfo.metalLibrary = nullptr;
     }
+
+    mProgramHasFlatAttributes = stream->readBool();
 }
 
 GLboolean ProgramMtl::validate(const gl::Caps &caps, gl::InfoLog *infoLog)

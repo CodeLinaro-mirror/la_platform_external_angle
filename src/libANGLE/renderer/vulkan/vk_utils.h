@@ -20,8 +20,10 @@
 #include "common/debug.h"
 #include "libANGLE/Error.h"
 #include "libANGLE/Observer.h"
+#include "libANGLE/angletypes.h"
 #include "libANGLE/renderer/serial_utils.h"
 #include "libANGLE/renderer/vulkan/SecondaryCommandBuffer.h"
+#include "libANGLE/renderer/vulkan/VulkanSecondaryCommandBuffer.h"
 #include "libANGLE/renderer/vulkan/vk_wrapper.h"
 #include "vulkan/vulkan_fuchsia_ext.h"
 
@@ -52,12 +54,8 @@ class ShareGroup;
 
 namespace gl
 {
-struct Box;
 class MockOverlay;
-struct Extents;
 struct RasterizerState;
-struct Rectangle;
-class State;
 struct SwizzleState;
 struct VertexAttribute;
 class VertexBinding;
@@ -157,6 +155,23 @@ void AddToPNextChain(VulkanStruct1 *chainStart, VulkanStruct2 *ptr)
     localPtr->pNext              = reinterpret_cast<VkBaseOutStructure *>(ptr);
 }
 
+// Append ptr to the end of the chain
+template <typename VulkanStruct1, typename VulkanStruct2>
+void AppendToPNextChain(VulkanStruct1 *chainStart, VulkanStruct2 *ptr)
+{
+    if (!ptr)
+    {
+        return;
+    }
+
+    VkBaseOutStructure *endPtr = reinterpret_cast<VkBaseOutStructure *>(chainStart);
+    while (endPtr->pNext)
+    {
+        endPtr = endPtr->pNext;
+    }
+    endPtr->pNext = reinterpret_cast<VkBaseOutStructure *>(ptr);
+}
+
 struct Error
 {
     VkResult errorCode;
@@ -185,185 +200,13 @@ class Context : angle::NonCopyable
 
 class RenderPassDesc;
 
-using PrimaryCommandBuffer = priv::CommandBuffer;
-
 #if ANGLE_USE_CUSTOM_VULKAN_CMD_BUFFERS
 using CommandBuffer = priv::SecondaryCommandBuffer;
 #else
-class VulkanSecondaryCommandBuffer : public priv::CommandBuffer
-{
-  public:
-    VulkanSecondaryCommandBuffer() = default;
-
-    angle::Result initialize(VkDevice device,
-                             vk::CommandPool *pool,
-                             angle::PoolAllocator *allocator);
-
-    void draw(uint32_t vertexCount,
-              uint32_t instanceCount,
-              uint32_t firstVertex,
-              uint32_t firstInstance);
-    void draw(uint32_t vertexCount, uint32_t firstVertex);
-    void drawInstanced(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex);
-    void drawInstancedBaseInstance(uint32_t vertexCount,
-                                   uint32_t instanceCount,
-                                   uint32_t firstVertex,
-                                   uint32_t firstInstance);
-    void drawIndexed(uint32_t indexCount,
-                     uint32_t instanceCount,
-                     uint32_t firstIndex,
-                     int32_t vertexOffset,
-                     uint32_t firstInstance);
-    void drawIndexed(uint32_t indexCount);
-    void drawIndexedBaseVertex(uint32_t indexCount, uint32_t vertexOffset);
-    void drawIndexedInstanced(uint32_t indexCount, uint32_t instanceCount);
-    void drawIndexedInstancedBaseVertex(uint32_t indexCount,
-                                        uint32_t instanceCount,
-                                        uint32_t vertexOffset);
-    void drawIndexedInstancedBaseVertexBaseInstance(uint32_t indexCount,
-                                                    uint32_t instanceCount,
-                                                    uint32_t firstIndex,
-                                                    int32_t vertexOffset,
-                                                    uint32_t firstInstance);
-    void drawIndexedIndirect(const Buffer &buffer,
-                             VkDeviceSize offset,
-                             uint32_t drawCount,
-                             uint32_t stride);
-    void drawIndirect(const Buffer &buffer,
-                      VkDeviceSize offset,
-                      uint32_t drawCount,
-                      uint32_t stride);
-
-    void dispatch(uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ);
-    void dispatchIndirect(const Buffer &buffer, VkDeviceSize offset);
-
-    void open() const {}
-    void close() const {}
-    bool empty() const { return mSize == 0; }
-    uint32_t getCommandSize() const { return mSize; }
-    std::string dumpCommands(const char *separator) const { return ""; }
-
-  private:
-    uint32_t mSize = 0;
-};
-
-ANGLE_INLINE void VulkanSecondaryCommandBuffer::draw(uint32_t vertexCount,
-                                                     uint32_t instanceCount,
-                                                     uint32_t firstVertex,
-                                                     uint32_t firstInstance)
-{
-    ++mSize;
-    CommandBuffer::draw(vertexCount, instanceCount, firstVertex, firstInstance);
-}
-
-ANGLE_INLINE void VulkanSecondaryCommandBuffer::draw(uint32_t vertexCount, uint32_t firstVertex)
-{
-    ++mSize;
-    CommandBuffer::draw(vertexCount, 1, firstVertex, 0);
-}
-
-ANGLE_INLINE void VulkanSecondaryCommandBuffer::drawInstanced(uint32_t vertexCount,
-                                                              uint32_t instanceCount,
-                                                              uint32_t firstVertex)
-{
-    ++mSize;
-    CommandBuffer::draw(vertexCount, instanceCount, firstVertex, 0);
-}
-
-ANGLE_INLINE void VulkanSecondaryCommandBuffer::drawInstancedBaseInstance(uint32_t vertexCount,
-                                                                          uint32_t instanceCount,
-                                                                          uint32_t firstVertex,
-                                                                          uint32_t firstInstance)
-{
-    ++mSize;
-    CommandBuffer::draw(vertexCount, instanceCount, firstVertex, firstInstance);
-}
-
-ANGLE_INLINE void VulkanSecondaryCommandBuffer::drawIndexed(uint32_t indexCount,
-                                                            uint32_t instanceCount,
-                                                            uint32_t firstIndex,
-                                                            int32_t vertexOffset,
-                                                            uint32_t firstInstance)
-{
-    ++mSize;
-    CommandBuffer::drawIndexed(indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
-}
-
-ANGLE_INLINE void VulkanSecondaryCommandBuffer::drawIndexed(uint32_t indexCount)
-{
-    ++mSize;
-    CommandBuffer::drawIndexed(indexCount, 1, 0, 0, 0);
-}
-
-ANGLE_INLINE void VulkanSecondaryCommandBuffer::drawIndexedBaseVertex(uint32_t indexCount,
-                                                                      uint32_t vertexOffset)
-{
-    ++mSize;
-    CommandBuffer::drawIndexed(indexCount, 1, 0, vertexOffset, 0);
-}
-
-ANGLE_INLINE void VulkanSecondaryCommandBuffer::drawIndexedInstanced(uint32_t indexCount,
-                                                                     uint32_t instanceCount)
-{
-    ++mSize;
-    CommandBuffer::drawIndexed(indexCount, instanceCount, 0, 0, 0);
-}
-
-ANGLE_INLINE void VulkanSecondaryCommandBuffer::drawIndexedInstancedBaseVertex(
-    uint32_t indexCount,
-    uint32_t instanceCount,
-    uint32_t vertexOffset)
-{
-    ++mSize;
-    CommandBuffer::drawIndexed(indexCount, instanceCount, 0, vertexOffset, 0);
-}
-
-ANGLE_INLINE void VulkanSecondaryCommandBuffer::drawIndexedInstancedBaseVertexBaseInstance(
-    uint32_t indexCount,
-    uint32_t instanceCount,
-    uint32_t firstIndex,
-    int32_t vertexOffset,
-    uint32_t firstInstance)
-{
-    ++mSize;
-    CommandBuffer::drawIndexed(indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
-}
-
-ANGLE_INLINE void VulkanSecondaryCommandBuffer::drawIndexedIndirect(const Buffer &buffer,
-                                                                    VkDeviceSize offset,
-                                                                    uint32_t drawCount,
-                                                                    uint32_t stride)
-{
-    ++mSize;
-    CommandBuffer::drawIndexedIndirect(buffer, offset, drawCount, stride);
-}
-
-ANGLE_INLINE void VulkanSecondaryCommandBuffer::drawIndirect(const Buffer &buffer,
-                                                             VkDeviceSize offset,
-                                                             uint32_t drawCount,
-                                                             uint32_t stride)
-{
-    ++mSize;
-    CommandBuffer::drawIndirect(buffer, offset, drawCount, stride);
-}
-
-ANGLE_INLINE void VulkanSecondaryCommandBuffer::dispatch(uint32_t groupCountX,
-                                                         uint32_t groupCountY,
-                                                         uint32_t groupCountZ)
-{
-    ++mSize;
-    CommandBuffer::dispatch(groupCountX, groupCountY, groupCountZ);
-}
-
-ANGLE_INLINE void VulkanSecondaryCommandBuffer::dispatchIndirect(const Buffer &buffer,
-                                                                 VkDeviceSize offset)
-{
-    ++mSize;
-    CommandBuffer::dispatchIndirect(buffer, offset);
-}
-
 using CommandBuffer                          = VulkanSecondaryCommandBuffer;
 #endif
+
+using SecondaryCommandBufferList = std::vector<CommandBuffer>;
 
 VkImageAspectFlags GetDepthStencilAspectFlags(const angle::Format &format);
 VkImageAspectFlags GetFormatAspectFlags(const angle::Format &format);
@@ -524,8 +367,55 @@ class MemoryProperties final : angle::NonCopyable
         return mMemoryProperties.memoryHeaps[heapIndex].size;
     }
 
+    uint32_t getMemoryTypeCount() const { return mMemoryProperties.memoryTypeCount; }
+
   private:
     VkPhysicalDeviceMemoryProperties mMemoryProperties;
+};
+
+class BufferMemory : angle::NonCopyable
+{
+  public:
+    BufferMemory();
+    ~BufferMemory();
+    angle::Result initExternal(void *clientBuffer);
+    angle::Result init();
+
+    void destroy(RendererVk *renderer);
+
+    angle::Result map(ContextVk *contextVk, VkDeviceSize size, uint8_t **ptrOut)
+    {
+        if (mMappedMemory == nullptr)
+        {
+            ANGLE_TRY(mapImpl(contextVk, size));
+        }
+        *ptrOut = mMappedMemory;
+        return angle::Result::Continue;
+    }
+    void unmap(RendererVk *renderer);
+    void flush(RendererVk *renderer,
+               VkMemoryMapFlags memoryPropertyFlags,
+               VkDeviceSize offset,
+               VkDeviceSize size);
+    void invalidate(RendererVk *renderer,
+                    VkMemoryMapFlags memoryPropertyFlags,
+                    VkDeviceSize offset,
+                    VkDeviceSize size);
+
+    bool isExternalBuffer() const { return mClientBuffer != nullptr; }
+
+    uint8_t *getMappedMemory() const { return mMappedMemory; }
+    DeviceMemory *getExternalMemoryObject() { return &mExternalMemory; }
+    Allocation *getMemoryObject() { return &mAllocation; }
+
+  private:
+    angle::Result mapImpl(ContextVk *contextVk, VkDeviceSize size);
+
+    Allocation mAllocation;        // use mAllocation if isExternalBuffer() is false
+    DeviceMemory mExternalMemory;  // use mExternalMemory if isExternalBuffer() is true
+
+    void *mClientBuffer;
+    uint8_t *mMappedMemory;
 };
 
 // Similar to StagingImage, for Buffers.
@@ -908,6 +798,9 @@ ANGLE_DISABLE_STRUCT_PADDING_WARNINGS
 
 template <typename T>
 using SpecializationConstantMap = angle::PackedEnumMap<sh::vk::SpecializationConstantId, T>;
+
+using ShaderAndSerialPointer = BindingPointer<ShaderAndSerial>;
+using ShaderAndSerialMap     = gl::ShaderMap<ShaderAndSerialPointer>;
 
 void MakeDebugUtilsLabel(GLenum source, const char *marker, VkDebugUtilsLabelEXT *label);
 

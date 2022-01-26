@@ -286,24 +286,14 @@ class CommandBuffer : public WrappedObject<CommandBuffer, VkCommandBuffer>
 
     void getMemoryUsageStats(size_t *usedMemoryOut, size_t *allocatedMemoryOut) const;
 
-    void executionBarrier(VkPipelineStageFlags stageMask);
-
     void fillBuffer(const Buffer &dstBuffer,
                     VkDeviceSize dstOffset,
                     VkDeviceSize size,
                     uint32_t data);
 
-    void bufferBarrier(VkPipelineStageFlags srcStageMask,
-                       VkPipelineStageFlags dstStageMask,
-                       const VkBufferMemoryBarrier *bufferMemoryBarrier);
-
     void imageBarrier(VkPipelineStageFlags srcStageMask,
                       VkPipelineStageFlags dstStageMask,
                       const VkImageMemoryBarrier &imageMemoryBarrier);
-
-    void memoryBarrier(VkPipelineStageFlags srcStageMask,
-                       VkPipelineStageFlags dstStageMask,
-                       const VkMemoryBarrier *memoryBarrier);
 
     void nextSubpass(VkSubpassContents subpassContents);
 
@@ -371,6 +361,8 @@ class CommandBuffer : public WrappedObject<CommandBuffer, VkCommandBuffer>
     void insertDebugUtilsLabelEXT(const VkDebugUtilsLabelEXT &labelInfo);
 };
 }  // namespace priv
+
+using PrimaryCommandBuffer = priv::CommandBuffer;
 
 class Image final : public WrappedObject<Image, VkImage>
 {
@@ -460,22 +452,6 @@ class Allocator : public WrappedObject<Allocator, VmaAllocator>
                   uint32_t apiVersion,
                   VkDeviceSize preferredLargeHeapBlockSize);
 
-    // Initializes the buffer handle and memory allocation.
-    VkResult createBuffer(const VkBufferCreateInfo &bufferCreateInfo,
-                          VkMemoryPropertyFlags requiredFlags,
-                          VkMemoryPropertyFlags preferredFlags,
-                          bool persistentlyMappedBuffers,
-                          uint32_t *memoryTypeIndexOut,
-                          Buffer *bufferOut,
-                          Allocation *allocationOut) const;
-
-    void getMemoryTypeProperties(uint32_t memoryTypeIndex, VkMemoryPropertyFlags *flagsOut) const;
-    VkResult findMemoryTypeIndexForBufferInfo(const VkBufferCreateInfo &bufferCreateInfo,
-                                              VkMemoryPropertyFlags requiredFlags,
-                                              VkMemoryPropertyFlags preferredFlags,
-                                              bool persistentlyMappedBuffers,
-                                              uint32_t *memoryTypeIndexOut) const;
-
     void buildStatsString(char **statsString, VkBool32 detailedMap);
     void freeStatsString(char *statsString);
 };
@@ -492,7 +468,7 @@ class Allocation final : public WrappedObject<Allocation, VmaAllocation>
     void invalidate(const Allocator &allocator, VkDeviceSize offset, VkDeviceSize size);
 
   private:
-    friend class Allocator;
+    friend class BufferMemoryAllocator;
 };
 
 class RenderPass final : public WrappedObject<RenderPass, VkRenderPass>
@@ -523,7 +499,7 @@ class Buffer final : public WrappedObject<Buffer, VkBuffer>
     void getMemoryRequirements(VkDevice device, VkMemoryRequirements *memoryRequirementsOut);
 
   private:
-    friend class Allocator;
+    friend class BufferMemoryAllocator;
 };
 
 class BufferView final : public WrappedObject<BufferView, VkBufferView>
@@ -736,15 +712,6 @@ ANGLE_INLINE VkResult CommandBuffer::reset()
     return vkResetCommandBuffer(mHandle, 0);
 }
 
-ANGLE_INLINE void CommandBuffer::memoryBarrier(VkPipelineStageFlags srcStageMask,
-                                               VkPipelineStageFlags dstStageMask,
-                                               const VkMemoryBarrier *memoryBarrier)
-{
-    ASSERT(valid());
-    vkCmdPipelineBarrier(mHandle, srcStageMask, dstStageMask, 0, 1, memoryBarrier, 0, nullptr, 0,
-                         nullptr);
-}
-
 ANGLE_INLINE void CommandBuffer::nextSubpass(VkSubpassContents subpassContents)
 {
     ASSERT(valid());
@@ -765,21 +732,6 @@ ANGLE_INLINE void CommandBuffer::pipelineBarrier(VkPipelineStageFlags srcStageMa
     vkCmdPipelineBarrier(mHandle, srcStageMask, dstStageMask, dependencyFlags, memoryBarrierCount,
                          memoryBarriers, bufferMemoryBarrierCount, bufferMemoryBarriers,
                          imageMemoryBarrierCount, imageMemoryBarriers);
-}
-
-ANGLE_INLINE void CommandBuffer::executionBarrier(VkPipelineStageFlags stageMask)
-{
-    ASSERT(valid());
-    vkCmdPipelineBarrier(mHandle, stageMask, stageMask, 0, 0, nullptr, 0, nullptr, 0, nullptr);
-}
-
-ANGLE_INLINE void CommandBuffer::bufferBarrier(VkPipelineStageFlags srcStageMask,
-                                               VkPipelineStageFlags dstStageMask,
-                                               const VkBufferMemoryBarrier *bufferMemoryBarrier)
-{
-    ASSERT(valid());
-    vkCmdPipelineBarrier(mHandle, srcStageMask, dstStageMask, 0, 0, nullptr, 1, bufferMemoryBarrier,
-                         0, nullptr);
 }
 
 ANGLE_INLINE void CommandBuffer::imageBarrier(VkPipelineStageFlags srcStageMask,
@@ -1375,42 +1327,6 @@ ANGLE_INLINE VkResult Allocator::init(VkPhysicalDevice physicalDevice,
     ASSERT(!valid());
     return vma::InitAllocator(physicalDevice, device, instance, apiVersion,
                               preferredLargeHeapBlockSize, &mHandle);
-}
-
-ANGLE_INLINE VkResult Allocator::createBuffer(const VkBufferCreateInfo &bufferCreateInfo,
-                                              VkMemoryPropertyFlags requiredFlags,
-                                              VkMemoryPropertyFlags preferredFlags,
-                                              bool persistentlyMappedBuffers,
-                                              uint32_t *memoryTypeIndexOut,
-                                              Buffer *bufferOut,
-                                              Allocation *allocationOut) const
-{
-    ASSERT(valid());
-    ASSERT(bufferOut && !bufferOut->valid());
-    ASSERT(allocationOut && !allocationOut->valid());
-    return vma::CreateBuffer(mHandle, &bufferCreateInfo, requiredFlags, preferredFlags,
-                             persistentlyMappedBuffers, memoryTypeIndexOut, &bufferOut->mHandle,
-                             &allocationOut->mHandle);
-}
-
-ANGLE_INLINE void Allocator::getMemoryTypeProperties(uint32_t memoryTypeIndex,
-                                                     VkMemoryPropertyFlags *flagsOut) const
-{
-    ASSERT(valid());
-    vma::GetMemoryTypeProperties(mHandle, memoryTypeIndex, flagsOut);
-}
-
-ANGLE_INLINE VkResult
-Allocator::findMemoryTypeIndexForBufferInfo(const VkBufferCreateInfo &bufferCreateInfo,
-                                            VkMemoryPropertyFlags requiredFlags,
-                                            VkMemoryPropertyFlags preferredFlags,
-                                            bool persistentlyMappedBuffers,
-                                            uint32_t *memoryTypeIndexOut) const
-{
-    ASSERT(valid());
-    return vma::FindMemoryTypeIndexForBufferInfo(mHandle, &bufferCreateInfo, requiredFlags,
-                                                 preferredFlags, persistentlyMappedBuffers,
-                                                 memoryTypeIndexOut);
 }
 
 ANGLE_INLINE void Allocator::buildStatsString(char **statsString, VkBool32 detailedMap)

@@ -84,6 +84,8 @@ _vulkan_backend_sources = [
   "UtilsVk.h",
   "VertexArrayVk.cpp",
   "VertexArrayVk.h",
+  "VulkanSecondaryCommandBuffer.cpp",
+  "VulkanSecondaryCommandBuffer.h",
   "android/vk_android_utils.cpp",
   "android/vk_android_utils.h",
   "vk_cache_utils.cpp",
@@ -261,6 +263,10 @@ angle_source_set("angle_vulkan_backend") {
     "$angle_root/src/common/spirv:angle_spirv_builder",
     "$angle_spirv_headers_dir:spv_headers",
   ]
+
+  if (angle_enable_cl || is_android) {
+    deps += [ "$angle_root:angle_version_info" ]
+  }
 
   public_deps = [
     "$angle_root:angle_glslang_wrapper",
