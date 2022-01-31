@@ -255,9 +255,11 @@ class RendererVk : angle::NonCopyable
     bool hasBufferFormatFeatureBits(angle::FormatID format,
                                     const VkFormatFeatureFlags featureBits) const;
 
+    bool isAsyncCommandQueueEnabled() const { return mFeatures.asyncCommandQueue.enabled; }
+
     ANGLE_INLINE egl::ContextPriority getDriverPriority(egl::ContextPriority priority)
     {
-        if (mFeatures.asyncCommandQueue.enabled)
+        if (isAsyncCommandQueueEnabled())
         {
             return mCommandProcessor.getDriverPriority(priority);
         }
@@ -268,7 +270,7 @@ class RendererVk : angle::NonCopyable
     }
     ANGLE_INLINE uint32_t getDeviceQueueIndex()
     {
-        if (mFeatures.asyncCommandQueue.enabled)
+        if (isAsyncCommandQueueEnabled())
         {
             return mCommandProcessor.getDeviceQueueIndex();
         }
@@ -280,7 +282,7 @@ class RendererVk : angle::NonCopyable
 
     VkQueue getQueue(egl::ContextPriority priority)
     {
-        if (mFeatures.asyncCommandQueue.enabled)
+        if (isAsyncCommandQueueEnabled())
         {
             return mCommandProcessor.getQueue(priority);
         }
@@ -357,7 +359,7 @@ class RendererVk : angle::NonCopyable
 
     ANGLE_INLINE Serial getLastCompletedQueueSerial()
     {
-        if (mFeatures.asyncCommandQueue.enabled)
+        if (isAsyncCommandQueueEnabled())
         {
             return mCommandProcessor.getLastCompletedQueueSerial();
         }
@@ -371,7 +373,7 @@ class RendererVk : angle::NonCopyable
     ANGLE_INLINE bool isCommandQueueBusy()
     {
         std::lock_guard<std::mutex> lock(mCommandQueueMutex);
-        if (mFeatures.asyncCommandQueue.enabled)
+        if (isAsyncCommandQueueEnabled())
         {
             return mCommandProcessor.isBusy();
         }
@@ -383,7 +385,7 @@ class RendererVk : angle::NonCopyable
 
     angle::Result ensureNoPendingWork(vk::Context *context)
     {
-        if (mFeatures.asyncCommandQueue.enabled)
+        if (isAsyncCommandQueueEnabled())
         {
             return mCommandProcessor.ensureNoPendingWork(context);
         }
@@ -504,6 +506,16 @@ class RendererVk : angle::NonCopyable
         return mEnabledDeviceExtensions;
     }
 
+    VkDeviceSize getPreferedBufferBlockSize(uint32_t memoryTypeIndex) const;
+
+    uint32_t getStagingBufferMemoryTypeIndex(vk::MemoryCoherency coherency) const
+    {
+        return coherency == vk::MemoryCoherency::Coherent
+                   ? mCoherentStagingBufferMemoryTypeIndex
+                   : mNonCoherentStagingBufferMemoryTypeIndex;
+    }
+    size_t getStagingBufferAlignment() const { return mStagingBufferAlignment; }
+
   private:
     angle::Result initializeDevice(DisplayVk *displayVk, uint32_t queueFamilyIndex);
     void ensureCapsInitialized() const;
@@ -592,6 +604,11 @@ class RendererVk : angle::NonCopyable
 
     vk::MemoryProperties mMemoryProperties;
     vk::FormatTable mFormatTable;
+
+    // The cached memory type index for staging buffer that is host visible.
+    uint32_t mCoherentStagingBufferMemoryTypeIndex;
+    uint32_t mNonCoherentStagingBufferMemoryTypeIndex;
+    size_t mStagingBufferAlignment;
 
     // All access to the pipeline cache is done through EGL objects so it is thread safe to not use
     // a lock.
