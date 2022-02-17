@@ -92,15 +92,6 @@ class OffscreenSurfaceVk : public SurfaceVk
                                  bool isRobustResourceInitEnabled,
                                  bool hasProtectedContent);
 
-        angle::Result initializeWithExternalMemory(DisplayVk *displayVk,
-                                                   EGLint width,
-                                                   EGLint height,
-                                                   const vk::Format &vkFormat,
-                                                   GLint samples,
-                                                   void *buffer,
-                                                   bool isRobustResourceInitEnabled,
-                                                   bool hasProtectedContent);
-
         void destroy(const egl::Display *display);
 
         vk::ImageHelper image;
@@ -191,6 +182,7 @@ class WindowSurfaceVk : public SurfaceVk
                                             FramebufferAttachmentRenderTarget **rtOut) override;
     FramebufferImpl *createDefaultFramebuffer(const gl::Context *context,
                                               const gl::FramebufferState &state) override;
+    egl::Error prepareSwap(const gl::Context *context) override;
     egl::Error swap(const gl::Context *context) override;
     egl::Error swapWithDamage(const gl::Context *context,
                               const EGLint *rects,
@@ -249,7 +241,15 @@ class WindowSurfaceVk : public SurfaceVk
 
     egl::Error getBufferAge(const gl::Context *context, EGLint *age) override;
 
+    egl::Error setRenderBuffer(EGLint renderBuffer) override;
+
+    bool isSharedPresentMode() const
+    {
+        return (mSwapchainPresentMode == VK_PRESENT_MODE_SHARED_DEMAND_REFRESH_KHR);
+    }
+
   protected:
+    angle::Result prepareSwapImpl(const gl::Context *context);
     angle::Result swapImpl(const gl::Context *context,
                            const EGLint *rects,
                            EGLint n_rects,

@@ -803,8 +803,8 @@ bool ValidateES3TexImageParametersBase(const Context *context,
             }
         }
 
-        // ...the buffer object's data store is currently mapped.
-        if (pixelUnpackBuffer->isMapped())
+        // ...the buffer object's data store is currently mapped but not persistently.
+        if (pixelUnpackBuffer->isMapped() && !pixelUnpackBuffer->isPersistentlyMapped())
         {
             context->validationError(entryPoint, GL_INVALID_OPERATION, kBufferMapped);
             return false;
@@ -1959,8 +1959,11 @@ bool ValidateCompressedTexImage3D(const Context *context,
     // 3D texture target validation
     if (target != TextureTarget::_3D && target != TextureTarget::_2DArray)
     {
-        context->validationError(entryPoint, GL_INVALID_ENUM, kInvalidTextureTarget);
-        return false;
+        if (context->getClientVersion() < ES_3_2 || target != TextureTarget::CubeMapArray)
+        {
+            context->validationError(entryPoint, GL_INVALID_ENUM, kInvalidTextureTarget);
+            return false;
+        }
     }
 
     // validateES3TexImageFormat sets the error code if there is an error

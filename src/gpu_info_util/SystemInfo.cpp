@@ -17,8 +17,6 @@
 
 namespace angle
 {
-namespace
-{
 std::string VendorName(VendorID vendor)
 {
     switch (vendor)
@@ -53,7 +51,7 @@ std::string VendorName(VendorID vendor)
             return "Unknown (" + std::to_string(vendor) + ")";
     }
 }
-}  // anonymous namespace
+
 GPUDeviceInfo::GPUDeviceInfo() = default;
 
 GPUDeviceInfo::~GPUDeviceInfo() = default;
@@ -347,4 +345,20 @@ VersionInfo ParseNvidiaDriverVersion(uint32_t version)
         version & 0x3f         // patch
     };
 }
+
+uint64_t GetSystemDeviceIdFromParts(uint32_t highPart, uint32_t lowPart)
+{
+    return (static_cast<uint64_t>(highPart) << 32) | lowPart;
+}
+
+uint32_t GetSystemDeviceIdHighPart(uint64_t systemDeviceId)
+{
+    return (systemDeviceId >> 32) & 0xffffffff;
+}
+
+uint32_t GetSystemDeviceIdLowPart(uint64_t systemDeviceId)
+{
+    return systemDeviceId & 0xffffffff;
+}
+
 }  // namespace angle

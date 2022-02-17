@@ -61,6 +61,7 @@ const ProcEntry g_procTable[] = {
     {"eglDestroySync", P(EGL_DestroySync)},
     {"eglDestroySyncKHR", P(EGL_DestroySyncKHR)},
     {"eglDupNativeFenceFDANDROID", P(EGL_DupNativeFenceFDANDROID)},
+    {"eglExportVkImageANGLE", P(EGL_ExportVkImageANGLE)},
     {"eglGetCompositorTimingANDROID", P(EGL_GetCompositorTimingANDROID)},
     {"eglGetCompositorTimingSupportedANDROID", P(EGL_GetCompositorTimingSupportedANDROID)},
     {"eglGetConfigAttrib", P(EGL_GetConfigAttrib)},
@@ -87,6 +88,7 @@ const ProcEntry g_procTable[] = {
     {"eglLockSurfaceKHR", P(EGL_LockSurfaceKHR)},
     {"eglMakeCurrent", P(EGL_MakeCurrent)},
     {"eglPostSubBufferNV", P(EGL_PostSubBufferNV)},
+    {"eglPrepareSwapBuffersANGLE", P(EGL_PrepareSwapBuffersANGLE)},
     {"eglPresentationTimeANDROID", P(EGL_PresentationTimeANDROID)},
     {"eglProgramCacheGetAttribANGLE", P(EGL_ProgramCacheGetAttribANGLE)},
     {"eglProgramCachePopulateANGLE", P(EGL_ProgramCachePopulateANGLE)},
@@ -132,6 +134,7 @@ const ProcEntry g_procTable[] = {
     {"eglWaitNative", P(EGL_WaitNative)},
     {"eglWaitSync", P(EGL_WaitSync)},
     {"eglWaitSyncKHR", P(EGL_WaitSyncKHR)},
+    {"glAcquireTexturesANGLE", P(GL_AcquireTexturesANGLE)},
     {"glActiveShaderProgram", P(GL_ActiveShaderProgram)},
     {"glActiveShaderProgramEXT", P(GL_ActiveShaderProgramEXT)},
     {"glActiveTexture", P(GL_ActiveTexture)},
@@ -344,6 +347,7 @@ const ProcEntry g_procTable[] = {
     {"glFogxv", P(GL_Fogxv)},
     {"glFramebufferFetchBarrierEXT", P(GL_FramebufferFetchBarrierEXT)},
     {"glFramebufferParameteri", P(GL_FramebufferParameteri)},
+    {"glFramebufferParameteriMESA", P(GL_FramebufferParameteriMESA)},
     {"glFramebufferRenderbuffer", P(GL_FramebufferRenderbuffer)},
     {"glFramebufferRenderbufferOES", P(GL_FramebufferRenderbufferOES)},
     {"glFramebufferTexture", P(GL_FramebufferTexture)},
@@ -412,6 +416,7 @@ const ProcEntry g_procTable[] = {
     {"glGetFramebufferAttachmentParameterivRobustANGLE",
      P(GL_GetFramebufferAttachmentParameterivRobustANGLE)},
     {"glGetFramebufferParameteriv", P(GL_GetFramebufferParameteriv)},
+    {"glGetFramebufferParameterivMESA", P(GL_GetFramebufferParameterivMESA)},
     {"glGetFramebufferParameterivRobustANGLE", P(GL_GetFramebufferParameterivRobustANGLE)},
     {"glGetGraphicsResetStatus", P(GL_GetGraphicsResetStatus)},
     {"glGetGraphicsResetStatusEXT", P(GL_GetGraphicsResetStatusEXT)},
@@ -621,11 +626,13 @@ const ProcEntry g_procTable[] = {
     {"glMultMatrixf", P(GL_MultMatrixf)},
     {"glMultMatrixx", P(GL_MultMatrixx)},
     {"glMultiDrawArraysANGLE", P(GL_MultiDrawArraysANGLE)},
+    {"glMultiDrawArraysIndirectEXT", P(GL_MultiDrawArraysIndirectEXT)},
     {"glMultiDrawArraysInstancedANGLE", P(GL_MultiDrawArraysInstancedANGLE)},
     {"glMultiDrawArraysInstancedBaseInstanceANGLE",
      P(GL_MultiDrawArraysInstancedBaseInstanceANGLE)},
     {"glMultiDrawElementsANGLE", P(GL_MultiDrawElementsANGLE)},
     {"glMultiDrawElementsBaseVertexEXT", P(GL_MultiDrawElementsBaseVertexEXT)},
+    {"glMultiDrawElementsIndirectEXT", P(GL_MultiDrawElementsIndirectEXT)},
     {"glMultiDrawElementsInstancedANGLE", P(GL_MultiDrawElementsInstancedANGLE)},
     {"glMultiDrawElementsInstancedBaseVertexBaseInstanceANGLE",
      P(GL_MultiDrawElementsInstancedBaseVertexBaseInstanceANGLE)},
@@ -744,6 +751,7 @@ const ProcEntry g_procTable[] = {
     {"glReadnPixelsEXT", P(GL_ReadnPixelsEXT)},
     {"glReadnPixelsRobustANGLE", P(GL_ReadnPixelsRobustANGLE)},
     {"glReleaseShaderCompiler", P(GL_ReleaseShaderCompiler)},
+    {"glReleaseTexturesANGLE", P(GL_ReleaseTexturesANGLE)},
     {"glRenderbufferStorage", P(GL_RenderbufferStorage)},
     {"glRenderbufferStorageMultisample", P(GL_RenderbufferStorageMultisample)},
     {"glRenderbufferStorageMultisampleANGLE", P(GL_RenderbufferStorageMultisampleANGLE)},
@@ -922,5 +930,5 @@ const ProcEntry g_procTable[] = {
     {"glWaitSync", P(GL_WaitSync)},
     {"glWeightPointerOES", P(GL_WeightPointerOES)}};
 
-const size_t g_numProcs = 889;
+const size_t g_numProcs = 897;
 }  // namespace egl

@@ -64,15 +64,6 @@ struct FeaturesVk : FeatureSetBase
         "The depth value is not clamped to [0,1] for floating point depth buffers.", &members,
         "http://anglebug.com/3970"};
 
-    // On some android devices, the memory barrier between the compute shader that converts vertex
-    // attributes and the vertex shader that reads from it is ineffective.  Only known workaround is
-    // to perform a flush after the conversion.  http://anglebug.com/3016
-    Feature flushAfterVertexConversion = {
-        "flushAfterVertexConversion", FeatureCategory::VulkanWorkarounds,
-        "The memory barrier between the compute shader that converts vertex attributes and the "
-        "vertex shader that reads from it is ineffective",
-        &members, "http://anglebug.com/3016"};
-
     Feature supportsRenderpass2 = {"supportsRenderpass2", FeatureCategory::VulkanFeatures,
                                    "VkDevice supports the VK_KHR_create_renderpass2 extension",
                                    &members};
@@ -197,10 +188,16 @@ struct FeaturesVk : FeatureSetBase
 
     // Whether the VkDevice supports the VK_EXT_custom_border_color extension
     // http://anglebug.com/3577
-    Feature supportsCustomBorderColorEXT = {
-        "supports_custom_border_color", FeatureCategory::VulkanFeatures,
+    Feature supportsCustomBorderColor = {
+        "supportsCustomBorderColor", FeatureCategory::VulkanFeatures,
         "VkDevice supports the VK_EXT_custom_border_color extension", &members,
         "http://anglebug.com/3577"};
+
+    // Whether the VkDevice supports multiDrawIndirect (drawIndirect with drawCount > 1)
+    // http://anglebug.com/6439
+    Feature supportsMultiDrawIndirect = {
+        "supportsMultiDrawIndirect", FeatureCategory::VulkanFeatures,
+        "VkDevice supports the multiDrawIndirect extension", &members, "http://anglebug.com/6439"};
 
     // Whether the VkDevice supports the VK_KHR_depth_stencil_resolve extension with the
     // independentResolveNone feature.
@@ -286,13 +283,6 @@ struct FeaturesVk : FeatureSetBase
         "This workaround limits GL_MAX_VERTEX_ATTRIB_STRIDE to a maximum value and "
         "pads up every buffer allocation size to be a multiple of the maximum stride.",
         &members, "http://anglebug.com/4428"};
-
-    // Whether the VkDevice supports the VK_EXT_swapchain_colorspace extension
-    // http://anglebug.com/2514
-    Feature supportsSwapchainColorspace = {
-        "supportsSwapchainColorspace", FeatureCategory::VulkanFeatures,
-        "VkDevice supports the VK_EXT_swapchain_colorspace extension", &members,
-        "http://anglebug.com/2514"};
 
     // Whether the VkDevice supports the VK_EXT_external_memory_dma_buf and
     // VK_EXT_image_drm_format_modifier extensions.  These extensions are always used together to
@@ -569,9 +559,15 @@ struct FeaturesVk : FeatureSetBase
         "http://anglebug.com/6141"};
 
     // Whether the VkDevice can support Protected Memory.
-    Feature supportsProtectedMemory = {"supports_protected_memory", FeatureCategory::VulkanFeatures,
+    Feature supportsProtectedMemory = {"supportsProtectedMemory", FeatureCategory::VulkanFeatures,
                                        "VkDevice supports protected memory", &members,
                                        "http://anglebug.com/3965"};
+
+    // Whether the VkDevice supports the VK_EXT_host_query_reset extension
+    // http://anglebug.com/6692
+    Feature supportsHostQueryReset = {"supportsHostQueryReset", FeatureCategory::VulkanFeatures,
+                                      "VkDevice supports VK_EXT_host_query_reset extension",
+                                      &members, "http://anglebug.com/6692"};
 
     // Whether the VkInstance supports the VK_KHR_get_surface_capabilities2 extension.
     Feature supportsSurfaceCapabilities2Extension = {
@@ -593,6 +589,11 @@ struct FeaturesVk : FeatureSetBase
     Feature overrideSurfaceFormatRGB8toRGBA8 = {
         "overrideSurfaceFormatRGB8toRGBA8", FeatureCategory::VulkanWorkarounds,
         "Override surface format GL_RGB8 to GL_RGBA8", &members, "http://anglebug.com/6651"};
+
+    // Whether the VkSurface supports VK_KHR_shared_presentable_images.
+    Feature supportsSharedPresentableImageExtension = {
+        "supportsSharedPresentableImageExtension", FeatureCategory::VulkanFeatures,
+        "VkSurface supports the VK_KHR_shared_presentable_images extension", &members};
 };
 
 inline FeaturesVk::FeaturesVk()  = default;

@@ -373,13 +373,17 @@ void RendererVk::ensureCapsInitialized() const
         !IsSwiftshader(mPhysicalDeviceProperties.vendorID, mPhysicalDeviceProperties.deviceID) &&
         !IsARM(mPhysicalDeviceProperties.vendorID);
     mNativeExtensions.discardFramebufferEXT = true;
-    mNativeExtensions.textureBorderClampOES = getFeatures().supportsCustomBorderColorEXT.enabled;
-    mNativeExtensions.textureBorderClampEXT = getFeatures().supportsCustomBorderColorEXT.enabled;
+    mNativeExtensions.textureBorderClampOES = getFeatures().supportsCustomBorderColor.enabled;
+    mNativeExtensions.textureBorderClampEXT = getFeatures().supportsCustomBorderColor.enabled;
     // Enable EXT_texture_type_2_10_10_10_REV
     mNativeExtensions.textureType2101010REVEXT = true;
 
+    // Enable EXT_multi_draw_indirect
+    mNativeExtensions.multiDrawIndirectEXT = true;
+
     // Enable ANGLE_base_vertex_base_instance
-    mNativeExtensions.baseVertexBaseInstanceANGLE = true;
+    mNativeExtensions.baseVertexBaseInstanceANGLE              = true;
+    mNativeExtensions.baseVertexBaseInstanceShaderBuiltinANGLE = true;
 
     // Enable OES/EXT_draw_elements_base_vertex
     mNativeExtensions.drawElementsBaseVertexOES = true;
@@ -435,9 +439,10 @@ void RendererVk::ensureCapsInitialized() const
     // This query is applicable to render passes, but the `inheritedQueries` feature may not be
     // present.  The extension is not exposed in that case.
     // We use secondary command buffers almost everywhere and they require a feature to be
-    // able to execute in the presence of queries.  As a result, we won't support queries
+    // able to execute in the presence of queries.  As a result, we won't support timestamp queries
     // unless that feature is available.
-    if (vk::CommandBuffer::SupportsQueries(mPhysicalDeviceFeatures))
+    if (vk::OutsideRenderPassCommandBuffer::SupportsQueries(mPhysicalDeviceFeatures) &&
+        vk::RenderPassCommandBuffer::SupportsQueries(mPhysicalDeviceFeatures))
     {
         mNativeExtensions.disjointTimerQueryEXT = queueFamilyProperties.timestampValidBits > 0;
         mNativeCaps.queryCounterBitsTimeElapsed = queueFamilyProperties.timestampValidBits;
@@ -559,6 +564,9 @@ void RendererVk::ensureCapsInitialized() const
     // meant to match.  This is rectified in the GL spec.
     // https://gitlab.khronos.org/opengl/API/-/issues/149
     mNativeExtensions.shaderMultisampleInterpolationOES = mNativeExtensions.sampleVariablesOES;
+
+    // Always enable ANGLE_rgbx_internal_format to expose GL_RGBX8_ANGLE.
+    mNativeExtensions.rgbxInternalFormatANGLE = true;
 
     // https://vulkan.lunarg.com/doc/view/1.0.30.0/linux/vkspec.chunked/ch31s02.html
     mNativeCaps.maxElementIndex  = std::numeric_limits<GLuint>::max() - 1;
@@ -926,6 +934,16 @@ void RendererVk::ensureCapsInitialized() const
             mNativeCaps.maxDrawBuffers >= gl::IMPLEMENTATION_MAX_DRAW_BUFFERS;
     }
 
+    // Per http://anglebug.com/6872
+    // On ARM hardware, framebuffer-fetch-like behavior on Vulkan is already coherent, so we can
+    // expose the coherent version of the GL extension despite unofficial Vulkan support.
+    if (IsARM(mPhysicalDeviceProperties.vendorID))
+    {
+        // gl::IMPLEMENTATION_MAX_DRAW_BUFFERS is used to support the extension.
+        mNativeExtensions.shaderFramebufferFetchEXT =
+            mNativeCaps.maxDrawBuffers >= gl::IMPLEMENTATION_MAX_DRAW_BUFFERS;
+    }
+
     // Enable Program Binary extension.
     mNativeExtensions.getProgramBinaryOES = true;
     mNativeCaps.programBinaryFormats.push_back(GL_PROGRAM_BINARY_ANGLE);
@@ -1099,6 +1117,15 @@ void RendererVk::ensureCapsInitialized() const
 
     // GL_EXT_protected_textures
     mNativeExtensions.protectedTexturesEXT = mFeatures.supportsProtectedMemory.enabled;
+
+    // GL_ANGLE_vulkan_image
+    mNativeExtensions.vulkanImageANGLE = true;
+
+    // GL_ANGLE_texture_usage
+    mNativeExtensions.textureUsageANGLE = true;
+
+    // GL_KHR_parallel_shader_compile
+    mNativeExtensions.parallelShaderCompileKHR = true;
 }
 
 namespace vk
@@ -1165,13 +1192,6 @@ egl::Config GenerateDefaultConfig(DisplayVk *display,
     EGLint es2Support = (maxSupportedESVersion.major >= 2 ? EGL_OPENGL_ES2_BIT : 0);
     EGLint es3Support = (maxSupportedESVersion.major >= 3 ? EGL_OPENGL_ES3_BIT : 0);
 
-    EGLint surfaceType = EGL_WINDOW_BIT;
-    // Don't support RGB8 PBuffers.
-    if (colorFormat.internalFormat != GL_RGB8)
-    {
-        surfaceType |= EGL_PBUFFER_BIT;
-    }
-
     egl::Config config;
 
     config.renderTargetFormat = colorFormat.internalFormat;
@@ -1202,7 +1222,11 @@ egl::Config GenerateDefaultConfig(DisplayVk *display,
     config.renderableType     = es1Support | es2Support | es3Support;
     config.sampleBuffers      = (sampleCount > 0) ? 1 : 0;
     config.samples            = sampleCount;
-    config.surfaceType        = surfaceType;
+    config.surfaceType        = EGL_WINDOW_BIT | EGL_PBUFFER_BIT;
+    if (display->getExtensions().mutableRenderBufferKHR)
+    {
+        config.surfaceType |= EGL_MUTABLE_RENDER_BUFFER_BIT_KHR;
+    }
     // Vulkan surfaces use a different origin than OpenGL, always prefer to be flipped vertically if
     // possible.
     config.optimalOrientation    = EGL_SURFACE_ORIENTATION_INVERT_Y_ANGLE;

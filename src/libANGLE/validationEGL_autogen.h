@@ -251,6 +251,11 @@ bool ValidateReacquireHighPowerGPUANGLE(const ValidationContext *val,
                                         const gl::Context *ctxPacked);
 bool ValidateHandleGPUSwitchANGLE(const ValidationContext *val, const egl::Display *dpyPacked);
 
+// EGL_ANGLE_prepare_swap_buffers
+bool ValidatePrepareSwapBuffersANGLE(const ValidationContext *val,
+                                     const egl::Display *dpyPacked,
+                                     const Surface *surfacePacked);
+
 // EGL_ANGLE_program_cache_control
 bool ValidateProgramCacheGetAttribANGLE(const ValidationContext *val,
                                         const egl::Display *dpyPacked,
@@ -303,6 +308,13 @@ bool ValidateGetMscRateANGLE(const ValidationContext *val,
                              const Surface *surfacePacked,
                              const EGLint *numerator,
                              const EGLint *denominator);
+
+// EGL_ANGLE_vulkan_image
+bool ValidateExportVkImageANGLE(const ValidationContext *val,
+                                const egl::Display *dpyPacked,
+                                const Image *imagePacked,
+                                const void *vk_image,
+                                const void *vk_image_create_info);
 
 // EGL_CHROMIUM_sync_control
 bool ValidateGetSyncValuesCHROMIUM(const ValidationContext *val,
@@ -386,7 +398,7 @@ bool ValidateDestroyImageKHR(const ValidationContext *val,
 bool ValidateLockSurfaceKHR(const ValidationContext *val,
                             const egl::Display *dpyPacked,
                             const Surface *surfacePacked,
-                            const EGLint *attrib_list);
+                            const AttributeMap &attrib_listPacked);
 bool ValidateQuerySurface64KHR(const ValidationContext *val,
                                const egl::Display *dpyPacked,
                                const Surface *surfacePacked,

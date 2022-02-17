@@ -371,7 +371,7 @@ angle::Result DmaBufImageSiblingVkLinux::initImpl(DisplayVk *displayVk)
     VkImageUsageFlags usageFlags =
         GetUsageFlags(renderer, format, modifierProperties, &mTextureable, &mRenderable);
 
-    const VkImageCreateFlags createFlags =
+    VkImageCreateFlags createFlags =
         vk::kVkImageCreateFlagsNone | (hasProtectedContent() ? VK_IMAGE_CREATE_PROTECTED_BIT : 0);
 
     // The Vulkan and EGL plane counts are expected to match.
@@ -440,6 +440,12 @@ angle::Result DmaBufImageSiblingVkLinux::initImpl(DisplayVk *displayVk)
     externalMemoryImageCreateInfo.pNext       = &imageDrmModifierCreateInfo;
     externalMemoryImageCreateInfo.handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_DMA_BUF_BIT_EXT;
 
+    VkImageFormatListCreateInfoKHR imageFormatListInfoStorage;
+    vk::ImageHelper::ImageListFormats imageListFormatsStorage;
+    const void *imageCreateInfoPNext = vk::ImageHelper::DeriveCreateInfoPNext(
+        displayVk, actualImageFormatID, &externalMemoryImageCreateInfo, &imageFormatListInfoStorage,
+        &imageListFormatsStorage, &createFlags);
+
     // Create the image
     mImage = new vk::ImageHelper();
 
@@ -448,11 +454,10 @@ angle::Result DmaBufImageSiblingVkLinux::initImpl(DisplayVk *displayVk)
 
     constexpr bool kIsRobustInitEnabled = false;
 
-    ANGLE_TRY(mImage->initExternal(displayVk, gl::TextureType::_2D, vkExtents, intendedFormatID,
-                                   actualImageFormatID, 1, usageFlags, createFlags,
-                                   vk::ImageLayout::ExternalPreInitialized,
-                                   &externalMemoryImageCreateInfo, gl::LevelIndex(0), 1, 1,
-                                   kIsRobustInitEnabled, nullptr, hasProtectedContent()));
+    ANGLE_TRY(mImage->initExternal(
+        displayVk, gl::TextureType::_2D, vkExtents, intendedFormatID, actualImageFormatID, 1,
+        usageFlags, createFlags, vk::ImageLayout::ExternalPreInitialized, imageCreateInfoPNext,
+        gl::LevelIndex(0), 1, 1, kIsRobustInitEnabled, hasProtectedContent()));
 
     VkMemoryRequirements externalMemoryRequirements;
     mImage->getImage().getMemoryRequirements(renderer->getDevice(), &externalMemoryRequirements);
@@ -461,8 +466,6 @@ angle::Result DmaBufImageSiblingVkLinux::initImpl(DisplayVk *displayVk)
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT |
         (hasProtectedContent() ? VK_MEMORY_PROPERTY_PROTECTED_BIT : 0);
 
-    VkSamplerYcbcrConversionCreateInfo yuvConversionInfo     = {};
-    VkSamplerYcbcrConversionCreateInfo *yuvConversionInfoPtr = nullptr;
     if (mYUV)
     {
         const VkChromaLocation xChromaOffset =
@@ -471,30 +474,27 @@ angle::Result DmaBufImageSiblingVkLinux::initImpl(DisplayVk *displayVk)
             GetChromaLocation(mAttribs, EGL_YUV_CHROMA_VERTICAL_SITING_HINT_EXT);
         const VkSamplerYcbcrModelConversion model = GetYcbcrModel(mAttribs);
         const VkSamplerYcbcrRange range           = GetYcbcrRange(mAttribs);
+        const VkComponentMapping components       = {
+            VK_COMPONENT_SWIZZLE_IDENTITY,
+            VK_COMPONENT_SWIZZLE_IDENTITY,
+            VK_COMPONENT_SWIZZLE_IDENTITY,
+            VK_COMPONENT_SWIZZLE_IDENTITY,
+        };
 
         ANGLE_VK_CHECK(displayVk, renderer->getFeatures().supportsYUVSamplerConversion.enabled,
                        VK_ERROR_FEATURE_NOT_PRESENT);
 
-        yuvConversionInfo.sType         = VK_STRUCTURE_TYPE_SAMPLER_YCBCR_CONVERSION_CREATE_INFO;
-        yuvConversionInfo.format        = vulkanFormat;
-        yuvConversionInfo.xChromaOffset = xChromaOffset;
-        yuvConversionInfo.yChromaOffset = yChromaOffset;
-        yuvConversionInfo.ycbcrModel    = model;
-        yuvConversionInfo.ycbcrRange    = range;
-        yuvConversionInfo.chromaFilter  = VK_FILTER_NEAREST;
-        // yuvConversionInfo.components    = {}; // TODO: swizzle?
-
-        yuvConversionInfoPtr = &yuvConversionInfo;
+        mImage->updateYcbcrConversionDesc(renderer, 0, model, range, xChromaOffset, yChromaOffset,
+                                          VK_FILTER_NEAREST, components, intendedFormatID);
     }
 
     AllocateInfo allocateInfo;
     const uint32_t allocateInfoCount = GetAllocateInfo(
         mAttribs, mImage->getImage().getHandle(), planeCount, modifierProperties, &allocateInfo);
 
-    return mImage->initExternalMemory(displayVk, renderer->getMemoryProperties(),
-                                      externalMemoryRequirements, yuvConversionInfoPtr,
-                                      allocateInfoCount, allocateInfo.allocateInfoPtr.data(),
-                                      VK_QUEUE_FAMILY_FOREIGN_EXT, flags);
+    return mImage->initExternalMemory(
+        displayVk, renderer->getMemoryProperties(), externalMemoryRequirements, allocateInfoCount,
+        allocateInfo.allocateInfoPtr.data(), VK_QUEUE_FAMILY_FOREIGN_EXT, flags);
 }
 
 void DmaBufImageSiblingVkLinux::onDestroy(const egl::Display *display)
@@ -550,7 +550,7 @@ void DmaBufImageSiblingVkLinux::release(RendererVk *renderer)
         // TODO: Handle the case where the EGLImage is used in two contexts not in the same share
         // group.  https://issuetracker.google.com/169868803
         mImage->releaseImage(renderer);
-        mImage->releaseStagingBuffer(renderer);
+        mImage->releaseStagedUpdates(renderer);
         SafeDelete(mImage);
     }
 }

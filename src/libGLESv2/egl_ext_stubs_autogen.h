@@ -87,7 +87,7 @@ EGLint LabelObjectKHR(Thread *thread,
 EGLBoolean LockSurfaceKHR(Thread *thread,
                           egl::Display *dpyPacked,
                           Surface *surfacePacked,
-                          const EGLint *attrib_list);
+                          const AttributeMap &attrib_listPacked);
 EGLBoolean PostSubBufferNV(Thread *thread,
                            egl::Display *dpyPacked,
                            Surface *surfacePacked,
@@ -225,6 +225,7 @@ EGLBoolean SwapBuffersWithFrameTokenANGLE(Thread *thread,
                                           egl::Display *dpyPacked,
                                           Surface *surfacePacked,
                                           EGLFrameTokenANGLE frametoken);
+EGLBoolean PrepareSwapBuffersANGLE(EGLDisplay dpy, EGLSurface surface);
 void ReleaseHighPowerGPUANGLE(Thread *thread, egl::Display *dpyPacked, gl::Context *ctxPacked);
 void ReacquireHighPowerGPUANGLE(Thread *thread, egl::Display *dpyPacked, gl::Context *ctxPacked);
 void HandleGPUSwitchANGLE(Thread *thread, egl::Display *dpyPacked);
@@ -232,5 +233,10 @@ EGLBoolean QueryDisplayAttribANGLE(Thread *thread,
                                    egl::Display *dpyPacked,
                                    EGLint attribute,
                                    EGLAttrib *value);
+EGLBoolean ExportVkImageANGLE(Thread *thread,
+                              egl::Display *dpyPacked,
+                              Image *imagePacked,
+                              void *vk_image,
+                              void *vk_image_create_info);
 }  // namespace egl
 #endif  // LIBGLESV2_EGL_EXT_STUBS_AUTOGEN_H_

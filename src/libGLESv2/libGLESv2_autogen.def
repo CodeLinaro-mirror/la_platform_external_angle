@@ -605,6 +605,10 @@ EXPORTS
     ; GL_ANGLE_translated_shader_source
     glGetTranslatedShaderSourceANGLE
 
+    ; GL_ANGLE_vulkan_image
+    glAcquireTexturesANGLE
+    glReleaseTexturesANGLE
+
     ; GL_APPLE_clip_distance
 
     ; GL_ARB_sync
@@ -738,6 +742,10 @@ EXPORTS
     ; GL_EXT_memory_object_fd
     glImportMemoryFdEXT
 
+    ; GL_EXT_multi_draw_indirect
+    glMultiDrawArraysIndirectEXT
+    glMultiDrawElementsIndirectEXT
+
     ; GL_EXT_multisampled_render_to_texture
     glFramebufferTexture2DMultisampleEXT
     glRenderbufferStorageMultisampleEXT
@@ -820,6 +828,8 @@ EXPORTS
     glProgramUniformMatrix4x3fvEXT
     glUseProgramStagesEXT
     glValidateProgramPipelineEXT
+
+    ; GL_EXT_shader_framebuffer_fetch
 
     ; GL_EXT_shader_framebuffer_fetch_non_coherent
     glFramebufferFetchBarrierEXT
@@ -918,6 +928,10 @@ EXPORTS
     ; GL_KHR_texture_compression_astc_ldr
 
     ; GL_KHR_texture_compression_astc_sliced_3d
+
+    ; GL_MESA_framebuffer_flip_y
+    glFramebufferParameteriMESA
+    glGetFramebufferParameterivMESA
 
     ; GL_NV_fence
     glDeleteFencesNV
@@ -1207,6 +1221,9 @@ EXPORTS
     EGL_ReacquireHighPowerGPUANGLE
     EGL_ReleaseHighPowerGPUANGLE
 
+    ; EGL_ANGLE_prepare_swap_buffers
+    EGL_PrepareSwapBuffersANGLE
+
     ; EGL_ANGLE_program_cache_control
     EGL_ProgramCacheGetAttribANGLE
     EGL_ProgramCachePopulateANGLE
@@ -1225,6 +1242,9 @@ EXPORTS
 
     ; EGL_ANGLE_sync_control_rate
     EGL_GetMscRateANGLE
+
+    ; EGL_ANGLE_vulkan_image
+    EGL_ExportVkImageANGLE
 
     ; EGL_CHROMIUM_sync_control
     EGL_GetSyncValuesCHROMIUM

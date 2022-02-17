@@ -15,18 +15,6 @@ lucicfg.config(
     ],
 )
 
-# Enable LUCI Realms support.
-lucicfg.enable_experiment("crbug.com/1085650")
-# Launch 0% of Swarming tasks for builds in "realms-aware mode"
-# TODO(https://crbug.com/1204972): ramp up to 100%.
-# luci.builder.defaults.experiments.set({"luci.use_realms": 0})
-
-# Enable LUCI Realms support.
-lucicfg.enable_experiment("crbug.com/1085650")
-
-# Launch all builds and tasks in Angle in realms mode.
-luci.builder.defaults.experiments.set({"luci.use_realms": 100})
-
 luci.project(
     name = "angle",
     buildbucket = "cr-buildbucket.appspot.com",
@@ -59,6 +47,10 @@ luci.project(
         ),
     ],
     bindings = [
+        luci.binding(
+            roles = "role/configs.validator",
+            users = "angle-try-builder@chops-service-accounts.iam.gserviceaccount.com",
+        ),
         luci.binding(
             roles = "role/swarming.poolOwner",
             groups = ["project-angle-owners", "mdb/chrome-troopers"],
@@ -145,7 +137,7 @@ _GOMA_RBE_PROD = {
 }
 
 def _recipe_for_package(cipd_package):
-    def recipe(*, name, cipd_version = None, recipe = None, use_bbagent = False):
+    def recipe(*, name, cipd_version = None, recipe = None):
         # Force the caller to put the recipe prefix rather than adding it
         # programatically to make the string greppable
         if not name.startswith(_RECIPE_NAME_PREFIX):
@@ -158,7 +150,7 @@ def _recipe_for_package(cipd_package):
             cipd_package = cipd_package,
             cipd_version = cipd_version,
             recipe = recipe,
-            use_bbagent = use_bbagent,
+            use_bbagent = True,
         )
 
     return recipe
@@ -203,7 +195,10 @@ def angle_builder(name, cpu):
         goma_props["enable_ats"] = True
 
     is_asan = "-asan" in name
+    is_tsan = "-tsan" in name
+    is_ubsan = "-ubsan" in name
     is_debug = "-dbg" in name
+    is_exp = "-exp" in name
     is_perf = name.endswith("-perf")
     is_trace = name.endswith("-trace")
     is_uwp = "winuwp" in name
@@ -224,7 +219,10 @@ def angle_builder(name, cpu):
         # Trace tests are only run on CQ if files in the capture folders change.
         location_regexp = [
             ".+/[+]/src/libANGLE/capture/.+",
+            ".+/[+]/src/tests/angle_end2end_tests_expectations.txt",
             ".+/[+]/src/tests/capture.+",
+            ".+/[+]/src/tests/egl_tests/.+",
+            ".+/[+]/src/tests/gl_tests/.+",
         ]
     elif is_perf:
         test_mode = "compile_and_test"
@@ -246,8 +244,14 @@ def angle_builder(name, cpu):
         short_name = get_gpu_type_from_builder_name(name)
     elif is_asan:
         short_name = "asan"
+    elif is_tsan:
+        short_name = "tsan"
+    elif is_ubsan:
+        short_name = "ubsan"
     elif is_debug:
         short_name = "dbg"
+    elif is_exp:
+        short_name = "exp"
     else:
         short_name = "rel"
 
@@ -262,7 +266,7 @@ def angle_builder(name, cpu):
     luci.builder(
         name = name,
         bucket = "ci",
-        triggered_by = ["master-poller"],
+        triggered_by = ["main-poller"],
         executable = "recipe:angle",
         service_account = "angle-ci-builder@chops-service-accounts.iam.gserviceaccount.com",
         properties = properties,
@@ -304,10 +308,10 @@ def angle_builder(name, cpu):
             ),
         )
 
-        # Do not add ASAN tests to CQ (yet). http://anglebug.com/5795
-        if not is_asan:
+        # Don't add experimental bots to CQ.
+        if not is_exp:
             luci.cq_tryjob_verifier(
-                cq_group = "master",
+                cq_group = "main",
                 builder = "angle:try/" + name,
                 location_regexp = location_regexp,
             )
@@ -358,11 +362,11 @@ luci.builder(
 )
 
 luci.gitiles_poller(
-    name = "master-poller",
+    name = "main-poller",
     bucket = "ci",
     repo = "https://chromium.googlesource.com/angle/angle",
     refs = [
-        "refs/heads/master",
+        "refs/heads/main",
     ],
     schedule = "with 10s interval",
 )
@@ -373,9 +377,12 @@ angle_builder("android-arm-dbg-compile", cpu = "arm")
 angle_builder("android-arm64-dbg-compile", cpu = "arm64")
 angle_builder("android-arm64-test", cpu = "arm64")
 angle_builder("linux-asan-test", cpu = "x64")
+angle_builder("linux-tsan-test", cpu = "x64")
+angle_builder("linux-ubsan-test", cpu = "x64")
 angle_builder("linux-dbg-compile", cpu = "x64")
 angle_builder("linux-test", cpu = "x64")
 angle_builder("mac-dbg-compile", cpu = "x64")
+angle_builder("mac-exp-test", cpu = "x64")
 angle_builder("mac-test", cpu = "x64")
 angle_builder("win-asan-test", cpu = "x64")
 angle_builder("win-dbg-compile", cpu = "x64")
@@ -404,7 +411,6 @@ luci.console_view(
     name = "ci",
     title = "ANGLE CI Builders",
     repo = "https://chromium.googlesource.com/angle/angle",
-    refs = ["refs/heads/master"],
 )
 
 luci.list_view(
@@ -426,10 +432,10 @@ luci.cq(
 )
 
 luci.cq_group(
-    name = "master",
+    name = "main",
     watch = cq.refset(
         "https://chromium.googlesource.com/angle/angle",
-        refs = [r"refs/heads/master", r"refs/heads/main"],
+        refs = [r"refs/heads/main"],
     ),
     acls = [
         acl.entry(

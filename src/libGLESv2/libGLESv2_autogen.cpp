@@ -2897,10 +2897,11 @@ void GL_APIENTRY glTexStorageMemFlags2DANGLE(GLenum target,
                                              GLuint memory,
                                              GLuint64 offset,
                                              GLbitfield createFlags,
-                                             GLbitfield usageFlags)
+                                             GLbitfield usageFlags,
+                                             const void *imageCreateInfoPNext)
 {
     return GL_TexStorageMemFlags2DANGLE(target, levels, internalFormat, width, height, memory,
-                                        offset, createFlags, usageFlags);
+                                        offset, createFlags, usageFlags, imageCreateInfoPNext);
 }
 
 void GL_APIENTRY glTexStorageMemFlags2DMultisampleANGLE(GLenum target,
@@ -2912,11 +2913,12 @@ void GL_APIENTRY glTexStorageMemFlags2DMultisampleANGLE(GLenum target,
                                                         GLuint memory,
                                                         GLuint64 offset,
                                                         GLbitfield createFlags,
-                                                        GLbitfield usageFlags)
+                                                        GLbitfield usageFlags,
+                                                        const void *imageCreateInfoPNext)
 {
     return GL_TexStorageMemFlags2DMultisampleANGLE(target, samples, internalFormat, width, height,
                                                    fixedSampleLocations, memory, offset,
-                                                   createFlags, usageFlags);
+                                                   createFlags, usageFlags, imageCreateInfoPNext);
 }
 
 void GL_APIENTRY glTexStorageMemFlags3DANGLE(GLenum target,
@@ -2928,10 +2930,12 @@ void GL_APIENTRY glTexStorageMemFlags3DANGLE(GLenum target,
                                              GLuint memory,
                                              GLuint64 offset,
                                              GLbitfield createFlags,
-                                             GLbitfield usageFlags)
+                                             GLbitfield usageFlags,
+                                             const void *imageCreateInfoPNext)
 {
     return GL_TexStorageMemFlags3DANGLE(target, levels, internalFormat, width, height, depth,
-                                        memory, offset, createFlags, usageFlags);
+                                        memory, offset, createFlags, usageFlags,
+                                        imageCreateInfoPNext);
 }
 
 void GL_APIENTRY glTexStorageMemFlags3DMultisampleANGLE(GLenum target,
@@ -2944,11 +2948,12 @@ void GL_APIENTRY glTexStorageMemFlags3DMultisampleANGLE(GLenum target,
                                                         GLuint memory,
                                                         GLuint64 offset,
                                                         GLbitfield createFlags,
-                                                        GLbitfield usageFlags)
+                                                        GLbitfield usageFlags,
+                                                        const void *imageCreateInfoPNext)
 {
     return GL_TexStorageMemFlags3DMultisampleANGLE(target, samples, internalFormat, width, height,
                                                    depth, fixedSampleLocations, memory, offset,
-                                                   createFlags, usageFlags);
+                                                   createFlags, usageFlags, imageCreateInfoPNext);
 }
 
 // GL_ANGLE_memory_object_fuchsia
@@ -3723,6 +3728,19 @@ void GL_APIENTRY glGetTranslatedShaderSourceANGLE(GLuint shader,
     return GL_GetTranslatedShaderSourceANGLE(shader, bufsize, length, source);
 }
 
+// GL_ANGLE_vulkan_image
+void GL_APIENTRY glAcquireTexturesANGLE(GLuint numTextures,
+                                        const GLuint *textures,
+                                        const GLenum *layouts)
+{
+    return GL_AcquireTexturesANGLE(numTextures, textures, layouts);
+}
+
+void GL_APIENTRY glReleaseTexturesANGLE(GLuint numTextures, const GLuint *textures, GLenum *layouts)
+{
+    return GL_ReleaseTexturesANGLE(numTextures, textures, layouts);
+}
+
 // GL_APPLE_clip_distance
 
 // GL_ARB_sync
@@ -4237,6 +4255,24 @@ void GL_APIENTRY glImportMemoryFdEXT(GLuint memory, GLuint64 size, GLenum handle
     return GL_ImportMemoryFdEXT(memory, size, handleType, fd);
 }
 
+// GL_EXT_multi_draw_indirect
+void GL_APIENTRY glMultiDrawArraysIndirectEXT(GLenum mode,
+                                              const void *indirect,
+                                              GLsizei drawcount,
+                                              GLsizei stride)
+{
+    return GL_MultiDrawArraysIndirectEXT(mode, indirect, drawcount, stride);
+}
+
+void GL_APIENTRY glMultiDrawElementsIndirectEXT(GLenum mode,
+                                                GLenum type,
+                                                const void *indirect,
+                                                GLsizei drawcount,
+                                                GLsizei stride)
+{
+    return GL_MultiDrawElementsIndirectEXT(mode, type, indirect, drawcount, stride);
+}
+
 // GL_EXT_multisampled_render_to_texture
 void GL_APIENTRY glFramebufferTexture2DMultisampleEXT(GLenum target,
                                                       GLenum attachment,
@@ -4675,6 +4711,8 @@ void GL_APIENTRY glValidateProgramPipelineEXT(GLuint pipeline)
     return GL_ValidateProgramPipelineEXT(pipeline);
 }
 
+// GL_EXT_shader_framebuffer_fetch
+
 // GL_EXT_shader_framebuffer_fetch_non_coherent
 void GL_APIENTRY glFramebufferFetchBarrierEXT()
 {
@@ -4920,6 +4958,17 @@ void GL_APIENTRY glMaxShaderCompilerThreadsKHR(GLuint count)
 // GL_KHR_texture_compression_astc_ldr
 
 // GL_KHR_texture_compression_astc_sliced_3d
+
+// GL_MESA_framebuffer_flip_y
+void GL_APIENTRY glFramebufferParameteriMESA(GLenum target, GLenum pname, GLint param)
+{
+    return GL_FramebufferParameteriMESA(target, pname, param);
+}
+
+void GL_APIENTRY glGetFramebufferParameterivMESA(GLenum target, GLenum pname, GLint *params)
+{
+    return GL_GetFramebufferParameterivMESA(target, pname, params);
+}
 
 // GL_NV_fence
 void GL_APIENTRY glDeleteFencesNV(GLsizei n, const GLuint *fences)

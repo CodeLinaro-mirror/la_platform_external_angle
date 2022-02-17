@@ -639,6 +639,12 @@ struct DisplayExtensions
 
     // EGL_KHR_lock_surface3
     bool lockSurface3KHR = false;
+
+    // EGL_ANGLE_vulkan_image
+    bool vulkanImageANGLE = false;
+
+    // EGL_ANGLE_metal_create_context_ownership_identity
+    bool metalCreateContextOwnershipIdentityANGLE = false;
 };
 
 struct DeviceExtensions
@@ -708,6 +714,9 @@ struct ClientExtensions
     // EGL_ANGLE_platform_angle_device_context_volatile_cgl
     bool platformANGLEDeviceContextVolatileCgl = false;
 
+    // EGL_ANGLE_platform_angle_device_id
+    bool platformANGLEDeviceId = false;
+
     // EGL_ANGLE_device_creation
     bool deviceCreation = false;
 
@@ -737,6 +746,9 @@ struct ClientExtensions
 
     // EGL_EXT_device_query
     bool deviceQueryEXT = false;
+
+    // EGL_ANGLE_display_power_preference
+    bool displayPowerPreferenceANGLE = false;
 };
 
 }  // namespace egl
