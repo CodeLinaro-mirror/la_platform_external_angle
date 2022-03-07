@@ -606,6 +606,31 @@ struct FeaturesVk : FeatureSetBase
     Feature supportsShaderFramebufferFetchNonCoherent = {
         "supportsShaderFramebufferFetchNonCoherent", FeatureCategory::VulkanFeatures,
         "Whether the Vulkan backend supports non-coherent framebuffer fetch", &members};
+
+    // Whether the Surface supports EGL_KHR_lock_surface3.
+    Feature supportsLockSurfaceExtension = {
+        "supportsLockSurfaceExtension", FeatureCategory::VulkanFeatures,
+        "Surface supports the EGL_KHR_lock_surface3 extension", &members};
+
+    // When mutable_render_buffer goes into SINGLE_BUFFER mode, need to call swapbuffers at
+    // flush and finish so that the image is updated and presented to the display.
+    Feature swapbuffersOnFlushOrFinishWithSingleBuffer = {
+        "swapbuffersOnFlushOrFinishWithSingleBuffer", FeatureCategory::VulkanFeatures,
+        "Bypass deferredFlush with calling swapbuffers on flush or finish when in Shared Present "
+        "mode",
+        &members, "http://anglebug.com/6878"};
+
+    // Whether dithering should be emulated.
+    Feature emulateDithering = {"emulateDithering", FeatureCategory::VulkanFeatures,
+                                "Emulate OpenGL dithering", &members, "http://anglebug.com/6755"};
+
+    // Android bug workaround which assumes VkPresentRegionsKHR to have a bottom-left origin
+    // instead of top-left as specified by VK_KHR_incremental_present
+    Feature bottomLeftOriginPresentRegionRectangles = {
+        "bottomLeftOriginPresentRegionRectangles", FeatureCategory::VulkanWorkarounds,
+        "On some platforms present region rectangles are expected to have a bottom-left origin, "
+        "instead of top-left origin as from spec",
+        &members};
 };
 
 inline FeaturesVk::FeaturesVk()  = default;
