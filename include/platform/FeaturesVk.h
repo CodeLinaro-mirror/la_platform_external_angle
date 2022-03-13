@@ -398,6 +398,12 @@ struct FeaturesVk : FeatureSetBase
         "VkDevice supports VK_EXT_load_store_op_none extension.", &members,
         "http://anglebug.com/5371"};
 
+    // Whether the VkDevice supports the VK_EXT_depth_clip_control extension
+    // http://anglebug.com/5421
+    Feature supportsDepthClipControl = {"supportsDepthClipControl", FeatureCategory::VulkanFeatures,
+                                        "VkDevice supports VK_EXT_depth_clip_control extension.",
+                                        &members, "http://anglebug.com/5421"};
+
     // Force maxUniformBufferSize to 16K on Qualcomm's Adreno 540. Pixel2's Adreno540 reports
     // maxUniformBufferSize 64k but various tests failed with that size. For that specific
     // device, we set to 16k for now which is known to pass all tests.
@@ -421,13 +427,6 @@ struct FeaturesVk : FeatureSetBase
     Feature enableMultisampledRenderToTexture = {
         "enableMultisampledRenderToTexture", FeatureCategory::VulkanWorkarounds,
         "Expose EXT_multisampled_render_to_texture", &members, "http://anglebug.com/4937"};
-
-    // Qualcomm fails some tests when reducing the preferred block size to 4M.
-    // http://anglebug.com/4995
-    Feature preferredLargeHeapBlockSize4MB = {
-        "preferredLargeHeapBlockSize4MB", FeatureCategory::VulkanWorkarounds,
-        "Use 4 MB preferred large heap block size with AMD allocator", &members,
-        "http://anglebug.com/4995"};
 
     // Manhattan is calling glFlush in the middle of renderpass which breaks renderpass and hurts
     // performance on tile based GPU. When this is enabled, we will defer the glFlush call made in
@@ -631,6 +630,16 @@ struct FeaturesVk : FeatureSetBase
         "On some platforms present region rectangles are expected to have a bottom-left origin, "
         "instead of top-left origin as from spec",
         &members};
+
+    // Whether we force submit updates to immutable textures.
+    Feature forceSubmitImmutableTextureUpdates = {
+        "forceSubmitImmutableTextureUpdates", FeatureCategory::AppWorkarounds,
+        "Force submit updates to immutable textures", &members, "http://anglebug.com/6929"};
+
+    // Whether we retain SPIR-V debug information to aid in analyzing shader code.
+    Feature retainSpirvDebugInfo = {"retainSpirvDebugInfo", FeatureCategory::VulkanFeatures,
+                                    "Retain debug info in SPIR-V blob.", &members,
+                                    "http://anglebug.com/5901"};
 };
 
 inline FeaturesVk::FeaturesVk()  = default;
