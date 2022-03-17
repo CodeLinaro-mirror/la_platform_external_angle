@@ -773,6 +773,7 @@ class Recycler final : angle::NonCopyable
         {
             object.destroy(device);
         }
+        mObjectFreeList.clear();
     }
 
     bool empty() const { return mObjectFreeList.empty(); }
@@ -1267,6 +1268,7 @@ struct PerfCounters
     uint32_t readOnlyDepthStencilRenderPasses;
     uint32_t descriptorSetAllocations;
     uint32_t descriptorSetCacheTotalSize;
+    uint32_t descriptorSetCacheKeySizeBytes;
     uint32_t uniformsAndXfbDescriptorSetCacheHits;
     uint32_t uniformsAndXfbDescriptorSetCacheMisses;
     uint32_t uniformsAndXfbDescriptorSetCacheTotalSize;
@@ -1487,9 +1489,6 @@ enum class RenderPassClosureReason
     TemporaryForImageClear,
     TemporaryForImageCopy,
     TemporaryForOverlayDraw,
-
-    // Misc
-    OverlayFontCreation,
 
     InvalidEnum,
     EnumCount = InvalidEnum,
