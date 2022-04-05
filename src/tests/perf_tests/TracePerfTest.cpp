@@ -954,9 +954,9 @@ TracePerfTest::TracePerfTest(const TracePerfParams &params)
     }
 
     // Adreno gives a driver error with empty/small draw calls. http://anglebug.com/5823
-    if (traceNameIs("hill_climb_racing"))
+    if (traceNameIs("hill_climb_racing") || traceNameIs("dead_trigger_2"))
     {
-        if (IsAndroid() && (IsPixel2() || IsPixel4()) &&
+        if (IsAndroid() && (IsPixel2() || IsPixel4() || IsPixel4XL()) &&
             mParams.driver == GLESDriverType::SystemEGL)
         {
             mSkipTest = true;
@@ -1172,6 +1172,34 @@ TracePerfTest::TracePerfTest(const TracePerfParams &params)
 
     if (traceNameIs("war_planet_online"))
     {
+        addExtensionPrerequisite("GL_KHR_texture_compression_astc_ldr");
+    }
+
+    if (traceNameIs("lords_mobile"))
+    {
+        // http://anglebug.com/7000 - glTexStorage2DEXT is not exposed on Pixel 4 native
+        addExtensionPrerequisite("GL_EXT_texture_storage");
+    }
+
+    if (traceNameIs("marvel_strike_force"))
+    {
+        // http://anglebug.com/7017 - Qualcomm native driver gets confused about the state of a
+        // buffer that was recreated during the trace
+        if ((IsAndroid() && IsQualcomm()) && mParams.driver != GLESDriverType::AngleEGL)
+        {
+            mSkipTest = true;
+        }
+    }
+
+    if (traceNameIs("real_racing3"))
+    {
+        addExtensionPrerequisite("GL_EXT_shader_framebuffer_fetch");
+    }
+
+    if (traceNameIs("blade_and_soul_revolution"))
+    {
+        addExtensionPrerequisite("GL_EXT_texture_buffer");
+        addExtensionPrerequisite("GL_EXT_shader_framebuffer_fetch");
         addExtensionPrerequisite("GL_KHR_texture_compression_astc_ldr");
     }
 

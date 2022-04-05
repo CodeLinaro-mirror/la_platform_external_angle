@@ -20,6 +20,7 @@
 #include "libANGLE/Texture.h"
 #include "libANGLE/Thread.h"
 #include "libANGLE/formatutils.h"
+#include "libANGLE/renderer/DisplayImpl.h"
 
 #include <EGL/eglext.h>
 
@@ -5058,10 +5059,12 @@ bool ValidateCreatePlatformWindowSurfaceEXT(const ValidationContext *val,
         return false;
     }
 
-    ANGLE_VALIDATION_TRY(ValidateConfig(val, display, configuration));
+    const void *actualNativeWindow = display->getImplementation()->isX11()
+                                         ? *reinterpret_cast<const void *const *>(nativeWindow)
+                                         : nativeWindow;
 
-    val->setError(EGL_BAD_DISPLAY, "ValidateCreatePlatformWindowSurfaceEXT unimplemented.");
-    return false;
+    return ValidateCreatePlatformWindowSurface(val, display, configuration, actualNativeWindow,
+                                               attributes);
 }
 
 bool ValidateCreatePlatformPixmapSurfaceEXT(const ValidationContext *val,
@@ -6500,6 +6503,85 @@ bool ValidateExportVkImageANGLE(const ValidationContext *val,
         return false;
     }
 
+    return true;
+}
+
+bool ValidateSetDamageRegionKHR(const ValidationContext *val,
+                                const Display *display,
+                                const Surface *surface,
+                                const EGLint *rects,
+                                EGLint n_rects)
+{
+    ANGLE_VALIDATION_TRY(ValidateDisplay(val, display));
+    ANGLE_VALIDATION_TRY(ValidateSurface(val, display, surface));
+
+    return false;
+}
+
+bool ValidateQueryDmaBufFormatsEXT(ValidationContext const *val,
+                                   Display const *dpy,
+                                   EGLint max_formats,
+                                   const EGLint *formats,
+                                   const EGLint *num_formats)
+{
+    ANGLE_VALIDATION_TRY(ValidateDisplay(val, dpy));
+
+    if (!dpy->getExtensions().imageDmaBufImportModifiersEXT)
+    {
+        val->setError(EGL_BAD_ACCESS, "EGL_EXT_dma_buf_import_modfier not supported");
+        return false;
+    }
+
+    if (max_formats < 0)
+    {
+        val->setError(EGL_BAD_PARAMETER, "max_formats should not be negative");
+        return false;
+    }
+
+    if (max_formats > 0 && formats == nullptr)
+    {
+        val->setError(EGL_BAD_PARAMETER, "if max_formats is positive, formats should not be NULL");
+        return false;
+    }
+
+    return true;
+}
+
+bool ValidateQueryDmaBufModifiersEXT(ValidationContext const *val,
+                                     Display const *dpy,
+                                     EGLint format,
+                                     EGLint max_modifiers,
+                                     const EGLuint64KHR *modifiers,
+                                     const EGLBoolean *external_only,
+                                     const EGLint *num_modifiers)
+{
+    ANGLE_VALIDATION_TRY(ValidateDisplay(val, dpy));
+
+    if (!dpy->getExtensions().imageDmaBufImportModifiersEXT)
+    {
+        val->setError(EGL_BAD_ACCESS, "EGL_EXT_dma_buf_import_modfier not supported");
+        return false;
+    }
+
+    if (max_modifiers < 0)
+    {
+        val->setError(EGL_BAD_PARAMETER, "max_modifiers should not be negative");
+        return false;
+    }
+
+    if (max_modifiers > 0 && modifiers == nullptr)
+    {
+        val->setError(EGL_BAD_PARAMETER,
+                      "if max_modifiers is positive, modifiers should not be NULL");
+        return false;
+    }
+
+    if (!dpy->supportsDmaBufFormat(format))
+    {
+        val->setError(EGL_BAD_PARAMETER,
+                      "format should be one of the formats advertised by QueryDmaBufFormatsEXT");
+        return false;
+    }
     return true;
 }
 

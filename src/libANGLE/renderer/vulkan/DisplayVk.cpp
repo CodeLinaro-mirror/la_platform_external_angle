@@ -98,11 +98,11 @@ std::string DisplayVk::getVendorString()
     return std::string();
 }
 
-std::string DisplayVk::getVersionString()
+std::string DisplayVk::getVersionString(bool includeFullVersion)
 {
     if (mRenderer)
     {
-        return mRenderer->getVersionString();
+        return mRenderer->getVersionString(includeFullVersion);
     }
     return std::string();
 }
@@ -433,6 +433,18 @@ void ShareGroupVk::onDestroy(const egl::Display *display)
     mDescriptorSetLayoutCache.destroy(renderer);
 
     ASSERT(mResourceUseLists.empty());
+}
+
+void ShareGroupVk::releaseResourceUseLists(const Serial &submitSerial)
+{
+    if (!mResourceUseLists.empty())
+    {
+        for (vk::ResourceUseList &it : mResourceUseLists)
+        {
+            it.releaseResourceUsesAndUpdateSerials(submitSerial);
+        }
+        mResourceUseLists.clear();
+    }
 }
 
 vk::BufferPool *ShareGroupVk::getDefaultBufferPool(RendererVk *renderer,

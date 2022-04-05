@@ -140,7 +140,7 @@ class RendererVk : angle::NonCopyable
 
     std::string getVendorString() const;
     std::string getRendererDescription() const;
-    std::string getVersionString() const;
+    std::string getVersionString(bool includeFullVersion) const;
 
     gl::Version getMaxSupportedESVersion() const;
     gl::Version getMaxConformantESVersion() const;
@@ -310,7 +310,12 @@ class RendererVk : angle::NonCopyable
         if (!sharedGarbage.empty())
         {
             vk::SharedGarbage garbage(std::move(use), std::move(sharedGarbage));
-            if (!garbage.destroyIfComplete(this, getLastCompletedQueueSerial()))
+            if (garbage.usedInRecordedCommands())
+            {
+                std::lock_guard<std::mutex> lock(mGarbageMutex);
+                mPendingSubmissionGarbage.push(std::move(garbage));
+            }
+            else if (!garbage.destroyIfComplete(this, getLastCompletedQueueSerial()))
             {
                 std::lock_guard<std::mutex> lock(mGarbageMutex);
                 mSharedGarbage.push(std::move(garbage));
@@ -322,7 +327,15 @@ class RendererVk : angle::NonCopyable
                                      vk::BufferSuballocation &&suballocation)
     {
         std::lock_guard<std::mutex> lock(mGarbageMutex);
-        mSuballocationGarbage.emplace(std::move(use), std::move(suballocation));
+        if (use.usedInRecordedCommands())
+        {
+            mPendingSubmissionSuballocationGarbage.emplace(std::move(use),
+                                                           std::move(suballocation));
+        }
+        else
+        {
+            mSuballocationGarbage.emplace(std::move(use), std::move(suballocation));
+        }
     }
 
     angle::Result getPipelineCache(vk::PipelineCache **pipelineCache);
@@ -406,6 +419,7 @@ class RendererVk : angle::NonCopyable
 
     angle::Result cleanupGarbage(Serial lastCompletedQueueSerial);
     void cleanupCompletedCommandsGarbage();
+    void cleanupPendingSubmissionGarbage();
 
     angle::Result submitFrame(vk::Context *context,
                               bool hasProtectedContent,
@@ -413,7 +427,6 @@ class RendererVk : angle::NonCopyable
                               std::vector<VkSemaphore> &&waitSemaphores,
                               std::vector<VkPipelineStageFlags> &&waitSemaphoreStageMasks,
                               const vk::Semaphore *signalSemaphore,
-                              std::vector<vk::ResourceUseList> &&resourceUseLists,
                               vk::GarbageList &&currentGarbage,
                               vk::SecondaryCommandPools *commandPools,
                               Serial *submitSerialOut);
@@ -517,6 +530,11 @@ class RendererVk : angle::NonCopyable
     }
     size_t getVertexConversionBufferAlignment() const { return mVertexConversionBufferAlignment; }
 
+    uint32_t getDeviceLocalMemoryTypeIndex() const
+    {
+        return mDeviceLocalVertexConversionBufferMemoryTypeIndex;
+    }
+
   private:
     angle::Result initializeDevice(DisplayVk *displayVk, uint32_t queueFamilyIndex);
     void ensureCapsInitialized() const;
@@ -524,6 +542,7 @@ class RendererVk : angle::NonCopyable
     void queryDeviceExtensionFeatures(const vk::ExtensionNameList &deviceExtensionNames);
 
     void initFeatures(DisplayVk *display, const vk::ExtensionNameList &extensions);
+    void appBasedFeatureOverrides(DisplayVk *display, const vk::ExtensionNameList &extensions);
     angle::Result initPipelineCache(DisplayVk *display,
                                     vk::PipelineCache *pipelineCache,
                                     bool *success);
@@ -570,6 +589,7 @@ class RendererVk : angle::NonCopyable
     VkPhysicalDeviceTransformFeedbackFeaturesEXT mTransformFeedbackFeatures;
     VkPhysicalDeviceIndexTypeUint8FeaturesEXT mIndexTypeUint8Features;
     VkPhysicalDeviceSubgroupProperties mSubgroupProperties;
+    VkPhysicalDeviceShaderSubgroupExtendedTypesFeaturesKHR mSubgroupExtendedTypesFeatures;
     VkPhysicalDeviceDeviceMemoryReportFeaturesEXT mMemoryReportFeatures;
     VkDeviceDeviceMemoryReportCreateInfoEXT mMemoryReportCallback;
     VkPhysicalDeviceExternalMemoryHostPropertiesEXT mExternalMemoryHostProperties;
@@ -585,8 +605,7 @@ class RendererVk : angle::NonCopyable
     VkPhysicalDeviceProtectedMemoryFeatures mProtectedMemoryFeatures;
     VkPhysicalDeviceProtectedMemoryProperties mProtectedMemoryProperties;
     VkPhysicalDeviceHostQueryResetFeaturesEXT mHostQueryResetFeatures;
-    VkExternalFenceProperties mExternalFenceProperties;
-    VkExternalSemaphoreProperties mExternalSemaphoreProperties;
+    VkPhysicalDeviceDepthClipControlFeaturesEXT mDepthClipControlFeatures;
     VkPhysicalDeviceSamplerYcbcrConversionFeatures mSamplerYcbcrConversionFeatures;
     std::vector<VkQueueFamilyProperties> mQueueFamilyProperties;
     uint32_t mMaxVertexAttribDivisor;
@@ -600,9 +619,16 @@ class RendererVk : angle::NonCopyable
 
     bool mDeviceLost;
 
+    // We group garbage into four categories: mSharedGarbage is the garbage that has already
+    // submitted to vulkan, we expect them to finish in finite time. mPendingSubmissionGarbage is
+    // the garbage that is still referenced in the recorded commands. suballocations have its own
+    // dedicated garbage list for performance optimization since they tend to be the most common
+    // garbage objects. All these four groups of garbage share the same mutex lock.
     std::mutex mGarbageMutex;
     vk::SharedGarbageList mSharedGarbage;
+    vk::SharedGarbageList mPendingSubmissionGarbage;
     vk::SharedBufferSuballocationGarbageList mSuballocationGarbage;
+    vk::SharedBufferSuballocationGarbageList mPendingSubmissionSuballocationGarbage;
 
     vk::MemoryProperties mMemoryProperties;
     vk::FormatTable mFormatTable;
