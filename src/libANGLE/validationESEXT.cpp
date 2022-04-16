@@ -622,8 +622,14 @@ bool ValidateDrawRangeElementsBaseVertexOES(const Context *context,
 // GL_KHR_blend_equation_advanced
 bool ValidateBlendBarrierKHR(const Context *context, angle::EntryPoint entryPoint)
 {
-    context->validationError(entryPoint, GL_INVALID_OPERATION, kExtensionNotEnabled);
-    return false;
+    const Extensions &extensions = context->getExtensions();
+
+    if (!extensions.blendEquationAdvancedKHR)
+    {
+        context->validationError(entryPoint, GL_INVALID_ENUM, kAdvancedBlendExtensionNotEnabled);
+    }
+
+    return true;
 }
 
 bool ValidateBlendEquationSeparateiEXT(const Context *context,
@@ -2697,6 +2703,7 @@ bool ValidateBeginPerfMonitorAMD(const Context *context,
         return false;
     }
 
+    UNIMPLEMENTED();
     return false;
 }
 
@@ -2711,6 +2718,7 @@ bool ValidateDeletePerfMonitorsAMD(const Context *context,
         return false;
     }
 
+    UNIMPLEMENTED();
     return false;
 }
 
@@ -2722,6 +2730,7 @@ bool ValidateEndPerfMonitorAMD(const Context *context, angle::EntryPoint entryPo
         return false;
     }
 
+    UNIMPLEMENTED();
     return false;
 }
 
@@ -2736,6 +2745,7 @@ bool ValidateGenPerfMonitorsAMD(const Context *context,
         return false;
     }
 
+    UNIMPLEMENTED();
     return false;
 }
 
@@ -2753,7 +2763,25 @@ bool ValidateGetPerfMonitorCounterDataAMD(const Context *context,
         return false;
     }
 
-    return false;
+    if (monitor != 0)
+    {
+        context->validationError(entryPoint, GL_INVALID_VALUE, kInvalidPerfMonitor);
+        return false;
+    }
+
+    switch (pname)
+    {
+        case GL_PERFMON_RESULT_AVAILABLE_AMD:
+        case GL_PERFMON_RESULT_SIZE_AMD:
+        case GL_PERFMON_RESULT_AMD:
+            break;
+
+        default:
+            context->validationError(entryPoint, GL_INVALID_ENUM, kInvalidPname);
+            return false;
+    }
+
+    return true;
 }
 
 bool ValidateGetPerfMonitorCounterInfoAMD(const Context *context,
@@ -2769,7 +2797,32 @@ bool ValidateGetPerfMonitorCounterInfoAMD(const Context *context,
         return false;
     }
 
-    return false;
+    const angle::PerfMonitorCounterGroups &groups = context->getPerfMonitorCounterGroups();
+
+    if (group >= groups.size())
+    {
+        context->validationError(entryPoint, GL_INVALID_VALUE, kInvalidPerfMonitorGroup);
+        return false;
+    }
+
+    if (counter >= groups[group].counters.size())
+    {
+        context->validationError(entryPoint, GL_INVALID_VALUE, kInvalidPerfMonitorCounter);
+        return false;
+    }
+
+    switch (pname)
+    {
+        case GL_COUNTER_TYPE_AMD:
+        case GL_COUNTER_RANGE_AMD:
+            break;
+
+        default:
+            context->validationError(entryPoint, GL_INVALID_ENUM, kInvalidPname);
+            return false;
+    }
+
+    return true;
 }
 
 bool ValidateGetPerfMonitorCounterStringAMD(const Context *context,
@@ -2786,7 +2839,21 @@ bool ValidateGetPerfMonitorCounterStringAMD(const Context *context,
         return false;
     }
 
-    return false;
+    const angle::PerfMonitorCounterGroups &groups = context->getPerfMonitorCounterGroups();
+
+    if (group >= groups.size())
+    {
+        context->validationError(entryPoint, GL_INVALID_VALUE, kInvalidPerfMonitorGroup);
+        return false;
+    }
+
+    if (counter >= groups[group].counters.size())
+    {
+        context->validationError(entryPoint, GL_INVALID_VALUE, kInvalidPerfMonitorCounter);
+        return false;
+    }
+
+    return true;
 }
 
 bool ValidateGetPerfMonitorCountersAMD(const Context *context,
@@ -2803,7 +2870,15 @@ bool ValidateGetPerfMonitorCountersAMD(const Context *context,
         return false;
     }
 
-    return false;
+    const angle::PerfMonitorCounterGroups &groups = context->getPerfMonitorCounterGroups();
+
+    if (group >= groups.size())
+    {
+        context->validationError(entryPoint, GL_INVALID_VALUE, kInvalidPerfMonitorGroup);
+        return false;
+    }
+
+    return true;
 }
 
 bool ValidateGetPerfMonitorGroupStringAMD(const Context *context,
@@ -2819,7 +2894,15 @@ bool ValidateGetPerfMonitorGroupStringAMD(const Context *context,
         return false;
     }
 
-    return false;
+    const angle::PerfMonitorCounterGroups &groups = context->getPerfMonitorCounterGroups();
+
+    if (group >= groups.size())
+    {
+        context->validationError(entryPoint, GL_INVALID_VALUE, kInvalidPerfMonitorGroup);
+        return false;
+    }
+
+    return true;
 }
 
 bool ValidateGetPerfMonitorGroupsAMD(const Context *context,
@@ -2834,7 +2917,7 @@ bool ValidateGetPerfMonitorGroupsAMD(const Context *context,
         return false;
     }
 
-    return false;
+    return true;
 }
 
 bool ValidateSelectPerfMonitorCountersAMD(const Context *context,
@@ -2851,6 +2934,7 @@ bool ValidateSelectPerfMonitorCountersAMD(const Context *context,
         return false;
     }
 
+    UNIMPLEMENTED();
     return false;
 }
 }  // namespace gl
