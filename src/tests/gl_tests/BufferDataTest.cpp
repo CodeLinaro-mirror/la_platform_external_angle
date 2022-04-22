@@ -416,8 +416,6 @@ void main()
 // https://code.google.com/p/angleproject/issues/detail?id=709
 TEST_P(IndexedBufferCopyTest, IndexRangeBug)
 {
-    // http://anglebug.com/4092
-    ANGLE_SKIP_TEST_IF(isSwiftshader());
     // TODO(geofflang): Figure out why this fails on AMD OpenGL (http://anglebug.com/1291)
     ANGLE_SKIP_TEST_IF(IsAMD() && IsOpenGL());
 
@@ -966,6 +964,19 @@ TEST_P(BufferDataTest, MapWriteArrayBufferDataDrawArrays)
     glDrawArrays(GL_TRIANGLES, 0, 6);
     EXPECT_PIXEL_COLOR_EQ(8, 8, GLColor::red);
     EXPECT_GL_NO_ERROR();
+}
+
+// Verify that buffer sub data uploads are properly validated within the buffer size range on 32-bit
+// systems.
+TEST_P(BufferDataTest, BufferSizeValidation32Bit)
+{
+    GLBuffer buffer;
+    glBindBuffer(GL_ARRAY_BUFFER, buffer);
+    glBufferData(GL_ARRAY_BUFFER, 100, nullptr, GL_STATIC_DRAW);
+
+    GLubyte data = 0;
+    glBufferSubData(GL_ARRAY_BUFFER, std::numeric_limits<uint32_t>::max(), 1, &data);
+    EXPECT_GL_ERROR(GL_INVALID_VALUE);
 }
 
 // Tests a null crash bug caused by copying from null back-end buffer pointer

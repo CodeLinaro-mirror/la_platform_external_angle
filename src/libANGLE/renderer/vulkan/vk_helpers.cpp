@@ -1250,7 +1250,8 @@ CommandBufferHelperCommon::CommandBufferHelperCommon()
       mPipelineBarrierMask(),
       mCommandPool(nullptr),
       mHasShaderStorageOutput(false),
-      mHasGLMemoryBarrierIssued(false)
+      mHasGLMemoryBarrierIssued(false),
+      mResourceUseList()
 {}
 
 CommandBufferHelperCommon::~CommandBufferHelperCommon() {}
@@ -1272,6 +1273,7 @@ void CommandBufferHelperCommon::resetImpl()
     mAllocator.push();
 
     mUsedBuffers.clear();
+    ASSERT(mResourceUseList.empty());
 }
 
 void CommandBufferHelperCommon::bufferRead(ContextVk *contextVk,
@@ -1289,7 +1291,7 @@ void CommandBufferHelperCommon::bufferRead(ContextVk *contextVk,
     if (!mUsedBuffers.contains(buffer->getBufferSerial()))
     {
         mUsedBuffers.insert(buffer->getBufferSerial(), BufferAccess::Read);
-        buffer->retainReadOnly(&contextVk->getResourceUseList());
+        buffer->retainReadOnly(&mResourceUseList);
     }
 }
 
@@ -1299,7 +1301,7 @@ void CommandBufferHelperCommon::bufferWrite(ContextVk *contextVk,
                                             AliasingMode aliasingMode,
                                             BufferHelper *buffer)
 {
-    buffer->retainReadWrite(&contextVk->getResourceUseList());
+    buffer->retainReadWrite(&mResourceUseList);
     VkPipelineStageFlagBits stageBits = kPipelineStageFlagBitMap[writeStage];
     if (buffer->recordWriteBarrier(writeAccessType, stageBits, &mPipelineBarriers[writeStage]))
     {
@@ -1391,7 +1393,7 @@ void CommandBufferHelperCommon::imageWriteImpl(ContextVk *contextVk,
                                                AliasingMode aliasingMode,
                                                ImageHelper *image)
 {
-    image->retain(&contextVk->getResourceUseList());
+    image->retain(&mResourceUseList);
     image->onWrite(level, 1, layerStart, layerCount, aspectFlags);
     // Write always requires a barrier
     updateImageLayoutAndBarrier(contextVk, image, aspectFlags, imageLayout);
@@ -1456,7 +1458,7 @@ void OutsideRenderPassCommandBufferHelper::imageRead(ContextVk *contextVk,
                                                      ImageHelper *image)
 {
     imageReadImpl(contextVk, aspectFlags, imageLayout, image);
-    image->retain(&contextVk->getResourceUseList());
+    image->retain(&mResourceUseList);
 }
 
 void OutsideRenderPassCommandBufferHelper::imageWrite(ContextVk *contextVk,
@@ -1579,7 +1581,7 @@ void RenderPassCommandBufferHelper::imageRead(ContextVk *contextVk,
     if (!usesImage(*image))
     {
         mRenderPassUsedImages.insert(image->getImageSerial());
-        image->retain(&contextVk->getResourceUseList());
+        image->retain(&mResourceUseList);
     }
 }
 
@@ -1762,7 +1764,7 @@ void RenderPassCommandBufferHelper::finalizeColorImageLayout(
         mImageOptimizeForPresent->setCurrentImageLayout(ImageLayout::Present);
         // TODO(syoussefi):  We currently don't store the layout of the resolve attachments, so once
         // multisampled backbuffers are optimized to use resolve attachments, this information needs
-        // to be stored somewhere.  http://anglebug.com/4836
+        // to be stored somewhere.  http://anglebug.com/7150
         SetBitField(mAttachmentOps[packedAttachmentIndex].finalLayout,
                     mImageOptimizeForPresent->getCurrentImageLayout());
         mImageOptimizeForPresent = nullptr;
@@ -3085,6 +3087,8 @@ angle::Result DynamicDescriptorPool::allocateSetsAndGetInfo(
 
         bindingOut->set(mDescriptorPools[mCurrentPoolIndex]);
     }
+
+    ++context->getPerfCounters().descriptorSetAllocations;
 
     return bindingOut->get().allocateDescriptorSets(context, resourceUseList, descriptorSetLayout,
                                                     descriptorSetCount, descriptorSetsOut);
@@ -6767,7 +6771,18 @@ void ImageHelper::invalidateSubresourceContentImpl(ContextVk *contextVk,
                                                    LevelContentDefinedMask *contentDefinedMask,
                                                    bool *preferToKeepContentsDefinedOut)
 {
-    // If the color format is emualted and has extra channels, those channels need to stay cleared.
+    // If the aspect being invalidated doesn't exist, skip invalidation altogether.
+    if ((getAspectFlags() & aspect) == 0)
+    {
+        if (preferToKeepContentsDefinedOut)
+        {
+            // Let the caller know that this invalidate request was ignored.
+            *preferToKeepContentsDefinedOut = true;
+        }
+        return;
+    }
+
+    // If the color format is emulated and has extra channels, those channels need to stay cleared.
     // On some devices, it's cheaper to skip invalidating the framebuffer attachment, while on
     // others it's cheaper to invalidate but then re-clear the image.
     //
