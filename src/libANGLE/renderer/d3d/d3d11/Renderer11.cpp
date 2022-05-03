@@ -1085,7 +1085,7 @@ void Renderer11::populateRenderer11DeviceCaps()
                                  &mRenderer11DeviceCaps.B5G6R5maxSamples);
     }
 
-    if (getFeatures().allowES3OnFL10_0.enabled)
+    if (getFeatures().allowES3OnFL100.enabled)
     {
         mRenderer11DeviceCaps.allowES3OnFL10_0 = true;
     }
@@ -3087,7 +3087,7 @@ angle::Result Renderer11::compileToExecutable(d3d::Context *context,
                                               gl::ShaderType type,
                                               const std::vector<D3DVarying> &streamOutVaryings,
                                               bool separatedOutputBuffers,
-                                              const angle::CompilerWorkaroundsD3D &workarounds,
+                                              const CompilerWorkaroundsD3D &workarounds,
                                               ShaderExecutableD3D **outExectuable)
 {
     std::stringstream profileStream;
