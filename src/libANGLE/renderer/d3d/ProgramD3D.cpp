@@ -1121,7 +1121,7 @@ std::unique_ptr<rx::LinkEvent> ProgramD3D::load(const gl::Context *context,
     {
         stream->readString(&mShaderHLSL[shaderType]);
         stream->readBytes(reinterpret_cast<unsigned char *>(&mShaderWorkarounds[shaderType]),
-                          sizeof(angle::CompilerWorkaroundsD3D));
+                          sizeof(CompilerWorkaroundsD3D));
     }
 
     stream->readBool(&mUsesFragDepth);
@@ -1417,7 +1417,7 @@ void ProgramD3D::save(const gl::Context *context, gl::BinaryOutputStream *stream
     {
         stream->writeString(mShaderHLSL[shaderType]);
         stream->writeBytes(reinterpret_cast<unsigned char *>(&mShaderWorkarounds[shaderType]),
-                           sizeof(angle::CompilerWorkaroundsD3D));
+                           sizeof(CompilerWorkaroundsD3D));
     }
 
     stream->writeBool(mUsesFragDepth);
@@ -1544,7 +1544,8 @@ angle::Result ProgramD3D::getPixelExecutableForCachedOutputLayout(
 
     std::string finalPixelHLSL = mDynamicHLSL->generatePixelShaderForOutputSignature(
         mShaderHLSL[gl::ShaderType::Fragment], mPixelShaderKey, mUsesFragDepth,
-        mPixelShaderOutputLayoutCache, mShaderStorageBlocks[gl::ShaderType::Fragment]);
+        mPixelShaderOutputLayoutCache, mShaderStorageBlocks[gl::ShaderType::Fragment],
+        mPixelShaderKey.size());
 
     // Generate new pixel executable
     ShaderExecutableD3D *pixelExecutable = nullptr;
@@ -1588,7 +1589,7 @@ angle::Result ProgramD3D::getVertexExecutableForCachedInputLayout(
     // Generate new dynamic layout with attribute conversions
     std::string finalVertexHLSL = mDynamicHLSL->generateVertexShaderForInputLayout(
         mShaderHLSL[gl::ShaderType::Vertex], mCachedInputLayout, mState.getProgramInputs(),
-        mShaderStorageBlocks[gl::ShaderType::Vertex], getNumPixelShaderOutputs());
+        mShaderStorageBlocks[gl::ShaderType::Vertex], mPixelShaderKey.size());
 
     // Generate new vertex executable
     ShaderExecutableD3D *vertexExecutable = nullptr;
@@ -1656,8 +1657,8 @@ angle::Result ProgramD3D::getGeometryExecutableForPrimitiveType(d3d::Context *co
     ShaderExecutableD3D *geometryExecutable = nullptr;
     angle::Result result                    = mRenderer->compileToExecutable(
         context, *currentInfoLog, geometryHLSL, gl::ShaderType::Geometry, mStreamOutVaryings,
-        (mState.getTransformFeedbackBufferMode() == GL_SEPARATE_ATTRIBS),
-        angle::CompilerWorkaroundsD3D(), &geometryExecutable);
+        (mState.getTransformFeedbackBufferMode() == GL_SEPARATE_ATTRIBS), CompilerWorkaroundsD3D(),
+        &geometryExecutable);
 
     if (!infoLog && result == angle::Result::Stop)
     {
@@ -2019,9 +2020,9 @@ angle::Result ProgramD3D::getComputeExecutableForImage2DBindLayout(
     gl::InfoLog tempInfoLog;
     gl::InfoLog *currentInfoLog = infoLog ? infoLog : &tempInfoLog;
 
-    ANGLE_TRY(mRenderer->compileToExecutable(
-        context, *currentInfoLog, finalComputeHLSL, gl::ShaderType::Compute,
-        std::vector<D3DVarying>(), false, angle::CompilerWorkaroundsD3D(), &computeExecutable));
+    ANGLE_TRY(mRenderer->compileToExecutable(context, *currentInfoLog, finalComputeHLSL,
+                                             gl::ShaderType::Compute, std::vector<D3DVarying>(),
+                                             false, CompilerWorkaroundsD3D(), &computeExecutable));
 
     if (computeExecutable)
     {

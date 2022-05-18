@@ -357,7 +357,6 @@ class ProgramD3D : public ProgramImpl
     bool hasNamedUniform(const std::string &name);
 
     bool usesVertexID() const { return mUsesVertexID; }
-    size_t getNumPixelShaderOutputs() const { return mPixelShaderOutputLayoutCache.size(); }
 
   private:
     // These forward-declared tasks are used for multi-thread shader compiles.
@@ -545,7 +544,7 @@ class ProgramD3D : public ProgramImpl
     std::vector<std::unique_ptr<ComputeExecutable>> mComputeExecutables;
 
     gl::ShaderMap<std::string> mShaderHLSL;
-    gl::ShaderMap<angle::CompilerWorkaroundsD3D> mShaderWorkarounds;
+    gl::ShaderMap<CompilerWorkaroundsD3D> mShaderWorkarounds;
 
     bool mUsesFragDepth;
     bool mHasANGLEMultiviewEnabled;
