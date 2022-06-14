@@ -43,12 +43,13 @@ namespace js = rapidjson;
 
 namespace
 {
-constexpr size_t kInitialTraceEventBufferSize = 50000;
-constexpr double kMilliSecondsPerSecond       = 1e3;
-constexpr double kMicroSecondsPerSecond       = 1e6;
-constexpr double kNanoSecondsPerSecond        = 1e9;
-constexpr char kPeakMemoryMetric[]            = ".memory_max";
-constexpr char kMedianMemoryMetric[]          = ".memory_median";
+constexpr size_t kInitialTraceEventBufferSize            = 50000;
+constexpr double kMilliSecondsPerSecond                  = 1e3;
+constexpr double kMicroSecondsPerSecond                  = 1e6;
+constexpr double kNanoSecondsPerSecond                   = 1e9;
+constexpr size_t kNumberOfStepsPerformedToComputeGPUTime = 16;
+constexpr char kPeakMemoryMetric[]                       = ".memory_max";
+constexpr char kMedianMemoryMetric[]                     = ".memory_median";
 
 struct TraceCategory
 {
@@ -373,6 +374,11 @@ void ANGLEPerfTest::doRunLoop(double maxRunTime, int maxStepsToRun, RunLoopPolic
                 mTrialNumStepsPerformed++;
                 mTotalNumStepsPerformed++;
             }
+
+            if ((mTotalNumStepsPerformed % kNumberOfStepsPerformedToComputeGPUTime) == 0)
+            {
+                computeGPUTime();
+            }
         }
     }
     finishTest();
@@ -666,18 +672,29 @@ std::string RenderTestParams::backend() const
 
 std::string RenderTestParams::story() const
 {
+    std::stringstream strstr;
+
     switch (surfaceType)
     {
         case SurfaceType::Window:
-            return "";
+            break;
         case SurfaceType::WindowWithVSync:
-            return "_vsync";
+            strstr << "_vsync";
+            break;
         case SurfaceType::Offscreen:
-            return "_offscreen";
+            strstr << "_offscreen";
+            break;
         default:
             UNREACHABLE();
             return "";
     }
+
+    if (multisample)
+    {
+        strstr << "_" << samples << "_samples";
+    }
+
+    return strstr.str();
 }
 
 std::string RenderTestParams::backendAndStory() const
@@ -795,6 +812,8 @@ void ANGLERenderTest::SetUp()
     mConfigParams.depthBits   = 24;
     mConfigParams.stencilBits = 8;
     mConfigParams.colorSpace  = mTestParams.colorSpace;
+    mConfigParams.multisample = mTestParams.multisample;
+    mConfigParams.samples     = mTestParams.samples;
     if (mTestParams.surfaceType != SurfaceType::WindowWithVSync)
     {
         mConfigParams.swapInterval = 0;
@@ -887,6 +906,8 @@ void ANGLERenderTest::SetUp()
 
 void ANGLERenderTest::TearDown()
 {
+    ASSERT(mTimestampQueries.empty());
+
     if (!mSkipTest)
     {
         destroyBenchmark();
@@ -1101,7 +1122,7 @@ void ANGLERenderTest::stopGpuTimer()
         GLuint endQuery = 0;
         glGenQueriesEXT(1, &endQuery);
         glQueryCounterEXT(endQuery, GL_TIMESTAMP_EXT);
-        mTimestampQueries.push_back({mCurrentTimestampBeginQuery, endQuery});
+        mTimestampQueries.push({mCurrentTimestampBeginQuery, endQuery});
     }
 }
 
@@ -1109,18 +1130,33 @@ void ANGLERenderTest::computeGPUTime()
 {
     if (mTestParams.trackGpuTime && mIsTimestampQueryAvailable)
     {
-        for (const TimestampSample &sample : mTimestampQueries)
+        while (!mTimestampQueries.empty())
         {
+            const TimestampSample &sample = mTimestampQueries.front();
+            GLuint available              = GL_FALSE;
+            glGetQueryObjectuivEXT(sample.endQuery, GL_QUERY_RESULT_AVAILABLE_EXT, &available);
+            if (available != GL_TRUE)
+            {
+                // query is not completed yet, bail out
+                break;
+            }
+
+            // frame's begin query must also completed.
+            glGetQueryObjectuivEXT(sample.beginQuery, GL_QUERY_RESULT_AVAILABLE_EXT, &available);
+            ASSERT(available == GL_TRUE);
+
+            // Retrieve query result
             uint64_t beginGLTimeNs = 0;
             uint64_t endGLTimeNs   = 0;
             glGetQueryObjectui64vEXT(sample.beginQuery, GL_QUERY_RESULT_EXT, &beginGLTimeNs);
             glGetQueryObjectui64vEXT(sample.endQuery, GL_QUERY_RESULT_EXT, &endGLTimeNs);
             glDeleteQueriesEXT(1, &sample.beginQuery);
             glDeleteQueriesEXT(1, &sample.endQuery);
+            mTimestampQueries.pop();
+
+            // compute GPU time
             mGPUTimeNs += endGLTimeNs - beginGLTimeNs;
         }
-
-        mTimestampQueries.clear();
     }
 }
 

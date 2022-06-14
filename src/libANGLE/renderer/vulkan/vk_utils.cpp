@@ -211,9 +211,9 @@ angle::Result AllocateBufferOrImageMemory(vk::Context *context,
 constexpr char kVkKhronosValidationLayerName[]  = "VK_LAYER_KHRONOS_validation";
 constexpr char kVkStandardValidationLayerName[] = "VK_LAYER_LUNARG_standard_validation";
 const char *kVkValidationLayerNames[]           = {
-    "VK_LAYER_GOOGLE_threading", "VK_LAYER_LUNARG_parameter_validation",
-    "VK_LAYER_LUNARG_object_tracker", "VK_LAYER_LUNARG_core_validation",
-    "VK_LAYER_GOOGLE_unique_objects"};
+              "VK_LAYER_GOOGLE_threading", "VK_LAYER_LUNARG_parameter_validation",
+              "VK_LAYER_LUNARG_object_tracker", "VK_LAYER_LUNARG_core_validation",
+              "VK_LAYER_GOOGLE_unique_objects"};
 
 bool HasValidationLayer(const std::vector<VkLayerProperties> &layerProps, const char *layerName)
 {
@@ -973,6 +973,10 @@ PFN_vkCreateStreamDescriptorSurfaceGGP vkCreateStreamDescriptorSurfaceGGP = null
 // VK_KHR_shared_presentable_image
 PFN_vkGetSwapchainStatusKHR vkGetSwapchainStatusKHR = nullptr;
 
+// VK_KHR_fragment_shading_rate
+PFN_vkGetPhysicalDeviceFragmentShadingRatesKHR vkGetPhysicalDeviceFragmentShadingRatesKHR = nullptr;
+PFN_vkCmdSetFragmentShadingRateKHR vkCmdSetFragmentShadingRateKHR                         = nullptr;
+
 void InitDebugUtilsEXTFunctions(VkInstance instance)
 {
     GET_INSTANCE_FUNC(vkCreateDebugUtilsMessengerEXT);
@@ -1092,6 +1096,13 @@ void InitExternalSemaphoreCapabilitiesFunctions(VkInstance instance)
 void InitGetSwapchainStatusKHRFunctions(VkDevice device)
 {
     GET_DEVICE_FUNC(vkGetSwapchainStatusKHR);
+}
+
+// VK_KHR_fragment_shading_rate
+void InitFragmentShadingRateKHRFunctions(VkDevice device)
+{
+    GET_DEVICE_FUNC(vkGetPhysicalDeviceFragmentShadingRatesKHR);
+    GET_DEVICE_FUNC(vkCmdSetFragmentShadingRateKHR);
 }
 
 #    undef GET_INSTANCE_FUNC
@@ -1671,6 +1682,12 @@ void BufferBlock::free(VkDeviceSize offset)
 int32_t BufferBlock::getAndIncrementEmptyCounter()
 {
     return ++mCountRemainsEmpty;
+}
+
+void BufferBlock::calculateStats(vma::StatInfo *pStatInfo) const
+{
+    std::lock_guard<ConditionalMutex> lock(mVirtualBlockMutex);
+    mVirtualBlock.calculateStats(pStatInfo);
 }
 
 // BufferSuballocation implementation.

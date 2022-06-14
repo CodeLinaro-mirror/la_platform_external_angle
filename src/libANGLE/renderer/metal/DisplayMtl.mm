@@ -1098,6 +1098,7 @@ void DisplayMtl::initializeFeatures()
     ANGLE_FEATURE_CONDITION((&mFeatures), multisampleColorFormatShaderReadWorkaround, isAMD());
     ANGLE_FEATURE_CONDITION((&mFeatures), copyIOSurfaceToNonIOSurfaceForReadOptimization,
                             isIntel());
+    ANGLE_FEATURE_CONDITION((&mFeatures), copyTextureToBufferForReadOptimization, isAMD());
 
     ANGLE_FEATURE_CONDITION((&mFeatures), forceNonCSBaseMipmapGeneration, isIntel());
 
@@ -1107,8 +1108,13 @@ void DisplayMtl::initializeFeatures()
 
     ApplyFeatureOverrides(&mFeatures, getState());
 #ifdef ANGLE_ENABLE_ASSERTS
-    fprintf(stderr, "Shader compiler output: %s\n",
-            mFeatures.directMetalGeneration.enabled ? "Metal" : "SPIR-V");
+    static bool once = true;
+    if (once)
+    {
+        fprintf(stderr, "Shader compiler output: %s\n",
+                mFeatures.directMetalGeneration.enabled ? "Metal" : "SPIR-V");
+        once = false;
+    }
 #endif
 }
 

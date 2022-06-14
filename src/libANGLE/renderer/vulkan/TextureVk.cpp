@@ -1430,8 +1430,9 @@ angle::Result TextureVk::setEGLImageTarget(const gl::Context *context,
         }
 
         vk::OutsideRenderPassCommandBuffer *commandBuffer;
-        ANGLE_TRY(contextVk->getOutsideRenderPassCommandBuffer({}, &commandBuffer));
-        mImage->retain(&contextVk->getResourceUseList());
+        vk::CommandBufferAccess access;
+        access.onExternalAcquireRelease(mImage);
+        ANGLE_TRY(contextVk->getOutsideRenderPassCommandBuffer(access, &commandBuffer));
         mImage->changeLayoutAndQueue(contextVk, mImage->getAspectFlags(), newLayout,
                                      rendererQueueFamilyIndex, commandBuffer);
     }
@@ -1950,9 +1951,6 @@ angle::Result TextureVk::generateMipmap(const gl::Context *context)
                                      mImage->getSamples(), mOwnsImage))
     {
         ASSERT((mImageUsageFlags & VK_IMAGE_USAGE_STORAGE_BIT) != 0);
-
-        mImage->retain(&contextVk->getResourceUseList());
-
         return generateMipmapsWithCompute(contextVk);
     }
     else if (renderer->hasImageFormatFeatureBits(mImage->getActualFormatID(), kBlitFeatureFlags))
@@ -2268,8 +2266,6 @@ angle::Result TextureVk::respecifyImageStorage(ContextVk *contextVk)
         // levels, base level, and max level.
         releaseImage(contextVk);
     }
-
-    mImage->retain(&contextVk->getResourceUseList());
 
     return angle::Result::Continue;
 }
@@ -2761,6 +2757,7 @@ angle::Result TextureVk::syncState(const gl::Context *context,
 }
 
 angle::Result TextureVk::initializeContents(const gl::Context *context,
+                                            GLenum binding,
                                             const gl::ImageIndex &imageIndex)
 {
     ContextVk *contextVk      = vk::GetImpl(context);
@@ -3035,10 +3032,15 @@ angle::Result TextureVk::initImageViews(ContextVk *contextVk,
     // Use this as a proxy for the SRGB override & skip decode settings.
     bool createExtraSRGBViews = mRequiresMutableStorage;
 
-    ANGLE_TRY(getImageViews().initReadViews(
-        contextVk, mState.getType(), *mImage, format, formatSwizzle, readSwizzle, baseLevelVk,
-        levelCount, baseLayer, layerCount, createExtraSRGBViews,
-        mImageUsageFlags & ~VK_IMAGE_USAGE_STORAGE_BIT, mState.getSamplerState()));
+    if (mImage->hasImmutableSampler())
+    {
+        mImage->updateImmutableSamplerState(mState.getSamplerState());
+    }
+
+    ANGLE_TRY(getImageViews().initReadViews(contextVk, mState.getType(), *mImage, format,
+                                            formatSwizzle, readSwizzle, baseLevelVk, levelCount,
+                                            baseLayer, layerCount, createExtraSRGBViews,
+                                            mImageUsageFlags & ~VK_IMAGE_USAGE_STORAGE_BIT));
 
     updateCachedImageViewSerials();
 

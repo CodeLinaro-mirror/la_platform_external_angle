@@ -197,6 +197,7 @@ ProgramExecutable::ProgramExecutable()
       mAtomicCounterUniformRange(0, 0),
       mFragmentInoutRange(0, 0),
       mUsesEarlyFragmentTestsOptimization(false),
+      mEnablesPerSampleShading(false),
       // [GL_EXT_geometry_shader] Table 20.22
       mGeometryShaderInputPrimitiveType(PrimitiveMode::Triangles),
       mGeometryShaderOutputPrimitiveType(PrimitiveMode::TriangleStrip),
@@ -245,6 +246,7 @@ ProgramExecutable::ProgramExecutable(const ProgramExecutable &other)
       mShaderStorageBlocks(other.mShaderStorageBlocks),
       mFragmentInoutRange(other.mFragmentInoutRange),
       mUsesEarlyFragmentTestsOptimization(other.mUsesEarlyFragmentTestsOptimization),
+      mEnablesPerSampleShading(other.mEnablesPerSampleShading),
       mAdvancedBlendEquations(other.mAdvancedBlendEquations)
 {
     reset();
@@ -291,6 +293,7 @@ void ProgramExecutable::reset()
 
     mFragmentInoutRange                 = RangeUI(0, 0);
     mUsesEarlyFragmentTestsOptimization = false;
+    mEnablesPerSampleShading            = false;
     mAdvancedBlendEquations.reset();
 
     mGeometryShaderInputPrimitiveType  = PrimitiveMode::Triangles;
@@ -323,6 +326,7 @@ void ProgramExecutable::load(bool isSeparable, gl::BinaryInputStream *stream)
     mFragmentInoutRange                 = RangeUI(fragmentInoutRangeLow, fragmentInoutRangeHigh);
 
     mUsesEarlyFragmentTestsOptimization = stream->readBool();
+    mEnablesPerSampleShading            = stream->readBool();
 
     static_assert(sizeof(mAdvancedBlendEquations.bits()) == sizeof(uint32_t));
     mAdvancedBlendEquations = BlendEquationBitSet(stream->readInt<uint32_t>());
@@ -555,6 +559,7 @@ void ProgramExecutable::save(bool isSeparable, gl::BinaryOutputStream *stream) c
     stream->writeInt(mFragmentInoutRange.high());
 
     stream->writeBool(mUsesEarlyFragmentTestsOptimization);
+    stream->writeBool(mEnablesPerSampleShading);
     stream->writeInt(mAdvancedBlendEquations.bits());
 
     stream->writeInt(mLinkedShaderStages.bits());
@@ -745,16 +750,12 @@ std::string ProgramExecutable::getInfoLogString() const
 
 bool ProgramExecutable::isAttribLocationActive(size_t attribLocation) const
 {
-    // TODO(timvp): http://anglebug.com/3570: Enable this assert here somehow.
-    //    ASSERT(!mLinkingState);
     ASSERT(attribLocation < mActiveAttribLocationsMask.size());
     return mActiveAttribLocationsMask[attribLocation];
 }
 
 AttributesMask ProgramExecutable::getAttributesMask() const
 {
-    // TODO(timvp): http://anglebug.com/3570: Enable this assert here somehow.
-    //    ASSERT(!mLinkingState);
     return mAttributesMask;
 }
 
