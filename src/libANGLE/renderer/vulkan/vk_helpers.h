@@ -585,33 +585,6 @@ class PipelineBarrier : angle::NonCopyable
         reset();
     }
 
-    void executeIndividually(PrimaryCommandBuffer *primary)
-    {
-        if (isEmpty())
-        {
-            return;
-        }
-
-        // Issue vkCmdPipelineBarrier call
-        VkMemoryBarrier memoryBarrier = {};
-        uint32_t memoryBarrierCount   = 0;
-        if (mMemoryBarrierDstAccess != 0)
-        {
-            memoryBarrier.sType         = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
-            memoryBarrier.srcAccessMask = mMemoryBarrierSrcAccess;
-            memoryBarrier.dstAccessMask = mMemoryBarrierDstAccess;
-            memoryBarrierCount++;
-        }
-
-        for (const VkImageMemoryBarrier &imageBarrier : mImageMemoryBarriers)
-        {
-            primary->pipelineBarrier(mSrcStageMask, mDstStageMask, 0, memoryBarrierCount,
-                                     &memoryBarrier, 0, nullptr, 1, &imageBarrier);
-        }
-
-        reset();
-    }
-
     // merge two barriers into one
     void merge(PipelineBarrier *other)
     {
@@ -1056,7 +1029,8 @@ class CommandBufferHelperCommon : angle::NonCopyable
     void imageReadImpl(ContextVk *contextVk,
                        VkImageAspectFlags aspectFlags,
                        ImageLayout imageLayout,
-                       ImageHelper *image);
+                       ImageHelper *image,
+                       bool *needLayoutTransition);
     void imageWriteImpl(ContextVk *contextVk,
                         gl::LevelIndex level,
                         uint32_t layerStart,
@@ -1196,6 +1170,7 @@ class RenderPassCommandBufferHelper final : public CommandBufferHelperCommon
                                 ImageHelper *resolveImage);
 
     bool usesImage(const ImageHelper &image) const;
+    bool isImageWithLayoutTransition(const ImageHelper &image) const;
 
     angle::Result flushToPrimary(Context *context,
                                  PrimaryCommandBuffer *primary,
@@ -1363,6 +1338,10 @@ class RenderPassCommandBufferHelper final : public CommandBufferHelperCommon
     // Images have unique layouts unlike buffers therefore we can't support simultaneous reads with
     // different layout.
     angle::FlatUnorderedSet<ImageSerial, kFlatMapSize> mRenderPassUsedImages;
+
+    // This can be used to track implicit image layout transition.
+    // Tracks the read images involved with barrier.
+    angle::FlatUnorderedSet<ImageSerial, kFlatMapSize> mRenderPassImagesWithLayoutTransition;
 
     // Array size of mColorAttachments
     PackedAttachmentCount mColorAttachmentsCount;
@@ -1603,16 +1582,6 @@ class ImageHelper final : public Resource, public angle::Subject
                                      uint32_t baseArrayLayer,
                                      uint32_t layerCount,
                                      gl::SrgbWriteControlMode mode) const;
-    angle::Result initLayerImageViewWithFormat(Context *context,
-                                               gl::TextureType textureType,
-                                               VkFormat imageFormat,
-                                               VkImageAspectFlags aspectMask,
-                                               const gl::SwizzleState &swizzleMap,
-                                               ImageView *imageViewOut,
-                                               LevelIndex baseMipLevelVk,
-                                               uint32_t levelCount,
-                                               uint32_t baseArrayLayer,
-                                               uint32_t layerCount) const;
     angle::Result initReinterpretedLayerImageView(Context *context,
                                                   gl::TextureType textureType,
                                                   VkImageAspectFlags aspectMask,
@@ -2340,18 +2309,17 @@ class ImageHelper final : public Resource, public angle::Subject
     const LevelContentDefinedMask &getLevelContentDefined(LevelIndex level) const;
     const LevelContentDefinedMask &getLevelStencilContentDefined(LevelIndex level) const;
 
-    angle::Result initLayerImageViewImpl(
-        Context *context,
-        gl::TextureType textureType,
-        VkImageAspectFlags aspectMask,
-        const gl::SwizzleState &swizzleMap,
-        ImageView *imageViewOut,
-        LevelIndex baseMipLevelVk,
-        uint32_t levelCount,
-        uint32_t baseArrayLayer,
-        uint32_t layerCount,
-        VkFormat imageFormat,
-        const VkImageViewUsageCreateInfo *imageViewUsageCreateInfo) const;
+    angle::Result initLayerImageViewImpl(Context *context,
+                                         gl::TextureType textureType,
+                                         VkImageAspectFlags aspectMask,
+                                         const gl::SwizzleState &swizzleMap,
+                                         ImageView *imageViewOut,
+                                         LevelIndex baseMipLevelVk,
+                                         uint32_t levelCount,
+                                         uint32_t baseArrayLayer,
+                                         uint32_t layerCount,
+                                         VkFormat imageFormat,
+                                         VkImageUsageFlags usageFlags) const;
 
     bool canCopyWithTransformForReadPixels(const PackPixelsParams &packPixelsParams,
                                            const angle::Format *readFormat);
@@ -2416,6 +2384,12 @@ class ImageHelper final : public Resource, public angle::Subject
 ANGLE_INLINE bool RenderPassCommandBufferHelper::usesImage(const ImageHelper &image) const
 {
     return mRenderPassUsedImages.contains(image.getImageSerial());
+}
+
+ANGLE_INLINE bool RenderPassCommandBufferHelper::isImageWithLayoutTransition(
+    const ImageHelper &image) const
+{
+    return mRenderPassImagesWithLayoutTransition.contains(image.getImageSerial());
 }
 
 // A vector of image views, such as one per level or one per layer.
@@ -2547,7 +2521,6 @@ class ImageViewHelper final : angle::NonCopyable
     angle::Result initReadViews(ContextVk *contextVk,
                                 gl::TextureType viewType,
                                 const ImageHelper &image,
-                                const angle::Format &format,
                                 const gl::SwizzleState &formatSwizzle,
                                 const gl::SwizzleState &readSwizzle,
                                 LevelIndex baseLevel,
@@ -2649,7 +2622,6 @@ class ImageViewHelper final : angle::NonCopyable
     angle::Result initReadViewsImpl(ContextVk *contextVk,
                                     gl::TextureType viewType,
                                     const ImageHelper &image,
-                                    const angle::Format &format,
                                     const gl::SwizzleState &formatSwizzle,
                                     const gl::SwizzleState &readSwizzle,
                                     LevelIndex baseLevel,
@@ -2661,7 +2633,6 @@ class ImageViewHelper final : angle::NonCopyable
     angle::Result initSRGBReadViewsImpl(ContextVk *contextVk,
                                         gl::TextureType viewType,
                                         const ImageHelper &image,
-                                        const angle::Format &format,
                                         const gl::SwizzleState &formatSwizzle,
                                         const gl::SwizzleState &readSwizzle,
                                         LevelIndex baseLevel,
