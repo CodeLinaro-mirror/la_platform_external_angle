@@ -237,11 +237,6 @@ struct FeaturesVk : FeatureSetBase
         "Vulkan swapchain is not returning VK_ERROR_OUT_OF_DATE when window resizing", &members,
         "http://anglebug.com/3623, http://anglebug.com/3624, http://anglebug.com/3625"};
 
-    FeatureInfo disallowSeamfulCubeMapEmulation = {
-        "disallowSeamfulCubeMapEmulation", FeatureCategory::VulkanWorkarounds,
-        "Seamful cube map emulation misbehaves on some drivers, so it's disallowed", &members,
-        "http://anglebug.com/3243"};
-
     FeatureInfo padBuffersToMaxVertexAttribStride = {
         "padBuffersToMaxVertexAttribStride", FeatureCategory::VulkanWorkarounds,
         "Vulkan considers vertex attribute accesses to count up to the last multiple of the "
@@ -614,6 +609,11 @@ struct FeaturesVk : FeatureSetBase
         "Explicitly enable per-sample shading if the fragment shader contains the "
         "sample qualifier",
         &members, "http://anglebug.com/6876"};
+
+    FeatureInfo forceContinuousRefreshOnSharedPresent = {
+        "forceContinuousRefreshOnSharedPresent", FeatureCategory::VulkanFeatures,
+        "Force to create vulkan swapchain with continuous refresh on shared present", &members,
+        "https://issuetracker.google.com/229267970"};
 };
 
 inline FeaturesVk::FeaturesVk()  = default;
