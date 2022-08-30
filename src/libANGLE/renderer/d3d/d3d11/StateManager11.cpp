@@ -356,7 +356,7 @@ bool ShaderConstants11::updateSamplerMetadata(SamplerMetadata *data,
     gl::TextureTarget target = (texture.getType() == gl::TextureType::CubeMap)
                                    ? gl::kCubeMapTextureTargetMin
                                    : gl::NonCubeTextureTypeToTarget(texture.getType());
-    GLenum sizedFormat = texture.getFormat(target, baseLevel).info->sizedInternalFormat;
+    GLenum sizedFormat       = texture.getFormat(target, baseLevel).info->sizedInternalFormat;
     if (data->baseLevel != static_cast<int>(baseLevel))
     {
         data->baseLevel = static_cast<int>(baseLevel);
@@ -568,16 +568,18 @@ void ShaderConstants11::onSamplerChange(gl::ShaderType shaderType,
     }
 }
 
-void ShaderConstants11::onImageChange(gl::ShaderType shaderType,
+bool ShaderConstants11::onImageChange(gl::ShaderType shaderType,
                                       unsigned int imageIndex,
                                       const gl::ImageUnit &imageUnit)
 {
     ASSERT(shaderType != gl::ShaderType::InvalidEnum);
+    bool dirty = false;
     if (imageUnit.access == GL_READ_ONLY)
     {
         if (updateImageMetadata(&mShaderReadonlyImageMetadata[shaderType][imageIndex], imageUnit))
         {
             mNumActiveShaderReadonlyImages[shaderType] = 0;
+            dirty                                      = true;
         }
     }
     else
@@ -585,8 +587,10 @@ void ShaderConstants11::onImageChange(gl::ShaderType shaderType,
         if (updateImageMetadata(&mShaderImageMetadata[shaderType][imageIndex], imageUnit))
         {
             mNumActiveShaderImages[shaderType] = 0;
+            dirty                              = true;
         }
     }
+    return dirty;
 }
 
 void ShaderConstants11::onClipControlChange(bool lowerLeft, bool zeroToOne)
@@ -1278,7 +1282,7 @@ angle::Result StateManager11::syncBlendState(const gl::Context *context,
 {
     const d3d11::BlendState *dxBlendState = nullptr;
     const d3d11::BlendStateKey &key       = RenderStateCache::GetBlendStateKey(
-        context, mFramebuffer11, blendStateExt, sampleAlphaToCoverage);
+              context, mFramebuffer11, blendStateExt, sampleAlphaToCoverage);
 
     ANGLE_TRY(mRenderer->getBlendState(context, key, &dxBlendState));
 
@@ -2651,6 +2655,7 @@ angle::Result StateManager11::syncTextures(const gl::Context *context)
 {
     ANGLE_TRY(applyTexturesForSRVs(context, gl::ShaderType::Vertex));
     ANGLE_TRY(applyTexturesForSRVs(context, gl::ShaderType::Fragment));
+    ANGLE_TRY(applyTexturesForUAVs(context, gl::ShaderType::Fragment));
     if (mProgramD3D->hasShaderStage(gl::ShaderType::Geometry))
     {
         ANGLE_TRY(applyTexturesForSRVs(context, gl::ShaderType::Geometry));
@@ -2767,7 +2772,10 @@ angle::Result StateManager11::setImageState(const gl::Context *context,
 {
     ASSERT(index < mRenderer->getNativeCaps().maxShaderImageUniforms[type]);
 
-    mShaderConstants.onImageChange(type, index, imageUnit);
+    if (mShaderConstants.onImageChange(type, index, imageUnit))
+    {
+        invalidateProgramUniforms();
+    }
 
     return angle::Result::Continue;
 }
@@ -2835,7 +2843,6 @@ angle::Result StateManager11::applyTexturesForSRVs(const gl::Context *context,
         {
             ANGLE_TRY(setImageState(context, gl::ShaderType::Compute,
                                     readonlyImageIndex - readonlyImageRange.low(), imageUnit));
-            invalidateProgramUniforms();
         }
         ANGLE_TRY(setTextureForImage(context, shaderType, readonlyImageIndex, true, imageUnit));
     }
@@ -2846,7 +2853,6 @@ angle::Result StateManager11::applyTexturesForSRVs(const gl::Context *context,
 angle::Result StateManager11::applyTexturesForUAVs(const gl::Context *context,
                                                    gl::ShaderType shaderType)
 {
-    ASSERT(shaderType == gl::ShaderType::Compute);
     const auto &glState = context->getState();
     const auto &caps    = context->getCaps();
 
@@ -2858,9 +2864,7 @@ angle::Result StateManager11::applyTexturesForUAVs(const gl::Context *context,
         const gl::ImageUnit &imageUnit = glState.getImageUnit(imageUnitIndex);
         if (!imageUnit.layered)
         {
-            ANGLE_TRY(setImageState(context, gl::ShaderType::Compute, imageIndex - imageRange.low(),
-                                    imageUnit));
-            invalidateProgramUniforms();
+            ANGLE_TRY(setImageState(context, shaderType, imageIndex - imageRange.low(), imageUnit));
         }
         ANGLE_TRY(setTextureForImage(context, shaderType, imageIndex, false, imageUnit));
     }
@@ -3333,7 +3337,7 @@ angle::Result StateManager11::generateSwizzle(const gl::Context *context, gl::Te
     {
         TextureStorage11 *storage11          = GetAs<TextureStorage11>(texStorage);
         const gl::TextureState &textureState = texture->getTextureState();
-        ANGLE_TRY(storage11->generateSwizzles(context, textureState.getSwizzleState()));
+        ANGLE_TRY(storage11->generateSwizzles(context, textureState));
     }
 
     return angle::Result::Continue;
@@ -3353,7 +3357,7 @@ angle::Result StateManager11::generateSwizzlesForShader(const gl::Context *conte
         {
             gl::Texture *texture = glState.getSamplerTexture(textureUnit, textureType);
             ASSERT(texture);
-            if (texture->getTextureState().swizzleRequired())
+            if (SwizzleRequired(texture->getTextureState()))
             {
                 ANGLE_TRY(generateSwizzle(context, texture));
             }
@@ -3601,9 +3605,9 @@ angle::Result StateManager11::syncUniformBuffersForShader(const gl::Context *con
         {
             case gl::ShaderType::Vertex:
             {
-                if (mCurrentConstantBufferVS[bufferIndex] == constantBuffer->getSerial() &&
-                    mCurrentConstantBufferVSOffset[bufferIndex] == uniformBufferOffset &&
-                    mCurrentConstantBufferVSSize[bufferIndex] == uniformBufferSize)
+                if (mCurrentConstantBufferVS[cache.registerIndex] == constantBuffer->getSerial() &&
+                    mCurrentConstantBufferVSOffset[cache.registerIndex] == uniformBufferOffset &&
+                    mCurrentConstantBufferVSSize[cache.registerIndex] == uniformBufferSize)
                 {
                     continue;
                 }
@@ -3629,9 +3633,9 @@ angle::Result StateManager11::syncUniformBuffersForShader(const gl::Context *con
 
             case gl::ShaderType::Fragment:
             {
-                if (mCurrentConstantBufferPS[bufferIndex] == constantBuffer->getSerial() &&
-                    mCurrentConstantBufferPSOffset[bufferIndex] == uniformBufferOffset &&
-                    mCurrentConstantBufferPSSize[bufferIndex] == uniformBufferSize)
+                if (mCurrentConstantBufferPS[cache.registerIndex] == constantBuffer->getSerial() &&
+                    mCurrentConstantBufferPSOffset[cache.registerIndex] == uniformBufferOffset &&
+                    mCurrentConstantBufferPSSize[cache.registerIndex] == uniformBufferSize)
                 {
                     continue;
                 }
